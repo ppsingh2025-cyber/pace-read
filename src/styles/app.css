@@ -159,3 +159,10 @@ kbd {
   border-radius: 3px;
   flex-shrink: 0;
 }
+
+.visitorCounter {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.75rem;
+  color: #666;
+}
