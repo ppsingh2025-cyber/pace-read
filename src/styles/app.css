@@ -136,6 +136,13 @@ kbd {
 
 /* ─── Footer: Techscript branding ───────────────────────────────── */
 
+/* Feedback strip — sits just above the Techscript footer */
+.preFooter {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem 0;
+}
+
 .appFooter {
   display: flex;
   align-items: center;
@@ -165,6 +172,13 @@ kbd {
   height: 1.1em;
   border-radius: 3px;
   flex-shrink: 0;
+}
+
+.visitorCounter {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.75rem;
+  color: #666;
 }
 
 .footerSep {

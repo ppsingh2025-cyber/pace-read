@@ -194,7 +194,6 @@ export default function App() {
           <p className="subtitle">RSVP Reader</p>
         </div>
         <div className="headerActions">
-          <FeedbackButton />
           <DonateButton />
         </div>
       </header>
@@ -238,6 +237,10 @@ export default function App() {
         </section>
       </main>
 
+      <div className="preFooter">
+        <FeedbackButton />
+      </div>
+
       <footer className="appFooter">
         <span>A product by&nbsp;</span>
         <a
@@ -249,23 +252,13 @@ export default function App() {
           <img src="/icons/icon.svg" className="footerIcon" alt="" aria-hidden="true" />
           Techscript
         </a>
-        {/*
-          Set VITE_GOATCOUNTER_SITE_CODE in your .env to enable the analytics link.
-        */}
-        {import.meta.env.VITE_GOATCOUNTER_SITE_CODE && (
-          <>
-            <span className="footerSep">·</span>
-            <a
-              href={`https://${import.meta.env.VITE_GOATCOUNTER_SITE_CODE}.goatcounter.com`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="analyticsLink"
-              title="View site visitor analytics"
-            >
-              📊 Site Analytics
-            </a>
-          </>
-        )}
+        <span className="visitorCounter">
+          {/* %2F is the URL-encoded '/' required by GoatCounter's counter endpoint */}
+          <img
+            src="https://readswift.goatcounter.com/counter/%2F.svg"
+            alt="Visitor count"
+          />
+        </span>
       </footer>
     </div>
   );
