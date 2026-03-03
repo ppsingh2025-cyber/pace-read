@@ -1,7 +1,7 @@
 /**
  * useRSVPEngine
  *
- * Core hook that drives the word-by-word display.
+ * Core hook that drives the rolling-window word display.
  *
  * Architecture decisions:
  * - Uses setInterval with drift correction so high WPM rates don't accumulate
@@ -9,9 +9,12 @@
  *   speed takes effect immediately without resetting position.
  * - Current word index is mirrored in a ref inside the engine so the interval
  *   callback can read/write it without stale-closure issues.
+ * - currentWordIndex always points to the CENTER (highlight) word of the window.
+ *   The window advances by ONE word per tick regardless of window size, keeping
+ *   WPM accuracy independent of window size.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 
 export function useRSVPEngine() {
@@ -20,6 +23,7 @@ export function useRSVPEngine() {
     currentWordIndex,
     isPlaying,
     wpm,
+    windowSize,
     setCurrentWordIndex,
     setIsPlaying,
     resetReader,
@@ -107,7 +111,26 @@ export function useRSVPEngine() {
     setCurrentWordIndex(Math.min(words.length - 1, currentWordIndex + 1));
   }, [setIsPlaying, setCurrentWordIndex, currentWordIndex, words.length]);
 
+  /**
+   * Build the rolling word window centered on currentWordIndex.
+   * The array always has `windowSize` slots; slots beyond word boundaries
+   * are empty strings so the middle word stays in a fixed focal position.
+   *
+   * Window size timing: the engine always advances ONE word per tick, so WPM
+   * accuracy is completely independent of window size — the window is purely
+   * a rendering concern.
+   */
+  const wordWindow = useMemo<string[]>(() => {
+    const half = Math.floor(windowSize / 2);
+    return Array.from({ length: windowSize }, (_, slot) => {
+      const wordIdx = currentWordIndex - half + slot;
+      if (wordIdx < 0 || wordIdx >= words.length) return '';
+      return words[wordIdx];
+    });
+  }, [words, currentWordIndex, windowSize]);
+
+  // The center word is the traditional "current word" for backward compat
   const currentWord = words[currentWordIndex] ?? '';
 
-  return { currentWord, play, pause, reset, faster, slower, prevWord, nextWord };
+  return { currentWord, wordWindow, play, pause, reset, faster, slower, prevWord, nextWord };
 }

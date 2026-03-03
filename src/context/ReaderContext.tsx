@@ -11,12 +11,18 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { ReaderContext, type FileMetadata, type ReadingRecord } from './readerContextDef';
+import { ReaderContext, type FileMetadata, type ReadingRecord, type WindowSize, type Orientation } from './readerContextDef';
 import { loadRecords } from '../utils/recordsUtils';
 
 const LS_KEY_INDEX = 'fastread_word_index';
 const LS_KEY_WPM = 'fastread_wpm';
+const LS_KEY_WINDOW_SIZE = 'fastread_window_size';
+const LS_KEY_HIGHLIGHT_COLOR = 'fastread_highlight_color';
+const LS_KEY_ORIENTATION = 'fastread_orientation';
 const DEFAULT_WPM = 250;
+const DEFAULT_WINDOW_SIZE: WindowSize = 3;
+const DEFAULT_HIGHLIGHT_COLOR = '#ff0000';
+const DEFAULT_ORIENTATION: Orientation = 'horizontal';
 
 export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [words, setWordsState] = useState<string[]>([]);
@@ -34,6 +40,18 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [pageBreaks, setPageBreaksState] = useState<number[]>([]);
   const [records, setRecordsState] = useState<ReadingRecord[]>(() => loadRecords());
+  const [windowSize, setWindowSizeState] = useState<WindowSize>(() => {
+    const saved = localStorage.getItem(LS_KEY_WINDOW_SIZE);
+    const parsed = saved ? parseInt(saved, 10) : DEFAULT_WINDOW_SIZE;
+    return ([1, 3, 5].includes(parsed) ? parsed : DEFAULT_WINDOW_SIZE) as WindowSize;
+  });
+  const [highlightColor, setHighlightColorState] = useState<string>(() => {
+    return localStorage.getItem(LS_KEY_HIGHLIGHT_COLOR) ?? DEFAULT_HIGHLIGHT_COLOR;
+  });
+  const [orientation, setOrientationState] = useState<Orientation>(() => {
+    const saved = localStorage.getItem(LS_KEY_ORIENTATION);
+    return (saved === 'vertical' ? 'vertical' : DEFAULT_ORIENTATION) as Orientation;
+  });
 
   // Derive 1-indexed current page via binary search over pageBreaks
   const currentPage = useMemo(() => {
@@ -112,6 +130,21 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     setRecordsState(newRecords);
   }, []);
 
+  const setWindowSize = useCallback((size: WindowSize) => {
+    setWindowSizeState(size);
+    localStorage.setItem(LS_KEY_WINDOW_SIZE, String(size));
+  }, []);
+
+  const setHighlightColor = useCallback((color: string) => {
+    setHighlightColorState(color);
+    localStorage.setItem(LS_KEY_HIGHLIGHT_COLOR, color);
+  }, []);
+
+  const setOrientation = useCallback((o: Orientation) => {
+    setOrientationState(o);
+    localStorage.setItem(LS_KEY_ORIENTATION, o);
+  }, []);
+
   return (
     <ReaderContext.Provider
       value={{
@@ -126,6 +159,9 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         currentPage,
         totalPages,
         records,
+        windowSize,
+        highlightColor,
+        orientation,
         setWords,
         setCurrentWordIndex,
         setIsPlaying,
@@ -138,6 +174,9 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         goToPage,
         goToWord,
         setRecords,
+        setWindowSize,
+        setHighlightColor,
+        setOrientation,
       }}
     >
       {children}

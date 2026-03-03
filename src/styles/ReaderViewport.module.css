@@ -20,28 +20,47 @@
   }
 }
 
-/* The word is rendered in a fixed-size box; text scales via font-size */
-.word {
-  font-size: clamp(2.8rem, 10vw, 5rem);
-  font-weight: 700;
-  color: #f4f4f4;
+/* ─── Rolling word window ─────────────────────────────────────── */
+
+/* Horizontal layout: words in a row with equal fixed-width columns so
+   the center slot never moves when adjacent words change.              */
+.windowHorizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  /* Prevent wrapping so layout stays stable */
+  white-space: nowrap;
+}
+
+/* Vertical layout: words stacked, each centered on the focal line */
+.windowVertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+/* Each word slot has a minimum width so shorter words don't compress
+   the layout and cause the center word to jump around.               */
+.wordSlot {
+  display: inline-block;
+  font-size: clamp(1.8rem, 6vw, 3.2rem);
   font-family: 'Georgia', serif;
   letter-spacing: 0.04em;
   text-align: center;
-  white-space: nowrap;
-  will-change: transform;
-  animation: wordAppear 0.06s ease-out;
+  color: #f4f4f4;
+  /* Fixed minimum width prevents the row from reflowing as words change */
+  min-width: 4ch;
+  will-change: contents;
 }
 
-@keyframes wordAppear {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* The highlighted (center) word gets bold + color via inline style. */
+.windowHorizontal .wordSlot:not([aria-hidden]),
+.windowVertical .wordSlot:not([aria-hidden]) {
+  transition: color 0.05s;
 }
 
 /* Subtle focal guide line underneath the word */
@@ -59,9 +78,10 @@
 
 .placeholder {
   color: #666;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: center;
   padding: 0 2rem;
+  max-width: 340px;
 }
 
 .loading {

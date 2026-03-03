@@ -1,25 +1,40 @@
 /**
  * ReaderViewport
  *
- * Displays exactly one word at a time in a fixed focal position.
- * The layout uses a centered fixed-width container so words never cause
- * layout shift regardless of their length.
+ * Displays the rolling word window in a fixed focal position.
+ * The center word is highlighted (bold + configurable color).
+ * Orientation can be horizontal or vertical.
  *
- * Performance: only re-renders when `currentWord` changes (memo boundary).
+ * Performance: only re-renders when window contents change (memo boundary).
+ * Layout is fixed-size so no layout shift occurs when words change.
  */
 
 import { memo } from 'react';
+import type { Orientation } from '../context/readerContextDef';
 import styles from '../styles/ReaderViewport.module.css';
 
 interface ReaderViewportProps {
-  currentWord: string;
+  /** Ordered list of words in the current window (length = windowSize) */
+  wordWindow: string[];
+  /** Index within wordWindow that should be highlighted (the center word) */
+  highlightIndex: number;
+  /** CSS color string for the highlighted word */
+  highlightColor: string;
+  /** Layout direction for the word window */
+  orientation: Orientation;
   isLoading: boolean;
   loadingProgress: number;
   hasWords: boolean;
 }
 
+/** Non-breaking space used to keep empty window slots visible without text */
+const EMPTY_SLOT_PLACEHOLDER = '\u00A0';
+
 const ReaderViewport = memo(function ReaderViewport({
-  currentWord,
+  wordWindow,
+  highlightIndex,
+  highlightColor,
+  orientation,
   isLoading,
   loadingProgress,
   hasWords,
@@ -43,9 +58,30 @@ const ReaderViewport = memo(function ReaderViewport({
           </div>
         </div>
       ) : !hasWords ? (
-        <p className={styles.placeholder}>Upload a PDF or EPUB to start reading</p>
+        <p className={styles.placeholder}>
+          Upload a file, paste text, or enter a URL to start reading
+        </p>
       ) : (
-        <span className={styles.word}>{currentWord}</span>
+        <div
+          className={
+            orientation === 'vertical' ? styles.windowVertical : styles.windowHorizontal
+          }
+        >
+          {wordWindow.map((word, i) => (
+            <span
+              key={i}
+              className={styles.wordSlot}
+              style={
+                i === highlightIndex
+                  ? { color: highlightColor, fontWeight: 700 }
+                  : undefined
+              }
+              aria-hidden={word === '' ? true : undefined}
+            >
+              {word || EMPTY_SLOT_PLACEHOLDER}
+            </span>
+          ))}
+        </div>
       )}
       {/* Fixed focal guide line */}
       <div className={styles.focalLine} aria-hidden="true" />

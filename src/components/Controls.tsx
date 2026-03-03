@@ -178,7 +178,7 @@ export default function Controls({
             <span className={styles.progressPct}>{progress}%</span>
           </>
         ) : (
-          <p className={styles.emptyHint}>Upload a PDF or EPUB to begin reading</p>
+          <p className={styles.emptyHint}>Upload a file, paste text, or enter a URL to begin</p>
         )}
       </div>
 
@@ -187,16 +187,16 @@ export default function Controls({
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.epub"
+          accept=".pdf,.epub,.txt,.md,.html,.htm,.rtf,.srt,.docx"
           className={styles.hiddenInput}
           onChange={handleFileChange}
-          aria-label="Upload PDF or EPUB file"
+          aria-label="Upload file"
         />
         <button
           className={styles.uploadBtn}
           onClick={handleFileClick}
           disabled={isLoading}
-          title="Upload PDF or EPUB (max 100 MB)"
+          title="Upload file (PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX)"
           aria-label="Upload file"
         >
           📂

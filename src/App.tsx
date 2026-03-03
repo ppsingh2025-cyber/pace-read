@@ -2,11 +2,12 @@
  * App
  *
  * Root component. Wires together:
- *  - File parsing (PDF/EPUB)
+ *  - File parsing (PDF/EPUB/TXT/MD/HTML/RTF/SRT/DOCX)
+ *  - Paste text mode and URL reader
  *  - ReaderContext state
  *  - useRSVPEngine hook
  *  - Keyboard shortcuts
- *  - ReaderViewport + Controls
+ *  - ReaderViewport + Controls + Settings + InputPanel
  */
 
 import { useCallback, useEffect } from 'react';
@@ -14,6 +15,8 @@ import { useReaderContext } from './context/useReaderContext';
 import { useRSVPEngine } from './hooks/useRSVPEngine';
 import ReaderViewport from './components/ReaderViewport';
 import Controls from './components/Controls';
+import Settings from './components/Settings';
+import InputPanel from './components/InputPanel';
 import ReadingHistory from './components/ReadingHistory';
 import PageNavigator from './components/PageNavigator';
 import WordNavigator from './components/WordNavigator';
@@ -22,11 +25,17 @@ import DonateButton from './components/DonateButton';
 import FeedbackButton from './components/FeedbackButton';
 import { parsePDF } from './parsers/pdfParser';
 import { parseEPUB } from './parsers/epubParser';
+import { parseFile } from './parsers/textParser';
 import { normalizeText, tokenize } from './utils/textUtils';
 import { saveRecord } from './utils/recordsUtils';
 import './styles/app.css';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+
+/** File extensions handled by PDF/EPUB parsers (streaming, with progress) */
+const STREAMING_EXTS = new Set(['pdf', 'epub']);
+/** File extensions handled by the unified text parser */
+const TEXT_EXTS = new Set(['txt', 'md', 'html', 'htm', 'rtf', 'srt', 'docx']);
 
 export default function App() {
   const {
@@ -38,6 +47,9 @@ export default function App() {
     wpm,
     fileMetadata,
     records,
+    windowSize,
+    highlightColor,
+    orientation,
     setWords,
     setCurrentWordIndex,
     setFileMetadata,
@@ -48,7 +60,10 @@ export default function App() {
     setRecords,
   } = useReaderContext();
 
-  const { currentWord, play, pause, reset, faster, slower, prevWord, nextWord } = useRSVPEngine();
+  const { wordWindow, play, pause, reset, faster, slower, prevWord, nextWord } = useRSVPEngine();
+
+  /** Highlight index is always the center slot of the window */
+  const highlightIndex = Math.floor(windowSize / 2);
 
   /** Persist reading progress to the record whenever reading is paused */
   useEffect(() => {
@@ -68,7 +83,39 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
 
-  /** Handle a file selected by the user */
+  /**
+   * Shared finalisation step: store words into the engine and save a record.
+   * Used by both the file-select handler and the InputPanel text-ready callback.
+   */
+  const finaliseWords = useCallback(
+    (allWords: string[], sourceName: string, breaks: number[] = []) => {
+      if (allWords.length === 0) {
+        alert('No readable text found.');
+        return;
+      }
+      setWords(allWords);
+      setPageBreaks(breaks);
+      const existing = records.find((r) => r.name === sourceName);
+      const restoredIndex =
+        existing &&
+        existing.lastWordIndex >= 0 &&
+        existing.lastWordIndex < allWords.length
+          ? existing.lastWordIndex
+          : 0;
+      if (restoredIndex > 0) setCurrentWordIndex(restoredIndex);
+      const updated = saveRecord({
+        name: sourceName,
+        wordCount: allWords.length,
+        lastWordIndex: restoredIndex,
+        lastReadAt: new Date().toISOString(),
+        wpm,
+      });
+      setRecords(updated);
+    },
+    [setWords, setPageBreaks, setCurrentWordIndex, records, wpm, setRecords],
+  );
+
+  /** Handle a file selected by the user (file input) */
   const handleFileSelect = useCallback(
     async (file: File) => {
       if (file.size > MAX_FILE_SIZE) {
@@ -78,9 +125,11 @@ export default function App() {
         return;
       }
 
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      if (ext !== 'pdf' && ext !== 'epub') {
-        alert('Only PDF and EPUB files are supported.');
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      if (!STREAMING_EXTS.has(ext) && !TEXT_EXTS.has(ext)) {
+        alert(
+          'Unsupported file type. Supported formats: PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX.',
+        );
         return;
       }
 
@@ -98,54 +147,47 @@ export default function App() {
             setLoadingProgress(p.percent),
           )) {
             breaks.push(allWords.length);
-            const normalized = normalizeText(pageText);
-            allWords.push(...tokenize(normalized));
+            allWords.push(...tokenize(normalizeText(pageText)));
           }
-        } else {
+        } else if (ext === 'epub') {
           for await (const chapterText of parseEPUB(file, (p) =>
             setLoadingProgress(p.percent),
           )) {
             breaks.push(allWords.length);
-            const normalized = normalizeText(chapterText);
-            allWords.push(...tokenize(normalized));
+            allWords.push(...tokenize(normalizeText(chapterText)));
           }
+        } else {
+          // Unified text parser for all other formats
+          setLoadingProgress(50);
+          const { words: parsed } = await parseFile(file);
+          breaks.push(0);
+          allWords.push(...parsed);
+          setLoadingProgress(100);
         }
 
-        if (allWords.length === 0) {
-          alert('No readable text found in this file.');
-        } else {
-          setWords(allWords);
-          setPageBreaks(breaks);
-          // Restore previous word index if a record exists for this file
-          const existing = records.find((r) => r.name === file.name);
-          const restoredIndex =
-            existing &&
-            existing.lastWordIndex >= 0 &&
-            existing.lastWordIndex < allWords.length
-              ? existing.lastWordIndex
-              : 0;
-          if (restoredIndex > 0) {
-            setCurrentWordIndex(restoredIndex);
-          }
-          // Save / update the reading record
-          const updated = saveRecord({
-            name: file.name,
-            wordCount: allWords.length,
-            lastWordIndex: restoredIndex,
-            lastReadAt: new Date().toISOString(),
-            wpm,
-          });
-          setRecords(updated);
-        }
+        finaliseWords(allWords, file.name, breaks);
       } catch (err) {
         console.error('Error parsing file:', err);
-        alert('Failed to parse the file. Please try a different PDF or EPUB.');
+        alert(
+          err instanceof Error
+            ? err.message
+            : 'Failed to parse the file. Please try a different file.',
+        );
       } finally {
         setIsLoading(false);
         setLoadingProgress(100);
       }
     },
-    [setIsPlaying, setIsLoading, setLoadingProgress, setFileMetadata, setWords, setPageBreaks, setCurrentWordIndex, records, wpm, setRecords],
+    [setIsPlaying, setIsLoading, setLoadingProgress, setFileMetadata, finaliseWords],
+  );
+
+  /** Called by InputPanel when paste/URL text is ready */
+  const handleTextReady = useCallback(
+    (words: string[], sourceName: string) => {
+      setFileMetadata({ name: sourceName, size: 0, type: 'text' });
+      finaliseWords(words, sourceName);
+    },
+    [setFileMetadata, finaliseWords],
   );
 
   /** Global keyboard shortcuts */
@@ -153,7 +195,7 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore shortcuts when focus is on an interactive element
       const tag = (e.target as HTMLElement).tagName.toLowerCase();
-      if (tag === 'input' || tag === 'button' || tag === 'select') return;
+      if (tag === 'input' || tag === 'button' || tag === 'select' || tag === 'textarea') return;
 
       switch (e.key) {
         case ' ':
@@ -191,7 +233,7 @@ export default function App() {
             <img src="/icons/icon.svg" className="brandIcon" alt="" aria-hidden="true" />
             ReadSwift
           </h1>
-          <p className="subtitle">RSVP Reader</p>
+          <p className="subtitle">Speed Reader</p>
         </div>
         <div className="headerActions">
           <DonateButton />
@@ -202,7 +244,10 @@ export default function App() {
         <div className="readingArea">
           <div className="viewportWrapper">
             <ReaderViewport
-              currentWord={currentWord}
+              wordWindow={wordWindow}
+              highlightIndex={highlightIndex}
+              highlightColor={highlightColor}
+              orientation={orientation}
               isLoading={isLoading}
               loadingProgress={loadingProgress}
               hasWords={words.length > 0}
@@ -221,6 +266,10 @@ export default function App() {
           onPrevWord={prevWord}
           onNextWord={nextWord}
         />
+
+        <Settings />
+
+        <InputPanel onTextReady={handleTextReady} />
 
         <PageNavigator />
 
@@ -252,7 +301,6 @@ export default function App() {
           <img src="/icons/icon.svg" className="footerIcon" alt="" aria-hidden="true" />
           Techscript
         </a>
-
       </footer>
     </div>
   );
