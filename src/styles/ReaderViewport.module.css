@@ -44,24 +44,42 @@
 /* ─── Rolling word window ─────────────────────────────────────── */
 
 /*
- * Inline text-flow layout (horizontal).
+ * Horizontal 3-column grid layout.
  *
- * Words render as a natural sentence, preserving the typographic rhythm
- * of continuous reading. The ORP (center/highlight) word remains visually
- * anchored at the focal point using text-align: center on the container.
+ * Columns: [1fr | auto | 1fr]
+ * The auto center column is sized to the ORP word's content. Because the
+ * two flanking columns are equal (both 1fr), the center column is always
+ * at exactly 50% of the container width — the ORP word never shifts.
  *
- * Word spacing is kept tight (0.25em) so multi-word windows read like
- * a phrase, not separated UI blocks. The container max-width prevents
- * lines from becoming too long at large font sizes.
+ * Left peripheral words are right-aligned so they sit flush against the
+ * center word; right peripheral words are left-aligned for the same reason.
  */
 .windowHorizontal {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  width: min(92vw, clamp(600px, calc(250px * var(--slot-count, 1)), 900px));
+  max-width: 100%;
+}
+
+/* Left peripherals — right-aligned to stay flush against center word */
+.leftPeripherals {
   display: flex;
   flex-wrap: nowrap;
   align-items: baseline;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.25em;
-  width: min(92vw, clamp(600px, calc(250px * var(--slot-count, 1)), 900px));
-  max-width: 100%;
+  padding-right: 0.25em;
+}
+
+/* Right peripherals — left-aligned to stay flush after center word */
+.rightPeripherals {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.25em;
+  padding-left: 0.25em;
 }
 
 /* Vertical layout: words stacked, each centered on the focal axis */

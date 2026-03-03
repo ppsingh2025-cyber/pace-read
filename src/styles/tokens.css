@@ -1,0 +1,33 @@
+/* tokens.css – Supplementary design tokens for ReadSwift
+ *
+ * Core spacing, typography, and border-radius tokens are defined in
+ * src/styles/app.css (imported by App.tsx). This file adds icon-size tokens,
+ * additional color aliases, and text-scale shorthand properties for
+ * cross-component consistency.
+ *
+ * All var() references include fallback values so this file is safe to
+ * import independently of load order.
+ */
+
+:root {
+  /* ── Icon sizes ──────────────────────────────────────────────── */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+
+  /* ── Extended color aliases ──────────────────────────────────── */
+  /* Accent used for destructive / call-to-action highlights */
+  --color-accent-primary: #e74c3c;
+  /* Accent used for informational / secondary interactive elements */
+  --color-accent-secondary: #4a7fa0;
+  /* Semantic border aliases that resolve to current-theme values */
+  --color-border-base:  var(--border, #1e1e1e);
+  --color-border-input: var(--border-input, #2a2a2a);
+
+  /* ── Text-scale shorthand (mirrors --font-size-* from app.css) ── */
+  --text-xs: var(--font-size-xs);   /* 0.75rem  / 12px  */
+  --text-sm: var(--font-size-sm);   /* 0.825rem / 13px  */
+  --text-md: var(--font-size-md);   /* 1rem     / 16px  */
+  --text-lg: var(--font-size-lg);   /* 1.125rem / 18px  */
+  --text-xl: var(--font-size-xl);   /* 1.25rem  / 20px  */
+}

@@ -4,10 +4,15 @@
  * Displays the rolling word window with a guaranteed-stable focal position.
  *
  * Layout approach:
- *   Horizontal mode uses inline text flow (flexbox with baseline alignment and
- *   tight gap). Words render like a natural sentence — the ORP (center) word
- *   is displayed at a scaled font size and all words sit on the same baseline,
- *   preserving typographic rhythm.
+ *   Horizontal mode uses a CSS Grid with three columns [1fr | auto | 1fr].
+ *   The auto (center) column holds the ORP word and is always at exactly 50%
+ *   of the container — the focal word never shifts as word lengths change.
+ *   Left peripherals are right-aligned in the first column; right peripherals
+ *   are left-aligned in the third column, so all words remain flush against
+ *   the center word without disturbing its position.
+ *
+ *   Vertical mode stacks words in a flex column; the center word is still
+ *   highlighted but there is no horizontal shift problem in this orientation.
  *
  * ORP (Optimal Recognition Point):
  *   When orpEnabled is true the center/ORP word is split into three spans:
@@ -164,24 +169,18 @@ const ReaderViewport = memo(function ReaderViewport({
         <p className={styles.placeholder}>
           Upload a file or paste text to start reading
         </p>
-      ) : (
+      ) : orientation === 'vertical' ? (
         /*
-         * Inline text-flow word window.
-         * Horizontal: words flow naturally side-by-side like a sentence.
-         * Vertical: words stacked, each centered on the focal axis.
-         * The ORP (center) word is scaled by the user's mainWordFontSize
-         * preference; side words always render at the default size.
+         * Vertical layout: words stacked, each centered on the focal axis.
+         * No horizontal shift problem in this orientation — keep flat map.
          */
         <div
-          className={
-            orientation === 'vertical' ? styles.windowVertical : styles.windowHorizontal
-          }
+          className={styles.windowVertical}
           style={{ '--slot-count': wordWindow.length } as CSSProperties}
         >
           {wordWindow.map((word, i) => {
             const isCenter = i === highlightIndex;
             const opacity = slotOpacity(i);
-            // Only scale the ORP word; side words stay at CSS default
             const scaledFont = isCenter
               ? computeOrpFontSize(fullHeight ?? false, userScale)
               : undefined;
@@ -204,6 +203,81 @@ const ReaderViewport = memo(function ReaderViewport({
               </span>
             );
           })}
+        </div>
+      ) : (
+        /*
+         * Horizontal 3-column grid layout.
+         *
+         * Problem with the old flat flex layout: when word lengths vary
+         * between flashes the total row width changes, so justify-content:center
+         * shifts the center word left/right on every word change.
+         *
+         * Fix: CSS Grid with columns [1fr | auto | 1fr].
+         *   - The auto (center) column is exactly the width of the center word.
+         *   - The two 1fr side columns are equal, so the center column is
+         *     always at exactly 50% of the container regardless of word content.
+         *   - Left peripherals right-align inside their 1fr column so they
+         *     sit flush against the center word.
+         *   - Right peripherals left-align inside their 1fr column.
+         */
+        <div
+          className={styles.windowHorizontal}
+          style={{ '--slot-count': wordWindow.length } as CSSProperties}
+        >
+          {/* Left peripheral words */}
+          <div className={styles.leftPeripherals}>
+            {wordWindow.slice(0, highlightIndex).map((word, i) => {
+              const opacity = slotOpacity(i);
+              return (
+                <span
+                  key={i}
+                  className={styles.wordSlot}
+                  style={opacity < 1 ? { opacity } : undefined}
+                  aria-hidden={word === '' ? true : undefined}
+                >
+                  {word || EMPTY_SLOT_PLACEHOLDER}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* Center (ORP) word — always at fixed horizontal center */}
+          {(() => {
+            const word = wordWindow[highlightIndex] ?? '';
+            const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
+            return (
+              <span
+                className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
+                style={{
+                  color: highlightColor,
+                  ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                }}
+              >
+                {word
+                  ? orpEnabled
+                    ? <WordWithOrp word={word} baseColor={highlightColor} />
+                    : word
+                  : EMPTY_SLOT_PLACEHOLDER}
+              </span>
+            );
+          })()}
+
+          {/* Right peripheral words */}
+          <div className={styles.rightPeripherals}>
+            {wordWindow.slice(highlightIndex + 1).map((word, i) => {
+              const opacity = slotOpacity(highlightIndex + 1 + i);
+              return (
+                <span
+                  key={i}
+                  className={styles.wordSlot}
+                  style={opacity < 1 ? { opacity } : undefined}
+                  aria-hidden={word === '' ? true : undefined}
+                >
+                  {word || EMPTY_SLOT_PLACEHOLDER}
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,6 @@
 /* Base reset – app-level styles live in src/styles/app.css */
+/* Design tokens (supplementary) */
+@import './styles/tokens.css';
 *,
 *::before,
 *::after {

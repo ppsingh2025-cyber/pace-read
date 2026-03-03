@@ -70,7 +70,11 @@ export default function HelpModal({ onClose }: HelpModalProps) {
             <ul className={styles.featureList}>
               <li>Open the <strong>☰ menu</strong> to adjust window size (1 – 5 words), orientation, and highlight colour.</li>
               <li>Use <strong>Window size</strong> to read 1, 2, 3, 4, or 5 words at once — higher counts give more context per flash, lower counts maximise focus. Default is 2 words.</li>
+              <li>Use <strong>Chunk mode</strong> to choose how words are grouped: <em>Fixed</em> groups by the exact window size, while <em>Intelligent</em> forms natural phrase-length chunks for smoother reading.</li>
+              <li>Use <strong>Font size</strong> (60 – 200 %) to scale the main reading word up or down independently of the peripheral words.</li>
               <li>Enable <strong>ORP</strong> to highlight the focal letter in each word and guide your eye.</li>
+              <li>Enable <strong>Peripheral fade</strong> to dim the surrounding words so the focal word stands out more sharply.</li>
+              <li>Enable <strong>Long-word compensation</strong> to add a small extra pause when a word is unusually long, giving your eyes more time to process it.</li>
               <li>Enable <strong>Punctuation pause</strong> to add natural pauses after sentence-ending marks.</li>
               <li>Click the <strong>☀</strong> (Day) or <strong>🌙</strong> (Night) button in the top-right corner to toggle between Day and Night mode. The app logo beside the title also switches automatically — no page reload needed.</li>
               <li>Click the <strong>?</strong> button in the top-right corner to re-open this guide at any time.</li>
