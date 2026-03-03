@@ -72,7 +72,8 @@ export default function HelpModal({ onClose }: HelpModalProps) {
               <li>Use <strong>Window size</strong> to read 1, 2, 3, 4, or 5 words at once — higher counts give more context per flash, lower counts maximise focus. Default is 2 words.</li>
               <li>Enable <strong>ORP</strong> to highlight the focal letter in each word and guide your eye.</li>
               <li>Enable <strong>Punctuation pause</strong> to add natural pauses after sentence-ending marks.</li>
-              <li>Click the <strong>☀</strong> (Day) or <strong>🌙</strong> (Night) button in the top-right corner to toggle between Day and Night mode. The app logo beside the title also switches automatically to match the selected theme — no page reload needed.</li>
+              <li>Click the <strong>☀</strong> (Day) or <strong>🌙</strong> (Night) button in the top-right corner to toggle between Day and Night mode. The app logo beside the title also switches automatically — no page reload needed.</li>
+              <li>Click the <strong>?</strong> button in the top-right corner to re-open this guide at any time.</li>
               <li>Click <strong>⊞</strong> on the viewport to enter focus mode for distraction-free reading.</li>
             </ul>
           </section>

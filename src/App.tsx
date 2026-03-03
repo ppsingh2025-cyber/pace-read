@@ -232,7 +232,7 @@ export default function App() {
 
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
       <header className="topBar">
-        <BurgerMenu onFileSelect={handleFileSelect} onShowHelp={() => setShowHelp(true)} />
+        <BurgerMenu onFileSelect={handleFileSelect} />
         <div className="topBarBrand">
           <img
             src={theme === 'day' ? '/icons/icon-day.svg' : '/icons/icon-night.svg'}
@@ -242,7 +242,17 @@ export default function App() {
           />
           <span className="topBarTitle">ReadSwift</span>
         </div>
-        <ThemeToggle />
+        <div className="topBarActions">
+          <button
+            className="helpBtn"
+            onClick={() => setShowHelp(true)}
+            title="How to Use ReadSwift"
+            aria-label="How to Use ReadSwift"
+          >
+            ?
+          </button>
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* ── 2. Reading main ─────────────────────────────────────── */}
