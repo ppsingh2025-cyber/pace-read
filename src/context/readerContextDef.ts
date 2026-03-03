@@ -22,6 +22,12 @@ export interface ReadingRecord {
   wpm: number;
 }
 
+/** Number of words displayed simultaneously in the rolling window */
+export type WindowSize = 1 | 3 | 5;
+
+/** Display orientation of the word window */
+export type Orientation = 'horizontal' | 'vertical';
+
 interface ReaderState {
   words: string[];
   currentWordIndex: number;
@@ -37,6 +43,12 @@ interface ReaderState {
   /** Total number of pages/chapters (equals pageBreaks.length, 0 when unknown) */
   totalPages: number;
   records: ReadingRecord[];
+  /** Number of words shown at once in the rolling window (1, 3, or 5) */
+  windowSize: WindowSize;
+  /** CSS color string for the highlighted (center) word */
+  highlightColor: string;
+  /** Layout direction of the rolling word window */
+  orientation: Orientation;
 }
 
 interface ReaderActions {
@@ -53,6 +65,9 @@ interface ReaderActions {
   /** Jump to a specific 0-indexed word and pause playback */
   goToWord: (index: number) => void;
   setRecords: (records: ReadingRecord[]) => void;
+  setWindowSize: (size: WindowSize) => void;
+  setHighlightColor: (color: string) => void;
+  setOrientation: (orientation: Orientation) => void;
 }
 
 export type ReaderContextValue = ReaderState & ReaderActions;

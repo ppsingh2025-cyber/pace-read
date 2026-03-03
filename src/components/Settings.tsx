@@ -1,0 +1,105 @@
+/**
+ * Settings
+ *
+ * Collapsible settings panel that exposes:
+ *   - Word window size (1 / 3 / 5)
+ *   - Highlight color picker (persisted in localStorage via ReaderContext)
+ *   - Reading orientation (Horizontal / Vertical)
+ *
+ * All changes take effect immediately without reloading.
+ */
+
+import { useCallback, useState } from 'react';
+import { useReaderContext } from '../context/useReaderContext';
+import type { WindowSize, Orientation } from '../context/readerContextDef';
+import styles from '../styles/Settings.module.css';
+
+export default function Settings() {
+  const { windowSize, setWindowSize, highlightColor, setHighlightColor, orientation, setOrientation } =
+    useReaderContext();
+
+  const [open, setOpen] = useState(false);
+
+  const handleWindowSize = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const val = parseInt(e.target.value, 10) as WindowSize;
+      setWindowSize(val);
+    },
+    [setWindowSize],
+  );
+
+  const handleColor = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setHighlightColor(e.target.value);
+    },
+    [setHighlightColor],
+  );
+
+  const handleOrientation = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setOrientation(e.target.value as Orientation);
+    },
+    [setOrientation],
+  );
+
+  return (
+    <div className={styles.container}>
+      <button
+        className={styles.toggle}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="settings-panel"
+      >
+        ⚙ Settings {open ? '▲' : '▼'}
+      </button>
+
+      {open && (
+        <div id="settings-panel" className={styles.panel}>
+          {/* Window size */}
+          <label className={styles.row}>
+            <span className={styles.label}>Window size</span>
+            <select
+              className={styles.select}
+              value={windowSize}
+              onChange={handleWindowSize}
+              aria-label="Number of words shown at once"
+            >
+              <option value={1}>1 word</option>
+              <option value={3}>3 words</option>
+              <option value={5}>5 words</option>
+            </select>
+          </label>
+
+          {/* Highlight color */}
+          <label className={styles.row}>
+            <span className={styles.label}>Highlight color</span>
+            <div className={styles.colorWrapper}>
+              <input
+                type="color"
+                className={styles.colorInput}
+                value={highlightColor}
+                onChange={handleColor}
+                aria-label="Center word highlight color"
+              />
+              <span className={styles.colorHex}>{highlightColor}</span>
+            </div>
+          </label>
+
+          {/* Orientation */}
+          <label className={styles.row}>
+            <span className={styles.label}>Orientation</span>
+            <select
+              className={styles.select}
+              value={orientation}
+              onChange={handleOrientation}
+              aria-label="Word window orientation"
+            >
+              <option value="horizontal">Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
