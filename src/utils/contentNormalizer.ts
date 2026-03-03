@@ -32,6 +32,15 @@
  *   • Standalone page-number lines (pure integers, "Page N", "N/N") are
  *     removed regardless of frequency.
  *
+ * Inline contamination removal (Stage 4 post-processing):
+ *   After whole-line classification, body lines that survived suppression are
+ *   scanned for inline contamination — fragments the PDF extractor injected
+ *   mid-sentence rather than on a separate line.  Two kinds are removed:
+ *     1. Page-counter patterns (e.g. "4 of 967", "Page 42") validated against
+ *        the document's page count to avoid removing legitimate numeric prose.
+ *     2. Identified running-header fragments (e.g. "Crime and Punishment")
+ *        found inline in body lines.
+ *
  * Performance: O(n) in total line count; no nested heavy loops over the full
  * document. Safe for 100k+ word novels.
  */
@@ -43,6 +52,8 @@ export interface NormalizationStats {
   suppressedHeaders: number;
   suppressedFooters: number;
   suppressedPageNumbers: number;
+  /** Inline header/page-counter fragments removed from body lines */
+  suppressedInlineContamination: number;
   /** Populated only when debug=true */
   classificationLog?: string[];
 }
@@ -77,6 +88,26 @@ const SIMILARITY_THRESHOLD = 0.85;
  */
 const DIVERSITY_GUARD = 0.6;
 
+/**
+ * Minimum character length for a header fragment to be removed when found
+ * inline inside a body line.  Too-short fragments risk false positives.
+ */
+const MIN_INLINE_FRAGMENT_LENGTH = 4;
+
+// ─── Inline contamination patterns ───────────────────────────────────────────
+
+/** Matches "N of M" page-counter patterns embedded mid-sentence. */
+const N_OF_M_RE = /\b(\d+)\s+of\s+(\d+)\b/gi;
+
+/** Matches "Page N" page-counter patterns embedded mid-sentence. */
+const PAGE_N_RE = /\bPage\s+(\d+)\b/gi;
+
+/**
+ * Cache of compiled RegExp objects for header fragment removal.
+ * Keyed by the lowercased fragment text; avoids recompiling on every line.
+ */
+const fragmentRegExpCache = new Map<string, RegExp>();
+
 // ─── Page-number patterns ─────────────────────────────────────────────────────
 
 const PAGE_NUMBER_PATTERNS = [
@@ -95,6 +126,72 @@ const SCENE_SEPARATOR_RE = /^(\*{3,}|[-–—]{3,}|_{3,}|[•·]{3,}|\*\s*\*\s*\
 
 function isSceneSeparator(line: string): boolean {
   return SCENE_SEPARATOR_RE.test(line.trim());
+}
+
+// ─── Inline contamination removal ────────────────────────────────────────────
+
+/**
+ * Remove inline page-counter fragments that match page-progression logic.
+ *
+ * Validates the detected numbers against `totalPages` so legitimate numeric
+ * prose (e.g. "3 of 5 apples") is not accidentally removed.
+ *
+ * Handles:
+ *   • "N of M"  — e.g. "4 of 967"  (pdfjs running counter injection)
+ *   • "Page N"  — e.g. "Page 42"
+ */
+function removeInlinePageCounters(text: string, totalPages: number): string {
+  let result = text;
+
+  // "N of M" — only strip when M is within ±20 % of the document's page count
+  result = result.replace(N_OF_M_RE, (match, p1, p2) => {
+    const page = parseInt(p1, 10);
+    const total = parseInt(p2, 10);
+    if (
+      total >= Math.max(2, Math.round(totalPages * 0.8)) &&
+      total <= Math.round(totalPages * 1.2) &&
+      page >= 1 &&
+      page <= total
+    ) {
+      return '';
+    }
+    return match;
+  });
+
+  // "Page N" — strip when N falls within the valid page range
+  result = result.replace(PAGE_N_RE, (match, p1) => {
+    const page = parseInt(p1, 10);
+    if (page >= 1 && page <= totalPages) return '';
+    return match;
+  });
+
+  return result.replace(/\s{2,}/g, ' ').trim();
+}
+
+/**
+ * Remove inline occurrences of identified header/footer fragments.
+ *
+ * Only targets fragments that were classified as repeating headers/footers
+ * (i.e. already present in the global suppression set).  Fragments shorter
+ * than MIN_INLINE_FRAGMENT_LENGTH are skipped to avoid false positives on
+ * common short words.
+ */
+function removeInlineHeaderFragments(
+  text: string,
+  fragments: ReadonlySet<string>,
+): string {
+  let result = text;
+  for (const fragment of fragments) {
+    if (fragment.length < MIN_INLINE_FRAGMENT_LENGTH) continue;
+    let re = fragmentRegExpCache.get(fragment);
+    if (!re) {
+      const escaped = fragment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      re = new RegExp('\\s*' + escaped + '\\s*', 'gi');
+      fragmentRegExpCache.set(fragment, re);
+    }
+    result = result.replace(re, ' ');
+  }
+  return result.replace(/\s{2,}/g, ' ').trim();
 }
 
 // ─── Lightweight bigram-Dice similarity ──────────────────────────────────────
@@ -198,6 +295,7 @@ export function normalizePages(
     suppressedHeaders: 0,
     suppressedFooters: 0,
     suppressedPageNumbers: 0,
+    suppressedInlineContamination: 0,
     classificationLog: debug ? [] : undefined,
   };
 
@@ -216,6 +314,16 @@ export function normalizePages(
             return false;
           }
           return true;
+        })
+        .map((line) => {
+          const trimmed = line.trim();
+          if (trimmed.length === 0) return line;
+          const cleaned = removeInlinePageCounters(trimmed, rawPages.length);
+          if (cleaned !== trimmed) {
+            stats.suppressedInlineContamination++;
+            if (debug) stats.classificationLog!.push(`INLINE_COUNTER removed in: "${trimmed}" → "${cleaned}"`);
+          }
+          return cleaned;
         })
         .join('\n');
     });
@@ -279,6 +387,27 @@ export function normalizePages(
     }
     return suppress;
   });
+
+  // ── Build global inline-suppression fragment set ──────────────────────────
+  //
+  // Collects all unique header/footer texts that were classified for
+  // suppression so that inline occurrences (fragments injected mid-sentence by
+  // the PDF extractor) can also be stripped from body lines.
+  const inlineSuppressionFragments = new Set<string>();
+  for (let pos = 0; pos < ZONE_DEPTH; pos++) {
+    if (suppressTop[pos]) {
+      for (const t of topZoneLines[pos]) {
+        const norm = t.trim().toLowerCase();
+        if (norm.length >= MIN_INLINE_FRAGMENT_LENGTH) inlineSuppressionFragments.add(norm);
+      }
+    }
+    if (suppressBottom[pos]) {
+      for (const t of bottomZoneLines[pos]) {
+        const norm = t.trim().toLowerCase();
+        if (norm.length >= MIN_INLINE_FRAGMENT_LENGTH) inlineSuppressionFragments.add(norm);
+      }
+    }
+  }
 
   // ── Stage 4: normalized content build ────────────────────────────────────
 
@@ -363,7 +492,28 @@ export function normalizePages(
       bodyLines.push(line);
     }
 
-    return bodyLines.join('\n');
+    // Apply inline contamination removal to surviving body lines.
+    // This strips header fragments and page counters that the PDF extractor
+    // injected mid-sentence (e.g. "Crime and Punishment 4 of 967").
+    const cleanedBodyLines = bodyLines.map((bl) => {
+      const trimmed = bl.trim();
+      if (trimmed.length === 0) return bl;
+
+      let cleaned = removeInlinePageCounters(trimmed, totalPages);
+      cleaned = removeInlineHeaderFragments(cleaned, inlineSuppressionFragments);
+
+      if (cleaned !== trimmed) {
+        stats.suppressedInlineContamination++;
+        if (debug) {
+          stats.classificationLog!.push(
+            `INLINE_CONTAMINATION removed: "${trimmed}" → "${cleaned}"`,
+          );
+        }
+      }
+      return cleaned;
+    });
+
+    return cleanedBodyLines.join('\n');
   });
 
   if (debug) {
@@ -373,6 +523,7 @@ export function normalizePages(
       suppressedHeaders: stats.suppressedHeaders,
       suppressedFooters: stats.suppressedFooters,
       suppressedPageNumbers: stats.suppressedPageNumbers,
+      suppressedInlineContamination: stats.suppressedInlineContamination,
     });
     if (stats.classificationLog && stats.classificationLog.length > 0) {
       console.debug('[contentNormalizer] Classification log:\n' + stats.classificationLog.join('\n'));
