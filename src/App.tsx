@@ -343,6 +343,8 @@ export default function App() {
             hasWords={words.length > 0}
             fullHeight={isFocused}
             mainWordFontSize={mainWordFontSize}
+            onFileSelect={handleFileSelect}
+            onShowPaste={togglePaste}
           />
           {/* Maximize / minimize button */}
           <button

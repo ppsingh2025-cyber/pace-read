@@ -18,39 +18,12 @@ export default function AccountSection() {
     return (
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Account</h3>
-        <p className={styles.aboutText} style={{ fontSize: '0.8rem', lineHeight: 1.5, marginBottom: '0.5rem' }}>
-          To enable <strong>Sign in with Google</strong> and cross-device sync, complete these 3 steps (both services are free):
-        </p>
-        <ol style={{ margin: '0 0 0.5rem 1.1rem', padding: 0, fontSize: '0.8rem', lineHeight: 1.7 }}>
-          <li>
-            Create a free project at{' '}
-            <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className={styles.aboutLink}>
-              supabase.com
-            </a>
-            , run the SQL migration, copy your Project URL and anon key
-          </li>
-          <li>
-            Create OAuth credentials at{' '}
-            <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className={styles.aboutLink}>
-              Google Cloud
-            </a>
-            , enable the Google provider in Supabase
-          </li>
-          <li>
-            Copy <code>.env.example</code> to <code>.env</code> and fill in the two Supabase values
-          </li>
-        </ol>
-        <p className={styles.aboutText} style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-          Full instructions (≈15 min):{' '}
-          <a
-            href="docs/SUPABASE_SETUP.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.aboutLink}
-          >
-            docs/SUPABASE_SETUP.md
-          </a>
-        </p>
+        <button
+          className={styles.linkBtn}
+          onClick={() => console.log('Sign in - auth not configured')}
+        >
+          Sign In with Google
+        </button>
       </section>
     );
   }

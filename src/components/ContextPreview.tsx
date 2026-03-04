@@ -13,12 +13,14 @@
  * current word index changes.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/ContextPreview.module.css';
 
 /** Number of words shown before and after the current position */
 const CONTEXT_HALF = 80;
+
+const LS_KEY_EXPANDED = 'contextPreview_expanded';
 
 export default function ContextPreview() {
   const {
@@ -29,6 +31,11 @@ export default function ContextPreview() {
   } = useReaderContext();
 
   const activeRef = useRef<HTMLSpanElement>(null);
+
+  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
+    const saved = localStorage.getItem(LS_KEY_EXPANDED);
+    return saved !== null ? saved === 'true' : true;
+  });
 
   // Always use a rolling window centered on the current word index.
   // This gives a true continuous reading experience with no page boundaries.
@@ -42,6 +49,14 @@ export default function ContextPreview() {
     activeRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [currentWordIndex]);
 
+  const handleToggle = useCallback(() => {
+    setIsExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem(LS_KEY_EXPANDED, String(next));
+      return next;
+    });
+  }, []);
+
   const handleWordClick = useCallback(
     (globalIndex: number) => {
       goToWord(globalIndex);
@@ -53,33 +68,49 @@ export default function ContextPreview() {
 
   return (
     <div className={styles.preview} aria-label="Reading context preview">
-      <p className={styles.heading}>Context</p>
-      <div className={styles.content}>
-        {visibleWords.map((word, i) => {
-          const globalIndex = start + i;
-          const isActive = globalIndex === currentWordIndex;
-          return (
-            <span
-              key={globalIndex}
-              ref={isActive ? activeRef : undefined}
-              className={isActive ? styles.activeWord : styles.wordSpan}
-              onClick={() => handleWordClick(globalIndex)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleWordClick(globalIndex);
-                }
-              }}
-              aria-label={`${word}${isActive ? ' (current)' : ''}`}
-              aria-pressed={isActive}
-            >
-              {word}{' '}
-            </span>
-          );
-        })}
-      </div>
+      <button
+        className={styles.heading}
+        onClick={handleToggle}
+        aria-expanded={isExpanded}
+        aria-controls="context-preview-content"
+      >
+        Context
+        <span
+          className={styles.chevron}
+          style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+          aria-hidden="true"
+        >
+          ▼
+        </span>
+      </button>
+      {isExpanded && (
+        <div id="context-preview-content" className={styles.content}>
+          {visibleWords.map((word, i) => {
+            const globalIndex = start + i;
+            const isActive = globalIndex === currentWordIndex;
+            return (
+              <span
+                key={globalIndex}
+                ref={isActive ? activeRef : undefined}
+                className={isActive ? styles.activeWord : styles.wordSpan}
+                onClick={() => handleWordClick(globalIndex)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleWordClick(globalIndex);
+                  }
+                }}
+                aria-label={`${word}${isActive ? ' (current)' : ''}`}
+                aria-pressed={isActive}
+              >
+                {word}{' '}
+              </span>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

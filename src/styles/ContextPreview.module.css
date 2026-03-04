@@ -19,6 +19,10 @@
 }
 
 .heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -26,6 +30,22 @@
   padding: 0.55rem 0.85rem 0.35rem;
   border-bottom: 1px solid var(--border, #1e1e1e);
   flex-shrink: 0;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.heading:hover {
+  color: var(--text, #999);
+}
+
+.chevron {
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+  display: inline-block;
 }
 
 .content {

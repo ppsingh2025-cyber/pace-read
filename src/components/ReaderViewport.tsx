@@ -25,7 +25,7 @@
  *   - Both: Math.ceil(n/2) - 1
  */
 
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { Orientation } from '../context/readerContextDef';
 import styles from '../styles/ReaderViewport.module.css';
@@ -50,6 +50,10 @@ interface ReaderViewportProps {
   fullHeight?: boolean;
   /** User-controlled font size scale for the ORP (center) word (percentage, 60–200, default 100) */
   mainWordFontSize?: number;
+  /** Called when the user clicks the "Upload File" placeholder button */
+  onFileSelect?: (file: File) => void;
+  /** Called when the user clicks the "Paste Text" placeholder button */
+  onShowPaste?: () => void;
 }
 
 /** Non-breaking space used to keep empty window slots visible without text */
@@ -126,6 +130,8 @@ const ReaderViewport = memo(function ReaderViewport({
   hasWords,
   fullHeight,
   mainWordFontSize = 100,
+  onFileSelect,
+  onShowPaste,
 }: ReaderViewportProps) {
   /**
    * Peripheral fade: opacity decreases with distance from the center slot.
@@ -138,6 +144,19 @@ const ReaderViewport = memo(function ReaderViewport({
     if (dist === 0) return 1;
     if (dist === 1) return 0.5;
     return 0.25;
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onFileSelect) {
+      onFileSelect(file);
+    }
   };
 
   const userScale = mainWordFontSize / 100;
@@ -165,9 +184,31 @@ const ReaderViewport = memo(function ReaderViewport({
           </div>
         </div>
       ) : !hasWords ? (
-        <p className={styles.placeholder}>
-          Upload a file or paste text to start reading
-        </p>
+        <div className={styles.placeholder}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.epub,.txt,.md,.html,.htm,.rtf,.srt,.docx"
+            className={styles.hiddenFileInput}
+            onChange={handleFileChange}
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+          <button
+            className={styles.placeholderBtn}
+            onClick={handleUploadClick}
+            aria-label="Upload a file to start reading"
+          >
+            📂 Upload File
+          </button>
+          <button
+            className={styles.placeholderBtn}
+            onClick={() => onShowPaste?.()}
+            aria-label="Paste text to start reading"
+          >
+            📋 Paste Text
+          </button>
+        </div>
       ) : orientation === 'vertical' ? (
         /*
          * Vertical layout: words stacked, each centered on the focal axis.
