@@ -26,3 +26,4 @@ dist-ssr
 # Capacitor generated native projects (run `npm run cap:android` / `cap:ios` to open)
 android/
 ios/
+.env

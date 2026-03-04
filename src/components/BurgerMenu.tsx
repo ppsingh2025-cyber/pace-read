@@ -21,6 +21,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import ReadingHistory from './ReadingHistory';
 import SessionStats from './SessionStats';
+import AccountSection from './AccountSection';
 import type { WindowSize, Orientation, ChunkMode } from '../context/readerContextDef';
 import { APP_VERSION } from '../version';
 import styles from '../styles/BurgerMenu.module.css';
@@ -113,6 +114,8 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
             </div>
 
             <div className={styles.drawerBody}>
+
+              <AccountSection />
 
               {/* ── Display ────────────────────────────────────────── */}
               <section className={styles.section}>

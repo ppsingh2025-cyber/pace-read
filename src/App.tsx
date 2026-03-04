@@ -34,6 +34,11 @@ import { normalizeText, tokenize } from './utils/textUtils';
 import { normalizePages } from './utils/contentNormalizer';
 import { saveRecord } from './utils/recordsUtils';
 import { buildStructureMap, buildStructureMapFromWords } from './utils/structureUtils';
+import { AuthProvider } from './auth/AuthContext';
+import SignInPrompt from './auth/SignInPrompt';
+import UserAvatar from './components/UserAvatar';
+import SyncStatusIndicator from './components/SyncStatusIndicator';
+import { Toaster } from 'react-hot-toast';
 import './styles/app.css';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
@@ -89,6 +94,7 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [showPaste, setShowPaste] = useState(false);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
 
   /** Apply theme as a data attribute on <html> so CSS variables cascade */
   useEffect(() => {
@@ -108,6 +114,7 @@ export default function App() {
         });
         setRecords(updated);
       }
+      setSessionCompleted(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
@@ -291,6 +298,7 @@ export default function App() {
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
 
   return (
+    <AuthProvider>
     <div className={`appShell${isFocused ? ' appShellFocused' : ''}`}>
 
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
@@ -306,6 +314,8 @@ export default function App() {
           <span className="topBarTitle">ReadSwift</span>
         </div>
         <div className="topBarActions">
+          <SyncStatusIndicator />
+          <UserAvatar />
           <button
             className="helpBtn"
             onClick={() => setShowHelp(true)}
@@ -381,8 +391,15 @@ export default function App() {
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
+      <SignInPrompt
+        sessionCompleted={sessionCompleted}
+        onDismiss={() => setSessionCompleted(false)}
+      />
+      <Toaster position="bottom-center" />
+
       {/* ── Footer ──────────────────────────────────────────────── */}
       {!isFocused && <AppFooter />}
     </div>
+    </AuthProvider>
   );
 }

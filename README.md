@@ -6,6 +6,24 @@ A production-quality React web application that implements **Rapid Serial Visual
 
 ---
 
+## Authentication & Sync (Optional)
+
+ReadSwift works fully offline without any account. If you want **cross-device reading progress sync**, enable the optional Supabase integration. You'll need two free accounts:
+
+| Account | What it does | Sign up |
+|---------|-------------|---------|
+| **Supabase** | Stores your reading progress in a managed PostgreSQL database | [supabase.com](https://supabase.com) — free tier |
+| **Google Cloud** | Provides the "Sign in with Google" OAuth button | [console.cloud.google.com](https://console.cloud.google.com) — free |
+
+**Setup guides (in order):**
+1. [Supabase project + database setup](docs/SUPABASE_SETUP.md)
+2. [Google OAuth credentials](docs/GOOGLE_OAUTH_SETUP.md)
+3. Copy `.env.example` → `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+
+Once configured, a **Sign In with Google** button appears in the burger menu. Without configuration, the app behaves exactly as before.
+
+---
+
 ## Features
 
 - **Upload** PDF or EPUB files (up to 100 MB)
