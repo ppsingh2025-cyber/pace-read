@@ -207,11 +207,10 @@ export default function Controls({
             title="Upload file (PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX)"
             aria-label="Upload file"
           >
-            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 15V3m0 0l-4 4m4-4l4 4"/>
               <path d="M2 17v2a2 2 0 002 2h16a2 2 0 002-2v-2"/>
             </svg>
-            <span className={styles.btnLabel}>Open File</span>
           </button>
         )}
 
@@ -224,11 +223,12 @@ export default function Controls({
             aria-label="Toggle paste panel"
             aria-pressed={pasteOpen}
           >
-            <svg className={styles.btnIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="9" y="2" width="6" height="4" rx="1"/>
               <path d="M9 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2h-2"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="13" y2="16"/>
             </svg>
-            <span className={styles.btnLabel}>Paste Text</span>
           </button>
         )}
 
@@ -239,7 +239,9 @@ export default function Controls({
           title="Previous word (←)"
           aria-label="Previous word"
         >
-          ‹
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
         </button>
 
         <button
@@ -250,13 +252,13 @@ export default function Controls({
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="1em" height="1em">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="10" fill="var(--color-primary, #1E3A8A)"/>
               <rect x="8" y="7" width="3" height="10" rx="1" fill="white"/>
               <rect x="13" y="7" width="3" height="10" rx="1" fill="white"/>
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="1em" height="1em">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="10" fill="var(--color-primary, #1E3A8A)"/>
               <polygon points="10,8 18,12 10,16" fill="white"/>
             </svg>
@@ -270,7 +272,9 @@ export default function Controls({
           title="Next word (→)"
           aria-label="Next word"
         >
-          ›
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
         </button>
 
         <button
@@ -280,7 +284,7 @@ export default function Controls({
           title="Restart from beginning"
           aria-label="Restart"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="1em" height="1em">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
           </svg>

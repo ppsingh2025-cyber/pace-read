@@ -4,12 +4,11 @@
  * Displays the rolling word window with a guaranteed-stable focal position.
  *
  * Layout approach:
- *   Horizontal mode uses a CSS Grid with three columns [1fr | auto | 1fr].
- *   The auto (center) column holds the ORP word and is always at exactly 50%
- *   of the container — the focal word never shifts as word lengths change.
- *   Left peripherals are right-aligned in the first column; right peripherals
- *   are left-aligned in the third column, so all words remain flush against
- *   the center word without disturbing its position.
+ *   Horizontal mode uses an inline-block center word inside a text-align:center
+ *   container. Peripheral words are absolutely positioned relative to the center
+ *   word's container edges so they never cause the ORP word to shift horizontally.
+ *   Left peripherals extend to the left, right peripherals extend to the right,
+ *   all without affecting the center word's position.
  *
  *   Vertical mode stacks words in a flex column; the center word is still
  *   highlighted but there is no horizontal shift problem in this orientation.
@@ -206,77 +205,72 @@ const ReaderViewport = memo(function ReaderViewport({
         </div>
       ) : (
         /*
-         * Horizontal 3-column grid layout.
+         * Horizontal layout with fixed center word.
          *
-         * Problem with the old flat flex layout: when word lengths vary
-         * between flashes the total row width changes, so justify-content:center
-         * shifts the center word left/right on every word change.
-         *
-         * Fix: CSS Grid with columns [1fr | auto | 1fr].
-         *   - The auto (center) column is exactly the width of the center word.
-         *   - The two 1fr side columns are equal, so the center column is
-         *     always at exactly 50% of the container regardless of word content.
-         *   - Left peripherals right-align inside their 1fr column so they
-         *     sit flush against the center word.
-         *   - Right peripherals left-align inside their 1fr column.
+         * The center word is the inline content of .wordLayout (inline-block),
+         * which is centered by text-align on .windowHorizontal. Peripheral
+         * words are absolutely positioned relative to .wordLayout's edges so
+         * they never cause the center word to shift horizontally.
          */
         <div
           className={styles.windowHorizontal}
           style={{ '--slot-count': wordWindow.length } as CSSProperties}
         >
-          {/* Left peripheral words */}
-          <div className={styles.leftPeripherals}>
-            {wordWindow.slice(0, highlightIndex).map((word, i) => {
-              const opacity = slotOpacity(i);
+          <div className={styles.wordLayout}>
+            {/* Left peripheral words */}
+            <div className={styles.leftPeripherals}>
+              {wordWindow.slice(0, highlightIndex).map((word, i) => {
+                const opacity = slotOpacity(i);
+                return (
+                  <span
+                    key={i}
+                    className={styles.wordSlot}
+                    style={opacity < 1 ? { opacity } : undefined}
+                    aria-hidden={word === '' ? true : undefined}
+                  >
+                    {word || EMPTY_SLOT_PLACEHOLDER}
+                  </span>
+                );
+              })}
+            </div>
+
+            {/* Center (ORP) word — always at fixed horizontal center */}
+            {(() => {
+              const word = wordWindow[highlightIndex] ?? '';
+              const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
               return (
                 <span
-                  key={i}
-                  className={styles.wordSlot}
-                  style={opacity < 1 ? { opacity } : undefined}
-                  aria-hidden={word === '' ? true : undefined}
+                  className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
+                  style={{
+                    color: highlightColor,
+                    ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                  }}
                 >
-                  {word || EMPTY_SLOT_PLACEHOLDER}
+                  {word
+                    ? orpEnabled
+                      ? <WordWithOrp word={word} baseColor={highlightColor} />
+                      : word
+                    : EMPTY_SLOT_PLACEHOLDER}
                 </span>
               );
-            })}
-          </div>
+            })()}
 
-          {/* Center (ORP) word — always at fixed horizontal center */}
-          {(() => {
-            const word = wordWindow[highlightIndex] ?? '';
-            const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
-            return (
-              <span
-                className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
-                style={{
-                  color: highlightColor,
-                  ...(scaledFont ? { fontSize: scaledFont } : undefined),
-                }}
-              >
-                {word
-                  ? orpEnabled
-                    ? <WordWithOrp word={word} baseColor={highlightColor} />
-                    : word
-                  : EMPTY_SLOT_PLACEHOLDER}
-              </span>
-            );
-          })()}
-
-          {/* Right peripheral words */}
-          <div className={styles.rightPeripherals}>
-            {wordWindow.slice(highlightIndex + 1).map((word, i) => {
-              const opacity = slotOpacity(highlightIndex + 1 + i);
-              return (
-                <span
-                  key={i}
-                  className={styles.wordSlot}
-                  style={opacity < 1 ? { opacity } : undefined}
-                  aria-hidden={word === '' ? true : undefined}
-                >
-                  {word || EMPTY_SLOT_PLACEHOLDER}
-                </span>
-              );
-            })}
+            {/* Right peripheral words */}
+            <div className={styles.rightPeripherals}>
+              {wordWindow.slice(highlightIndex + 1).map((word, i) => {
+                const opacity = slotOpacity(highlightIndex + 1 + i);
+                return (
+                  <span
+                    key={i}
+                    className={styles.wordSlot}
+                    style={opacity < 1 ? { opacity } : undefined}
+                    aria-hidden={word === '' ? true : undefined}
+                  >
+                    {word || EMPTY_SLOT_PLACEHOLDER}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

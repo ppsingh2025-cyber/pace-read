@@ -135,51 +135,54 @@
   display: none;
 }
 
-/* Upload — icon + label, touch-friendly */
-.uploadBtn {
+/* Base control button style — shared by upload, nav, and reset buttons */
+.controlBtn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.1rem;
-  min-width: 56px;
+  width: 44px;
   height: 44px;
-  padding: 0 0.5rem;
+  padding: 0;
   background: #172340;
   color: #6fa3ef;
   border: 1px solid #1f3a6b;
   border-radius: var(--radius-md, 10px);
-  font-size: 1.15rem;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   flex-shrink: 0;
 }
 
-.btnIcon {
-  width: 1.1rem;
-  height: 1.1rem;
-  flex-shrink: 0;
-}
-
-.btnLabel {
-  font-size: 0.6rem;
-  line-height: 1;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-
-.uploadBtn:hover:not(:disabled) {
+.controlBtn:hover:not(:disabled) {
   background: #1e2f52;
+  color: #8fb9ff;
   border-color: #3366bb;
 }
 
-.uploadBtn:active:not(:disabled) {
+.controlBtn:active:not(:disabled) {
   background: #243a66;
+  color: #5080d0;
 }
 
-.uploadBtn:disabled {
+.controlBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.controlBtn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Upload / Paste toggle buttons */
+.uploadBtn {
+  composes: controlBtn;
+}
+
+.btnIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 /* Active/pressed state when paste panel is open */
@@ -191,35 +194,7 @@
 
 /* Prev / Next word arrows */
 .navBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  font-size: 1.65rem;
-  line-height: 1;
-  background: var(--bg-input, #1a1a1a);
-  color: var(--text-muted, #bbb);
-  border: 1px solid var(--border-input, #2a2a2a);
-  border-radius: var(--radius-md, 10px);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.navBtn:hover:not(:disabled) {
-  background: var(--bg-panel, #242424);
-  color: var(--text, #f0f0f0);
-}
-
-.navBtn:active:not(:disabled) {
-  background: var(--border-input, #2e2e2e);
-}
-
-.navBtn:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
+  composes: controlBtn;
 }
 
 /* Play/Pause — primary action, circular, prominent */
@@ -255,34 +230,7 @@
 
 /* Reset */
 .resetBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  font-size: 1.15rem;
-  line-height: 1;
-  background: var(--bg-input, #1a1a1a);
-  color: var(--text-muted, #999);
-  border: 1px solid var(--border-input, #2a2a2a);
-  border-radius: var(--radius-md, 10px);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.resetBtn:hover:not(:disabled) {
-  background: var(--bg-panel, #242424);
-  color: var(--text, #f0f0f0);
-}
-
-.resetBtn:active:not(:disabled) {
-  background: var(--border-input, #2e2e2e);
-}
-
-.resetBtn:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
+  composes: controlBtn;
 }
 
 /* ─── Row 3: Speed ──────────────────────────────────────────────── */
@@ -395,7 +343,6 @@
   .resetBtn {
     width: 38px;
     height: 38px;
-    font-size: 1rem;
   }
 
   .speedRow {
