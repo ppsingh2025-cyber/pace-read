@@ -41,3 +41,12 @@ export function deleteRecord(name: string): ReadingRecord[] {
   localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
   return updated;
 }
+
+/**
+ * Delete all reading records.
+ * Returns an empty array.
+ */
+export function clearAllRecords(): ReadingRecord[] {
+  localStorage.removeItem(LS_KEY_RECORDS);
+  return [];
+}

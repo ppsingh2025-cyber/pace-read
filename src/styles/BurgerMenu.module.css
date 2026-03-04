@@ -261,3 +261,58 @@
 .aboutLink:hover {
   color: var(--text, #f0f0f0);
 }
+
+/* ── Danger variant for destructive actions ──────────────────────── */
+
+.dangerBtn {
+  color: #e57373;
+  border-color: #5a2020;
+}
+
+.dangerBtn:hover {
+  color: #ef9a9a;
+  background: #2d1010;
+  border-color: #7a2020;
+}
+
+[data-theme='day'] .dangerBtn {
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+[data-theme='day'] .dangerBtn:hover {
+  color: #b71c1c;
+  background: #ffebee;
+  border-color: #ef9a9a;
+}
+
+/* ── Confirmation overlay ───────────────────────────────────────── */
+
+.confirmOverlay {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-panel, #111);
+  border-top: 1px solid var(--border, #1e1e1e);
+  padding: 0.75rem 1.1rem;
+  z-index: 10;
+}
+
+.confirmBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.confirmText {
+  font-size: 0.85rem;
+  color: var(--text-muted, #888);
+  line-height: 1.4;
+}
+
+.confirmActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}

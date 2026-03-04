@@ -24,9 +24,27 @@ import SessionStats from './SessionStats';
 import AccountSection from './AccountSection';
 import type { WindowSize, Orientation, ChunkMode } from '../context/readerContextDef';
 import { APP_VERSION } from '../version';
+import { IndexedDBService } from '../sync/IndexedDBService';
+import { supabase, isSupabaseConfigured } from '../config/supabase';
+import { useAuth } from '../auth/useAuth';
+import { clearAllRecords } from '../utils/recordsUtils';
+import toast from 'react-hot-toast';
 import styles from '../styles/BurgerMenu.module.css';
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/dCBSTs4SjvhmA3Zh6';
+
+// Default preference values (mirrored from ReaderContext)
+const DEFAULT_WPM = 250;
+const DEFAULT_THEME = 'night' as const;
+const DEFAULT_WINDOW_SIZE = 1 as WindowSize;
+const DEFAULT_HIGHLIGHT_COLOR = '#ff0000';
+const DEFAULT_ORIENTATION = 'horizontal' as Orientation;
+const DEFAULT_ORP = false;
+const DEFAULT_PUNCT_PAUSE = true;
+const DEFAULT_PERIPHERAL_FADE = false;
+const DEFAULT_LONG_WORD_COMP = true;
+const DEFAULT_MAIN_FONT_SIZE = 100;
+const DEFAULT_CHUNK_MODE = 'fixed' as ChunkMode;
 
 interface BurgerMenuProps {
   onFileSelect: (file: File) => void;
@@ -45,19 +63,33 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     longWordCompensation, setLongWordCompensation,
     mainWordFontSize, setMainWordFontSize,
     chunkMode, setChunkMode,
+    setTheme,
+    setWpm,
+    setRecords,
   } = useReaderContext();
+
+  const { user } = useAuth();
+  const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
 
   const close = useCallback(() => setOpen(false), []);
 
-  // Close on Escape
+  // Close on Escape — dismiss confirm dialog first, then close menu
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showClearHistoryConfirm) {
+          setShowClearHistoryConfirm(false);
+        } else {
+          close();
+        }
+      }
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, close]);
+  }, [open, close, showClearHistoryConfirm]);
 
   // Trap focus inside panel when open (accessibility)
   useEffect(() => {
@@ -72,6 +104,53 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     },
     [close, onFileSelect],
   );
+
+  // Reset all user preferences to their defaults
+  const handleResetDefaults = useCallback(() => {
+    setTheme(DEFAULT_THEME);
+    setWindowSize(DEFAULT_WINDOW_SIZE);
+    setHighlightColor(DEFAULT_HIGHLIGHT_COLOR);
+    setOrientation(DEFAULT_ORIENTATION);
+    setOrpEnabled(DEFAULT_ORP);
+    setPunctuationPause(DEFAULT_PUNCT_PAUSE);
+    setPeripheralFade(DEFAULT_PERIPHERAL_FADE);
+    setLongWordCompensation(DEFAULT_LONG_WORD_COMP);
+    setMainWordFontSize(DEFAULT_MAIN_FONT_SIZE);
+    setChunkMode(DEFAULT_CHUNK_MODE);
+    setWpm(DEFAULT_WPM);
+    // Clear IndexedDB preferences
+    IndexedDBService.savePreferences({
+      theme: DEFAULT_THEME,
+      fontSize: DEFAULT_MAIN_FONT_SIZE,
+      wordWindow: DEFAULT_WINDOW_SIZE,
+      highlightColor: DEFAULT_HIGHLIGHT_COLOR,
+      updatedAt: new Date(),
+    }).catch(() => { /* ignore */ });
+    toast.success('Settings reset to defaults');
+  }, [setTheme, setWindowSize, setHighlightColor, setOrientation, setOrpEnabled,
+      setPunctuationPause, setPeripheralFade, setLongWordCompensation,
+      setMainWordFontSize, setChunkMode, setWpm]);
+
+  // Clear all reading history
+  const handleClearHistory = useCallback(async () => {
+    // Clear localStorage records
+    setRecords(clearAllRecords());
+
+    // Clear IndexedDB sessions
+    try {
+      await IndexedDBService.clearAllSessions();
+    } catch { /* ignore IndexedDB errors */ }
+
+    // If signed in, delete from Supabase
+    if (isSupabaseConfigured && supabase && user?.id) {
+      try {
+        await supabase.from('reading_sessions').delete().eq('user_id', user.id);
+      } catch { /* ignore Supabase errors */ }
+    }
+
+    setShowClearHistoryConfirm(false);
+    toast.success('Reading history cleared');
+  }, [setRecords, user]);
 
   return (
     <>
@@ -285,7 +364,44 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 >
                   💬 Send Feedback
                 </a>
+                <button
+                  className={styles.linkBtn}
+                  onClick={handleResetDefaults}
+                >
+                  ↺ Reset to Default Settings
+                </button>
+                <button
+                  className={`${styles.linkBtn} ${styles.dangerBtn}`}
+                  onClick={() => setShowClearHistoryConfirm(true)}
+                >
+                  🗑 Clear Reading History
+                </button>
               </section>
+
+              {/* ── Confirmation dialog for clearing history ─────── */}
+              {showClearHistoryConfirm && (
+                <div className={styles.confirmOverlay} role="dialog" aria-modal="true" aria-label="Confirm clear reading history">
+                  <div className={styles.confirmBox}>
+                    <p className={styles.confirmText}>
+                      Are you sure you want to permanently delete all reading history?
+                    </p>
+                    <div className={styles.confirmActions}>
+                      <button
+                        className={`${styles.linkBtn} ${styles.dangerBtn}`}
+                        onClick={handleClearHistory}
+                      >
+                        Yes, delete all
+                      </button>
+                      <button
+                        className={styles.linkBtn}
+                        onClick={() => setShowClearHistoryConfirm(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* ── About ───────────────────────────────────────── */}
               <section className={styles.section}>

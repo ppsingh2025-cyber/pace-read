@@ -205,6 +205,8 @@ body {
   flex-shrink: 0;
   gap: 0.5rem;
   border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 501;
 }
 
 .topBarBrand {

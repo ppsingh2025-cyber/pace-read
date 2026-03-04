@@ -98,4 +98,9 @@ export const IndexedDBService = {
     const record = await db.get('syncState', key);
     return record?.value;
   },
+
+  async clearAllSessions(): Promise<void> {
+    const db = await getDB();
+    await db.clear('sessions');
+  },
 };
