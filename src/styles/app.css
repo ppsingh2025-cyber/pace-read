@@ -215,8 +215,6 @@ body {
   gap: 0.35rem;
   flex: 1;
   justify-content: center;
-  position: relative;
-  z-index: 501;
 }
 
 .topBarIcon {
@@ -419,8 +417,6 @@ body {
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
-  position: relative;
-  z-index: 501;
 }
 
 .helpBtn {

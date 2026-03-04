@@ -44,7 +44,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.55);
-  z-index: 500;
+  z-index: 600;
   display: flex;
   align-items: stretch;
   backdrop-filter: blur(1px);
@@ -266,6 +266,76 @@
   color: var(--text-muted, #777);
   font-size: 0.78rem;
   font-family: monospace;
+}
+
+/* ── Colour palette picker ──────────────────────────────────────── */
+
+.colorPalette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.colorSwatches {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 0.3rem;
+}
+
+.colorSwatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.15s;
+  outline: none;
+  padding: 0;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.18);
+}
+
+.colorSwatchActive {
+  border-color: var(--text, #f0f0f0);
+  transform: scale(1.1);
+}
+
+.colorLabel {
+  font-size: 0.75rem;
+  color: var(--text-faint, #555);
+  text-align: center;
+}
+
+.customColorRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.customColorInput {
+  width: 32px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--border-input, #2a2a2a);
+  border-radius: 6px;
+  background: var(--bg-input, #1a1a1a);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.customColorLabel {
+  font-size: 0.8rem;
+  color: var(--text-muted, #888);
+  flex: 1;
+}
+
+.customColorHex {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--text-faint, #555);
 }
 
 .checkbox {
