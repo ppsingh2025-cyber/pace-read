@@ -42,7 +42,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(s);
       setUser(s?.user ?? null);
       setIsLoading(false);
-    }).catch(() => setIsLoading(false));
+    }).catch((err) => {
+      console.error('Failed to load initial session:', err);
+      setIsLoading(false);
+    });
 
     // Subscribe to future changes
     const unsubscribe = AuthService.onAuthStateChange((u, s) => {
