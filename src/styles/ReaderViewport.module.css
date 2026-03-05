@@ -41,17 +41,101 @@
   font-size: clamp(2rem, calc(10vw / var(--slot-count, 1)), 6rem);
 }
 
+/* Focal guide line — thin vertical marker at the ORP pivot position.
+ * Always visible when ORP is enabled, giving the eye a permanent lock point. */
+.focalGuide {
+  position: absolute;
+  left: 50%;
+  top: 15%;
+  bottom: 15%;
+  width: 1.5px;
+  background: var(--highlight-color, #e74c3c);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+  transform: translateX(-50%);
+}
+
 /* ─── Rolling word window ─────────────────────────────────────── */
 
 /*
- * Horizontal layout with fixed center word.
+ * Spritz-style ORP-aligned horizontal layout.
  *
- * The windowHorizontal container uses text-align:center so the inner
- * wordLayout (inline-block) is always horizontally centered.
- * The center word defines the layout width of wordLayout; peripheral words
- * are absolutely positioned relative to wordLayout's edges so they never
- * affect the center word's position.
+ * A 3-column grid ensures the ORP pivot letter always lands at the
+ * exact horizontal center of the viewport:
+ *   col 1 (1fr): left peripherals + word prefix  — right-aligned
+ *   col 2 (auto): ORP pivot character             — at center
+ *   col 3 (1fr): word suffix + right peripherals — left-aligned
+ *
+ * This is the most critical layout for RSVP fidelity — the ORP letter
+ * must not drift horizontally as words change.
  */
+.orpAlignedLayout {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Left column: right-aligned flex row for peripherals + prefix */
+.orpLeft {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 0.25em;
+  overflow: hidden;
+  max-width: 40vw;
+  min-width: 0;
+  padding-right: 0;
+}
+
+/* Right column: left-aligned flex row for suffix + peripherals */
+.orpRight {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 0.25em;
+  overflow: hidden;
+  max-width: 40vw;
+  min-width: 0;
+  padding-left: 0;
+}
+
+/*
+ * Vertical ORP grid — shared 3-column layout so every word's ORP
+ * pivot letter aligns on the same vertical axis.
+ */
+.windowVerticalOrpGrid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  justify-items: center;
+  row-gap: 0.3em;
+}
+
+/* Prefix cell in vertical ORP grid: right-aligned */
+.orpVertPre {
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Suffix cell in vertical ORP grid: left-aligned */
+.orpVertPost {
+  justify-self: start;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Non-center word in vertical ORP grid: center column, centered */
+.orpVertWord {
+  grid-column: 2;
+  text-align: center;
+}
 .windowHorizontal {
   position: relative;
   display: block;
@@ -148,15 +232,15 @@
   text-align: center;
 }
 
-/* ORP focal letter — slightly enlarged and full-color for eye anchoring */
+/* ORP focal letter — enlarged and full-color for eye anchoring */
 .orpChar {
-  font-size: 1.08em;
+  font-size: 1.18em;
   font-weight: 900;
 }
 
-/* Non-pivot prefix/suffix letters — slightly muted to draw attention to pivot */
+/* Non-pivot prefix/suffix letters — muted to draw attention to pivot */
 .orpContext {
-  opacity: 0.78;
+  opacity: 0.50;
 }
 
 .placeholder {

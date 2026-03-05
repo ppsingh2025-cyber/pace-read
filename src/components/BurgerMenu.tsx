@@ -76,7 +76,7 @@ const DEFAULT_THEME = 'night' as const;
 const DEFAULT_WINDOW_SIZE = 3 as WindowSize;
 const DEFAULT_HIGHLIGHT_COLOR = '#ff0000';
 const DEFAULT_ORIENTATION = 'horizontal' as Orientation;
-const DEFAULT_ORP = false;
+const DEFAULT_ORP = true;
 const DEFAULT_PUNCT_PAUSE = true;
 const DEFAULT_PERIPHERAL_FADE = true;
 const DEFAULT_LONG_WORD_COMP = true;
@@ -105,6 +105,8 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     records,
     setRecords,
     isPlaying,
+    autoFocusOnPlay, setAutoFocusOnPlay,
+    warmUpEnabled, setWarmUpEnabled,
   } = useReaderContext();
 
   const { user } = useAuth();
@@ -167,6 +169,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
       setLongWordCompensation(profile.longWordCompensation);
       setMainWordFontSize(profile.mainWordFontSize);
       setWpm(profile.wpm);
+      setOrpEnabled(profile.orpEnabled);
       setActiveProfileId(profile.id);
       localStorage.setItem(LS_KEY_PROFILE, profile.id);
       toast.success(`${profile.name} profile applied`);
@@ -174,7 +177,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     [
       setWindowSize, setOrientation, setHighlightColor, setChunkMode,
       setPeripheralFade, setPunctuationPause, setLongWordCompensation,
-      setMainWordFontSize, setWpm,
+      setMainWordFontSize, setWpm, setOrpEnabled,
     ],
   );
 
@@ -487,6 +490,34 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                     <option value="fixed">Fixed window</option>
                     <option value="intelligent">Intelligent phrases</option>
                   </select>
+                </label>
+
+                <label className={styles.row}>
+                  <span className={styles.label}>
+                    Auto-focus on play
+                    <span className={styles.hint}> (expand viewport)</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={autoFocusOnPlay}
+                    onChange={(e) => setAutoFocusOnPlay(e.target.checked)}
+                    aria-label="Automatically enter focus mode when playback starts"
+                  />
+                </label>
+
+                <label className={styles.row}>
+                  <span className={styles.label}>
+                    Warm-up ramp
+                    <span className={styles.hint}> (ease into speed)</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={warmUpEnabled}
+                    onChange={(e) => setWarmUpEnabled(e.target.checked)}
+                    aria-label="Start at 80% speed for the first 30 words"
+                  />
                 </label>
               </section>
               </>) /* end (!isPlaying || showAdvancedDuringReading) */}

@@ -27,12 +27,14 @@ const LS_KEY_LONG_WORD_COMP = 'fastread_long_word_comp';
 const LS_KEY_MAIN_FONT_SIZE = 'fastread_main_font_size';
 const LS_KEY_CHUNK_MODE = 'fastread_chunk_mode';
 const LS_KEY_SESSION_STATS = 'fastread_session_stats';
+const LS_KEY_AUTO_FOCUS = 'fastread_auto_focus';
+const LS_KEY_WARM_UP = 'fastread_warm_up';
 const DEFAULT_WPM = 250;
 const DEFAULT_WINDOW_SIZE: WindowSize = 3;
 const DEFAULT_HIGHLIGHT_COLOR = '#ff0000';
 const DEFAULT_ORIENTATION: Orientation = 'horizontal';
 const DEFAULT_THEME: Theme = 'night';
-const DEFAULT_ORP = false;
+const DEFAULT_ORP = true;
 const DEFAULT_PUNCT_PAUSE = true;
 const DEFAULT_PERIPHERAL_FADE = true;
 const DEFAULT_LONG_WORD_COMP = true;
@@ -117,6 +119,13 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       if (saved) return JSON.parse(saved) as SessionStats;
     } catch { /* ignore parse errors */ }
     return { ...EMPTY_SESSION_STATS };
+  });
+  const [autoFocusOnPlay, setAutoFocusOnPlayState] = useState<boolean>(() => {
+    return localStorage.getItem(LS_KEY_AUTO_FOCUS) === 'true';
+  });
+  const [warmUpEnabled, setWarmUpEnabledState] = useState<boolean>(() => {
+    const saved = localStorage.getItem(LS_KEY_WARM_UP);
+    return saved === null ? true : saved === 'true';
   });
 
   // Derive 1-indexed current page via binary search over pageBreaks
@@ -272,6 +281,16 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem(LS_KEY_SESSION_STATS, JSON.stringify(fresh)); } catch { /* ignore */ }
   }, []);
 
+  const setAutoFocusOnPlay = useCallback((enabled: boolean) => {
+    setAutoFocusOnPlayState(enabled);
+    localStorage.setItem(LS_KEY_AUTO_FOCUS, String(enabled));
+  }, []);
+
+  const setWarmUpEnabled = useCallback((enabled: boolean) => {
+    setWarmUpEnabledState(enabled);
+    localStorage.setItem(LS_KEY_WARM_UP, String(enabled));
+  }, []);
+
   return (
     <ReaderContext.Provider
       value={{
@@ -299,6 +318,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         mainWordFontSize,
         chunkMode,
         sessionStats,
+        autoFocusOnPlay,
+        warmUpEnabled,
         setWords,
         setCurrentWordIndex,
         setIsPlaying,
@@ -325,6 +346,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         setChunkMode,
         updateSessionStats,
         resetSessionStats,
+        setAutoFocusOnPlay,
+        setWarmUpEnabled,
       }}
     >
       {children}

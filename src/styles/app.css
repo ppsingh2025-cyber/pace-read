@@ -528,3 +528,27 @@ kbd {
   font-family: monospace;
   color: var(--kbd-text);
 }
+
+/* ─── UI auto-hide during playback ──────────────────────────── */
+
+/* Smooth fade transition on top bar and controls bar */
+.topBar {
+  transition: opacity 0.4s ease;
+}
+
+/* Hide header (topBar) visually — pointer-events off so click-through */
+.topBar.uiHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* controlsBar uses display:contents so target its children directly */
+.controlsBar.uiHidden > * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ensure children have base transition when visible */
+.controlsBar > * {
+  transition: opacity 0.4s ease;
+}

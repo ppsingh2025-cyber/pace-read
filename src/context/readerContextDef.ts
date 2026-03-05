@@ -97,6 +97,10 @@ interface ReaderState {
   chunkMode: ChunkMode;
   /** Lightweight session analytics for the current reading session */
   sessionStats: SessionStats;
+  /** Whether to automatically enter focus mode when playback starts */
+  autoFocusOnPlay: boolean;
+  /** Whether to apply a warm-up speed ramp at the start of playback */
+  warmUpEnabled: boolean;
 }
 
 interface ReaderActions {
@@ -130,6 +134,8 @@ interface ReaderActions {
   updateSessionStats: (delta: Partial<SessionStats>) => void;
   /** Reset session analytics (called when a new file is loaded) */
   resetSessionStats: () => void;
+  setAutoFocusOnPlay: (enabled: boolean) => void;
+  setWarmUpEnabled: (enabled: boolean) => void;
 }
 
 export type ReaderContextValue = ReaderState & ReaderActions;

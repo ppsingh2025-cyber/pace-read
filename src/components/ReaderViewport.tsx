@@ -25,7 +25,7 @@
  *   - Both: Math.ceil(n/2) - 1
  */
 
-import { memo, useRef } from 'react';
+import { Fragment, memo, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { Orientation } from '../context/readerContextDef';
 import styles from '../styles/ReaderViewport.module.css';
@@ -69,6 +69,16 @@ function calcOrpIndex(word: string): number {
   return Math.max(0, Math.ceil(word.length / 5) - 1);
 }
 
+function calcOrpParts(word: string): { before: string; orpChar: string; after: string } {
+  if (!word) return { before: '', orpChar: '', after: '' };
+  const idx = calcOrpIndex(word);
+  return {
+    before: word.slice(0, idx),
+    orpChar: word[idx] ?? '',
+    after: word.slice(idx + 1),
+  };
+}
+
 /**
  * Compute a CSS font-size value for the ORP (center) word based on the user's
  * mainWordFontSize preference (percentage 60–200, mapped to a scale factor).
@@ -95,29 +105,6 @@ function computeOrpFontSize(
 }
 
 
-function WordWithOrp({
-  word,
-  baseColor,
-}: {
-  word: string;
-  baseColor: string;
-}) {
-  const idx = calcOrpIndex(word);
-  const before = word.slice(0, idx);
-  const orpChar = word[idx] ?? '';
-  const after = word.slice(idx + 1);
-  return (
-    <>
-      {/* Prefix and suffix: slightly muted so the pivot stands out */}
-      <span className={styles.orpContext}>{before}</span>
-      {/* ORP pivot letter — full color, bold, slightly larger */}
-      <span className={styles.orpChar} style={{ color: baseColor }}>
-        {orpChar}
-      </span>
-      <span className={styles.orpContext}>{after}</span>
-    </>
-  );
-}
 
 const ReaderViewport = memo(function ReaderViewport({
   wordWindow,
@@ -210,109 +197,253 @@ const ReaderViewport = memo(function ReaderViewport({
         </div>
       ) : orientation === 'vertical' ? (
         /*
-         * Vertical layout: words stacked, each centered on the focal axis.
-         * No horizontal shift problem in this orientation — keep flat map.
-         */
-        <div
-          className={styles.windowVertical}
-          style={{ '--slot-count': wordWindow.length } as CSSProperties}
-        >
-          {wordWindow.map((word, i) => {
-            const isCenter = i === highlightIndex;
-            const opacity = slotOpacity(i);
-            const scaledFont = isCenter
-              ? computeOrpFontSize(fullHeight ?? false, userScale)
-              : undefined;
-            return (
-              <span
-                key={i}
-                className={`${styles.wordSlot}${isCenter ? ` ${styles.wordSlotCenter}` : ''}`}
-                style={{
-                  ...(isCenter ? { color: highlightColor } : undefined),
-                  ...(opacity < 1 ? { opacity } : undefined),
-                  ...(scaledFont ? { fontSize: scaledFont } : undefined),
-                }}
-                aria-hidden={word === '' ? true : undefined}
-              >
-                {word
-                  ? isCenter && orpEnabled
-                    ? <WordWithOrp word={word} baseColor={highlightColor} />
-                    : word
-                  : EMPTY_SLOT_PLACEHOLDER}
-              </span>
-            );
-          })}
-        </div>
-      ) : (
-        /*
-         * Horizontal layout with fixed center word.
+         * Vertical layout: words stacked on the focal axis.
          *
-         * The center word is the inline content of .wordLayout (inline-block),
-         * which is centered by text-align on .windowHorizontal. Peripheral
-         * words are absolutely positioned relative to .wordLayout's edges so
-         * they never cause the center word to shift horizontally.
+         * When ORP is enabled, a shared 3-column grid ensures every word's
+         * ORP pivot letter aligns on the same vertical axis (column 2).
+         * Non-center words occupy only the center column.
+         * When ORP is off, use the original flat flex layout.
          */
-        <div
-          className={styles.windowHorizontal}
-          style={{ '--slot-count': wordWindow.length } as CSSProperties}
-        >
-          <div className={styles.wordLayout}>
-            {/* Left peripheral words */}
-            <div className={styles.leftPeripherals}>
-              {wordWindow.slice(0, highlightIndex).map((word, i) => {
-                const opacity = slotOpacity(i);
-                return (
-                  <span
-                    key={i}
-                    className={styles.wordSlot}
-                    style={opacity < 1 ? { opacity } : undefined}
-                    aria-hidden={word === '' ? true : undefined}
-                  >
-                    {word || EMPTY_SLOT_PLACEHOLDER}
-                  </span>
-                );
-              })}
-            </div>
+        orpEnabled ? (
+          <div
+            className={styles.windowVerticalOrpGrid}
+            style={{ '--slot-count': wordWindow.length } as CSSProperties}
+          >
+            {wordWindow.map((word, i) => {
+              const isCenter = i === highlightIndex;
+              const opacity = slotOpacity(i);
+              const scaledFont = isCenter
+                ? computeOrpFontSize(fullHeight ?? false, userScale)
+                : undefined;
+              const centerStyle = {
+                ...(isCenter ? { color: highlightColor } : undefined),
+                ...(opacity < 1 ? { opacity } : undefined),
+                ...(scaledFont ? { fontSize: scaledFont } : undefined),
+              };
 
-            {/* Center (ORP) word — always at fixed horizontal center */}
-            {(() => {
-              const word = wordWindow[highlightIndex] ?? '';
-              const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
+              if (isCenter && word) {
+                const { before, orpChar: oc, after } = calcOrpParts(word);
+                return (
+                  <Fragment key={i}>
+                    <span
+                      className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpContext} ${styles.orpVertPre}`}
+                      style={centerStyle}
+                    >
+                      {before}
+                    </span>
+                    <span
+                      className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpChar}`}
+                      style={{ ...centerStyle, color: highlightColor }}
+                    >
+                      {oc || EMPTY_SLOT_PLACEHOLDER}
+                    </span>
+                    <span
+                      className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpContext} ${styles.orpVertPost}`}
+                      style={centerStyle}
+                    >
+                      {after}
+                    </span>
+                  </Fragment>
+                );
+              }
+              /* Non-center words — render in grid column 2 via CSS */
               return (
                 <span
-                  className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
-                  style={{
-                    color: highlightColor,
-                    ...(scaledFont ? { fontSize: scaledFont } : undefined),
-                  }}
+                  key={i}
+                  className={`${styles.wordSlot} ${styles.orpVertWord}`}
+                  style={opacity < 1 ? { opacity } : undefined}
+                  aria-hidden={word === '' ? true : undefined}
                 >
-                  {word
-                    ? orpEnabled
-                      ? <WordWithOrp word={word} baseColor={highlightColor} />
-                      : word
-                    : EMPTY_SLOT_PLACEHOLDER}
+                  {word || EMPTY_SLOT_PLACEHOLDER}
                 </span>
               );
-            })()}
+            })}
+          </div>
+        ) : (
+          <div
+            className={styles.windowVertical}
+            style={{ '--slot-count': wordWindow.length } as CSSProperties}
+          >
+            {wordWindow.map((word, i) => {
+              const isCenter = i === highlightIndex;
+              const opacity = slotOpacity(i);
+              const scaledFont = isCenter
+                ? computeOrpFontSize(fullHeight ?? false, userScale)
+                : undefined;
+              return (
+                <span
+                  key={i}
+                  className={`${styles.wordSlot}${isCenter ? ` ${styles.wordSlotCenter}` : ''}`}
+                  style={{
+                    ...(isCenter ? { color: highlightColor } : undefined),
+                    ...(opacity < 1 ? { opacity } : undefined),
+                    ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                  }}
+                  aria-hidden={word === '' ? true : undefined}
+                >
+                  {word || EMPTY_SLOT_PLACEHOLDER}
+                </span>
+              );
+            })}
+          </div>
+        )
+      ) : (
+        /*
+         * Horizontal layout.
+         *
+         * When ORP is enabled: Spritz-style 3-column grid so the pivot letter
+         * always lands at the exact horizontal center of the viewport.
+         *   col 1 (1fr): left peripheral words + word prefix  — right-aligned
+         *   col 2 (auto): ORP pivot character                 — at center
+         *   col 3 (1fr): word suffix + right peripheral words — left-aligned
+         *
+         * When ORP is off: classic inline-block center-aligned word with
+         * absolutely-positioned peripheral words.
+         */
+        orpEnabled ? (
+          <div
+            className={styles.windowHorizontal}
+            style={{ '--slot-count': wordWindow.length } as CSSProperties}
+          >
+            {/* Focal guide line — permanent lock point at the ORP pivot position */}
+            <div
+              className={styles.focalGuide}
+              style={{ background: highlightColor }}
+              aria-hidden="true"
+            />
+            {(() => {
+              const centerWord = wordWindow[highlightIndex] ?? '';
+              const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
+              const { before, orpChar: oc, after } = calcOrpParts(centerWord);
+              return (
+                <div className={styles.orpAlignedLayout}>
+                  {/* Left column: peripheral words + ORP prefix */}
+                  <div className={styles.orpLeft}>
+                    {wordWindow.slice(0, highlightIndex).map((word, i) => {
+                      const opacity = slotOpacity(i);
+                      return (
+                        <span
+                          key={i}
+                          className={styles.wordSlot}
+                          style={opacity < 1 ? { opacity } : undefined}
+                          aria-hidden={word === '' ? true : undefined}
+                        >
+                          {word || EMPTY_SLOT_PLACEHOLDER}
+                        </span>
+                      );
+                    })}
+                    {/* Word prefix (part of center word) */}
+                    <span
+                      className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpContext}`}
+                      style={{
+                        color: highlightColor,
+                        ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                      }}
+                    >
+                      {before}
+                    </span>
+                  </div>
 
-            {/* Right peripheral words */}
-            <div className={styles.rightPeripherals}>
-              {wordWindow.slice(highlightIndex + 1).map((word, i) => {
-                const opacity = slotOpacity(highlightIndex + 1 + i);
+                  {/* Center column: ORP pivot letter — always at viewport center */}
+                  <span
+                    className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpChar}`}
+                    style={{
+                      color: highlightColor,
+                      ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                    }}
+                  >
+                    {centerWord ? oc || EMPTY_SLOT_PLACEHOLDER : EMPTY_SLOT_PLACEHOLDER}
+                  </span>
+
+                  {/* Right column: ORP suffix + peripheral words */}
+                  <div className={styles.orpRight}>
+                    {/* Word suffix (part of center word) */}
+                    <span
+                      className={`${styles.wordSlot} ${styles.wordSlotCenter} ${styles.orpContext}`}
+                      style={{
+                        color: highlightColor,
+                        ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                      }}
+                    >
+                      {after}
+                    </span>
+                    {wordWindow.slice(highlightIndex + 1).map((word, i) => {
+                      const opacity = slotOpacity(highlightIndex + 1 + i);
+                      return (
+                        <span
+                          key={i}
+                          className={styles.wordSlot}
+                          style={opacity < 1 ? { opacity } : undefined}
+                          aria-hidden={word === '' ? true : undefined}
+                        >
+                          {word || EMPTY_SLOT_PLACEHOLDER}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        ) : (
+          <div
+            className={styles.windowHorizontal}
+            style={{ '--slot-count': wordWindow.length } as CSSProperties}
+          >
+            <div className={styles.wordLayout}>
+              {/* Left peripheral words */}
+              <div className={styles.leftPeripherals}>
+                {wordWindow.slice(0, highlightIndex).map((word, i) => {
+                  const opacity = slotOpacity(i);
+                  return (
+                    <span
+                      key={i}
+                      className={styles.wordSlot}
+                      style={opacity < 1 ? { opacity } : undefined}
+                      aria-hidden={word === '' ? true : undefined}
+                    >
+                      {word || EMPTY_SLOT_PLACEHOLDER}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Center word — always at fixed horizontal center */}
+              {(() => {
+                const word = wordWindow[highlightIndex] ?? '';
+                const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
                 return (
                   <span
-                    key={i}
-                    className={styles.wordSlot}
-                    style={opacity < 1 ? { opacity } : undefined}
-                    aria-hidden={word === '' ? true : undefined}
+                    className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
+                    style={{
+                      color: highlightColor,
+                      ...(scaledFont ? { fontSize: scaledFont } : undefined),
+                    }}
                   >
                     {word || EMPTY_SLOT_PLACEHOLDER}
                   </span>
                 );
-              })}
+              })()}
+
+              {/* Right peripheral words */}
+              <div className={styles.rightPeripherals}>
+                {wordWindow.slice(highlightIndex + 1).map((word, i) => {
+                  const opacity = slotOpacity(highlightIndex + 1 + i);
+                  return (
+                    <span
+                      key={i}
+                      className={styles.wordSlot}
+                      style={opacity < 1 ? { opacity } : undefined}
+                      aria-hidden={word === '' ? true : undefined}
+                    >
+                      {word || EMPTY_SLOT_PLACEHOLDER}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );

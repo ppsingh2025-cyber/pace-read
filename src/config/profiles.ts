@@ -24,6 +24,8 @@ export interface ReadingProfile {
   punctuationPause: boolean;
   longWordCompensation: boolean;
   mainWordFontSize: number;
+  /** Whether Optimal Recognition Point highlighting should be enabled for this profile */
+  orpEnabled: boolean;
 }
 
 export const READING_PROFILES: ReadingProfile[] = [
@@ -40,6 +42,7 @@ export const READING_PROFILES: ReadingProfile[] = [
     punctuationPause: false,
     longWordCompensation: false,
     mainWordFontSize: 150,
+    orpEnabled: true,
   },
   {
     id: 'sprint',
@@ -54,6 +57,7 @@ export const READING_PROFILES: ReadingProfile[] = [
     punctuationPause: false,
     longWordCompensation: false,
     mainWordFontSize: 130,
+    orpEnabled: true,
   },
   {
     id: 'balanced',
@@ -68,6 +72,7 @@ export const READING_PROFILES: ReadingProfile[] = [
     punctuationPause: true,
     longWordCompensation: true,
     mainWordFontSize: 100,
+    orpEnabled: true,
   },
   {
     id: 'deep-focus',
@@ -82,6 +87,7 @@ export const READING_PROFILES: ReadingProfile[] = [
     punctuationPause: true,
     longWordCompensation: true,
     mainWordFontSize: 120,
+    orpEnabled: true,
   },
   {
     id: 'zen',
@@ -96,6 +102,7 @@ export const READING_PROFILES: ReadingProfile[] = [
     punctuationPause: true,
     longWordCompensation: true,
     mainWordFontSize: 180,
+    orpEnabled: false,
   },
 ];
 
