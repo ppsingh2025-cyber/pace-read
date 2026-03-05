@@ -62,10 +62,11 @@ Once configured, a **Sign In with Google** button appears in the burger menu. Wi
 - **Session Analytics:** Words read, active time, effective WPM
 
 ### Reading Profiles (Quick Presets)
-- **Max Speed:** 600 WPM, single word, no pauses
-- **Balanced:** 250 WPM, 3-word window, normal pauses (default)
-- **Deep Focus:** 180 WPM, strong peripheral fade
-- **Comprehension:** 150 WPM, intelligent phrase grouping
+- **Max Speed:** 700 WPM, single word, no pauses — document triage
+- **Sprint:** 500 WPM, single word, no pauses — speed training
+- **Balanced:** 300 WPM, 3-word window, normal pauses (default)
+- **Deep Focus:** 180 WPM, 3-word window, strong peripheral fade
+- **Zen:** 100 WPM, single word, intelligent chunking — meditative reading
 
 ### Input Methods
 - **File Upload:** Drag & drop or click to select (up to 100 MB)

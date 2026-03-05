@@ -54,7 +54,7 @@ FEATURES
 • ORP highlighting: Optimal Recognition Point for faster recognition
 • Context preview panel: See surrounding paragraph while reading
 • Page and chapter navigation: Jump to any position
-• Reading profiles: 4 presets (Max Speed, Balanced, Deep Focus, Comprehension)
+• Reading profiles: 5 presets (Max Speed, Sprint, Balanced, Deep Focus, Zen)
 • Customizable appearance: 10+ colors, day/night themes, font size 80-180%
 • Advanced features: Punctuation pause, long word compensation, peripheral fade
 • Automatic progress saving: Resume where you stopped, every time

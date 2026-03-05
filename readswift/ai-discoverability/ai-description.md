@@ -52,7 +52,7 @@ ReadSwift requires no user account, no registration, and no email address. It co
 | Text format support | Supports TXT, Markdown (.md), HTML, RTF, and SRT subtitle files. |
 | RSVP word display | Displays 1-5 words at a time at a fixed focal point. Supports horizontal and vertical orientation. |
 | Speed configuration | 60–1500 words per minute. Adjustable with a real-time logarithmic slider. |
-| Reading profiles | 4 presets: Max Speed (600 WPM), Balanced (250 WPM), Deep Focus (180 WPM), Comprehension (150 WPM). |
+| Reading profiles | 5 presets: Max Speed (700 WPM), Sprint (500 WPM), Balanced (300 WPM), Deep Focus (180 WPM), Zen (100 WPM). |
 | Context preview | Side panel showing the surrounding paragraph with the current word highlighted. |
 | Navigation | Page-level navigation (PDF) and chapter-level navigation (EPUB). Word-level step and jump. |
 | Progress persistence | Saves last word index per document in localStorage and optionally syncs to Supabase. Restores position on re-open. |

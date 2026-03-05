@@ -151,7 +151,7 @@ Everything You Need. Nothing You Don't.
 Multi-word window          — Display 1-5 words simultaneously
 Intelligent phrase chunking — Natural language grouping
 ORP highlighting           — Optimal Recognition Point for faster recognition
-Reading profiles           — 4 presets for different reading modes
+Reading profiles           — 5 presets for different reading modes
 Advanced features          — Punctuation pause, long word delay, peripheral fade
 Context preview            — See surrounding paragraph while reading
 Page & word navigation     — Jump to any position instantly
@@ -236,9 +236,9 @@ A: ReadSwift supports speeds from 60 to 1500 words per minute.
    • Beginners: Start at 200-300 WPM
    • Intermediate: 400-600 WPM achievable within 1 week
    • Advanced: 700-1000+ WPM for familiar content
-   • Max Speed profile: 600 WPM preset with minimal pauses
+   • Max Speed profile: 700 WPM preset with minimal pauses
    
-   The app includes 4 reading profiles and adaptive speed calibration.
+   The app includes 5 reading profiles and adaptive speed calibration.
 ```
 
 **Q: What Android version is required?**
