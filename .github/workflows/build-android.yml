@@ -48,6 +48,43 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Deploy custom Android icons
+        run: |
+          # Create mipmap directories
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+
+          # Copy foreground icons
+          if [ -f release-package/icons/ic_launcher_foreground.mdpi.png ]; then
+            cp release-package/icons/ic_launcher_foreground.mdpi.png android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
+            cp release-package/icons/ic_launcher_foreground.hdpi.png android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
+            cp release-package/icons/ic_launcher_foreground.xhdpi.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
+            cp release-package/icons/ic_launcher_foreground.xxhdpi.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
+            cp release-package/icons/ic_launcher_foreground.xxxhdpi.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
+            echo "✓ Copied Android foreground icons"
+          fi
+
+          # Copy background icons
+          if [ -f release-package/icons/ic_launcher_background.mdpi.png ]; then
+            cp release-package/icons/ic_launcher_background.mdpi.png android/app/src/main/res/mipmap-mdpi/ic_launcher_background.png
+            cp release-package/icons/ic_launcher_background.hdpi.png android/app/src/main/res/mipmap-hdpi/ic_launcher_background.png
+            cp release-package/icons/ic_launcher_background.xhdpi.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_background.png
+            cp release-package/icons/ic_launcher_background.xxhdpi.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_background.png
+            cp release-package/icons/ic_launcher_background.xxxhdpi.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_background.png
+            echo "✓ Copied Android background icons"
+          fi
+
+          # Copy XML files
+          if [ -f release-package/icons/ic_launcher.xml ]; then
+            cp release-package/icons/ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/
+            cp release-package/icons/ic_launcher_round.xml android/app/src/main/res/mipmap-anydpi-v26/
+            echo "✓ Copied Android adaptive icon XML"
+          fi
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 

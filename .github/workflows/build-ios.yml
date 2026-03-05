@@ -36,6 +36,23 @@ jobs:
           npx cap add ios
           npx cap sync ios
 
+      - name: Deploy custom iOS icons
+        run: |
+          ASSET_DIR="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$ASSET_DIR"
+
+          # Copy iOS icons
+          if [ -d release-package/icons/ios ]; then
+            cp release-package/icons/ios/*.png "$ASSET_DIR/" 2>/dev/null || true
+            echo "✓ Copied iOS icon PNGs"
+
+            # Copy or create Contents.json
+            if [ -f release-package/icons/ios/Contents.json ]; then
+              cp release-package/icons/ios/Contents.json "$ASSET_DIR/"
+              echo "✓ Copied iOS Contents.json"
+            fi
+          fi
+
       - name: Build (unsigned, for CI validation)
         run: |
           xcodebuild \
