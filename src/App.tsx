@@ -64,7 +64,6 @@ export default function App() {
     theme,
     mainWordFontSize,
     chunkMode,
-    autoFocusOnPlay,
     setWords,
     setCurrentWordIndex,
     setFileMetadata,
@@ -111,63 +110,6 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('fastread_onboarding_complete'),
   );
-
-  // Auto-hide UI during active playback after 2 seconds of inactivity
-  const [uiVisible, setUiVisible] = useState(true);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (!isPlaying) {
-      // When not playing, always show UI and clear any pending hide timer
-      setUiVisible(true);
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-      return;
-    }
-
-    // While playing, start a 2-second timer to hide UI on inactivity
-    const startHideTimer = () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = setTimeout(() => setUiVisible(false), 2000);
-    };
-
-    const showUi = () => {
-      setUiVisible(true);
-      startHideTimer();
-    };
-
-    startHideTimer();
-    window.addEventListener('mousemove', showUi);
-    window.addEventListener('touchstart', showUi);
-    // Keyboard events are handled but UI is shown on any key (shortcuts still work)
-    window.addEventListener('keydown', showUi);
-
-    return () => {
-      if (hideTimerRef.current) {
-        clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
-      }
-      window.removeEventListener('mousemove', showUi);
-      window.removeEventListener('touchstart', showUi);
-      window.removeEventListener('keydown', showUi);
-    };
-  }, [isPlaying]);
-
-  // Auto-focus on play: enter focus mode when playback starts (if enabled)
-  useEffect(() => {
-    if (autoFocusOnPlay) {
-      if (isPlaying) {
-        setIsFocused(true);
-      } else {
-        setIsFocused(false);
-      }
-    } else {
-      // When the setting is turned off while playing, exit focus mode
-      setIsFocused(false);
-    }
-  }, [isPlaying, autoFocusOnPlay]);
 
   /** Apply theme as a data attribute on <html> so CSS variables cascade */
   useEffect(() => {
@@ -392,7 +334,7 @@ export default function App() {
     <div className={`appShell${isFocused ? ' appShellFocused' : ''}`}>
 
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
-      <header className={`topBar${!uiVisible ? ' uiHidden' : ''}`}>
+      <header className="topBar">
         <div className="topBarLeft">
           <BurgerMenu onFileSelect={handleFileSelect} />
         </div>
@@ -466,7 +408,7 @@ export default function App() {
       )}
 
       {/* ── 4. Bottom control bar (always visible) ──────────────── */}
-      <div className={`controlsBar${!uiVisible ? ' uiHidden' : ''}`}>
+      <div className="controlsBar">
         <Controls
           onFileSelect={handleFileSelect}
           onPlay={play}
