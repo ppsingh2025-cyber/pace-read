@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import OnboardingOverlay from './components/OnboardingOverlay';
 import { useReaderContext } from './context/useReaderContext';
 import { useRSVPEngine } from './hooks/useRSVPEngine';
 import { useChunkEngine } from './hooks/useChunkEngine';
@@ -106,6 +107,9 @@ export default function App() {
   const [isFocused, setIsFocused] = useState(false);
   const [showPaste, setShowPaste] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem('fastread_onboarding_complete'),
+  );
 
   /** Apply theme as a data attribute on <html> so CSS variables cascade */
   useEffect(() => {
@@ -317,9 +321,16 @@ export default function App() {
 
   const toggleFocus = useCallback(() => setIsFocused((f) => !f), []);
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
+  const completeOnboarding = useCallback(() => {
+    localStorage.setItem('fastread_onboarding_complete', 'true');
+    setShowOnboarding(false);
+  }, []);
 
   return (
     <AuthProvider>
+    {showOnboarding && (
+      <OnboardingOverlay onComplete={completeOnboarding} />
+    )}
     <div className={`appShell${isFocused ? ' appShellFocused' : ''}`}>
 
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
