@@ -25,41 +25,19 @@ import { useReaderContext } from '../context/useReaderContext';
 
 const LONG_WORD_THRESHOLD = 8;   // characters — pause bonus kicks in above this
 const LONG_WORD_BONUS = 0.04;    // +4% per extra character
-const PUNCT_SENTENCE_END_MULT = 1.8; // pause after sentence-ending . ? !
-const PUNCT_MAJOR_MULT = 1.4;    // pause after . ? ! mid-sentence (e.g., abbreviations)
+const PUNCT_MAJOR_MULT = 1.4;    // pause multiplier after . ? !
 const PUNCT_MINOR_MULT = 1.2;    // pause multiplier after , ; :
 /** Minimum active reading time (ms) before WPM is considered valid */
 const MIN_VALID_ACTIVE_MS = 2_000;
-/** Words played at warm-up stage 1 end (at 80% speed) */
-const WARMUP_STAGE1 = 15;
-/** Words played at warm-up stage 2 end (full speed reached) */
-const WARMUP_STAGE2 = 30;
-/** Duration of the ramp phase (words 16-30): WARMUP_STAGE2 - WARMUP_STAGE1 */
-const WARMUP_RAMP_LENGTH = WARMUP_STAGE2 - WARMUP_STAGE1;
 
-/** Calculate the delay multiplier for a given word.
- * @param word        The word just shown.
- * @param nextWord    The following word (used to detect sentence endings).
- * @param punctuationPause  Whether punctuation pause feature is enabled.
- * @param longWordComp      Whether long-word compensation is enabled.
- */
-function wordDelayMultiplier(
-  word: string,
-  nextWord: string,
-  punctuationPause: boolean,
-  longWordComp: boolean,
-): number {
+/** Calculate the delay multiplier for a given word */
+function wordDelayMultiplier(word: string, punctuationPause: boolean, longWordComp: boolean): number {
   let mult = 1.0;
 
   if (punctuationPause) {
     const last = word.slice(-1);
-    if (/[.?!]/.test(last)) {
-      // Sentence ending: next word starts with a capital letter or end of document
-      const isSentenceEnd = !nextWord || /^[A-Z]/.test(nextWord);
-      mult *= isSentenceEnd ? PUNCT_SENTENCE_END_MULT : PUNCT_MAJOR_MULT;
-    } else if (/[,;:]/.test(last)) {
-      mult *= PUNCT_MINOR_MULT;
-    }
+    if (/[.?!]/.test(last)) mult *= PUNCT_MAJOR_MULT;
+    else if (/[,;:]/.test(last)) mult *= PUNCT_MINOR_MULT;
   }
 
   if (longWordComp) {
@@ -81,8 +59,6 @@ export function useRSVPEngine() {
     windowSize,
     punctuationPause,
     longWordCompensation,
-    structureMap,
-    warmUpEnabled,
     setCurrentWordIndex,
     setIsPlaying,
     resetReader,
@@ -102,8 +78,6 @@ export function useRSVPEngine() {
   const longWordCompRef = useRef<boolean>(longWordCompensation);
   const wordsRef = useRef<string[]>(words);
   const isPlayingRef = useRef<boolean>(isPlaying);
-  const structureMapRef = useRef<Map<number, { type: string }>>(structureMap as Map<number, { type: string }>);
-  const warmUpEnabledRef = useRef<boolean>(warmUpEnabled);
   // --- Session analytics (pure refs — no stale-closure issues) ---
   /** performance.now() when the current play segment started; 0 when not playing */
   const segmentStartRef = useRef<number>(0);
@@ -111,8 +85,6 @@ export function useRSVPEngine() {
   const totalActiveTimeMsRef = useRef<number>(0);
   /** Total words actually displayed (incremented once per rAF tick that advances a word) */
   const totalWordsDisplayedRef = useRef<number>(0);
-  /** Words played in the current play segment (for warm-up ramp) */
-  const wordsInSegmentRef = useRef<number>(0);
 
   // Keep refs in sync with state
   useEffect(() => { indexRef.current = currentWordIndex; }, [currentWordIndex]);
@@ -121,8 +93,6 @@ export function useRSVPEngine() {
   useEffect(() => { punctuationPauseRef.current = punctuationPause; }, [punctuationPause]);
   useEffect(() => { longWordCompRef.current = longWordCompensation; }, [longWordCompensation]);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  useEffect(() => { structureMapRef.current = structureMap as Map<number, { type: string }>; }, [structureMap]);
-  useEffect(() => { warmUpEnabledRef.current = warmUpEnabled; }, [warmUpEnabled]);
 
   // Reset analytics refs when a new file is loaded (words array replaced)
   useEffect(() => {
@@ -169,8 +139,6 @@ export function useRSVPEngine() {
     // Record segment start for active-time tracking
     segmentStartRef.current = performance.now();
     indexAtSegmentStartRef.current = indexRef.current;
-    // Reset warm-up counter for this play segment
-    wordsInSegmentRef.current = 0;
 
     const tick = () => {
       if (!isPlayingRef.current) return; // safety guard
@@ -187,43 +155,12 @@ export function useRSVPEngine() {
 
         // Count this word as displayed (only increments during actual playback)
         totalWordsDisplayedRef.current += 1;
-        wordsInSegmentRef.current += 1;
 
         // Calculate delay for the NEXT word (the one just shown)
         const currentWord = wordsRef.current[nextIndex] ?? '';
-        const nextWord = wordsRef.current[nextIndex + 1] ?? '';
-        const delayMult = wordDelayMultiplier(
-          currentWord,
-          nextWord,
-          punctuationPauseRef.current,
-          longWordCompRef.current,
-        );
-
-        // Paragraph/structure-aware pause: look up structural marker at nextIndex
-        const marker = structureMapRef.current.get(nextIndex);
-        let structMult = 1.0;
-        if (marker) {
-          if (marker.type === 'paragraph' || marker.type === 'scene-separator') {
-            structMult = 2.5;
-          } else if (marker.type === 'header') {
-            structMult = 3.0;
-          }
-        }
-
-        // Warm-up ramp: ease into speed for the first 30 words of a segment
-        let speedMult = 1.0;
-        if (warmUpEnabledRef.current) {
-          const n = wordsInSegmentRef.current;
-          if (n <= WARMUP_STAGE1) {
-            speedMult = 0.8;
-          } else if (n <= WARMUP_STAGE2) {
-            speedMult = 0.8 + 0.2 * ((n - WARMUP_STAGE1) / WARMUP_RAMP_LENGTH);
-          }
-        }
-
+        const mult = wordDelayMultiplier(currentWord, punctuationPauseRef.current, longWordCompRef.current);
         const nextBaseMs = 60_000 / wpmRef.current;
-        // Higher speedMult = shorter delay (divide), higher delayMult/structMult = longer delay (multiply)
-        nextTickRef.current = now + (nextBaseMs * delayMult * structMult) / speedMult;
+        nextTickRef.current = now + nextBaseMs * mult;
       }
 
       rafRef.current = requestAnimationFrame(tick);
