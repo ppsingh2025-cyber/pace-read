@@ -3,6 +3,7 @@
 .viewport {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -300,7 +301,7 @@
   position: absolute;
   /* 20px from vertical center — closer to word than before */
   bottom: calc(50% + 20px);
-  left: 50%;
+  left: var(--focal-tick-x, 50%);  /* measured ORP position; fallback 50% for first frame */
   transform: translateX(-50%);
   width: 0;
   /* Short 16px ticks — absolute pixels, never percentage */
@@ -313,7 +314,7 @@
 .focalTickBottom {
   position: absolute;
   top: calc(50% + 20px);
-  left: 50%;
+  left: var(--focal-tick-x, 50%);  /* measured ORP position; fallback 50% for first frame */
   transform: translateX(-50%);
   width: 0;
   height: 16px;
@@ -360,13 +361,18 @@
 
 /* Slots 1+ — context/upcoming words */
 .contextWord {
-  font-size: clamp(0.85rem, 3.5vw, 1.3rem);
+  font-size: clamp(1.1rem, 5vw, 1.8rem);
   font-family: 'Georgia', serif;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  min-width: 0;
+  flex: 1;       /* share remaining space equally */
+  min-width: 0;  /* allow shrink below content size */
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 18vw;
+  /* NO text-overflow: ellipsis — only .contextWordLast gets that */
   flex-shrink: 1;
+}
+
+/* Last context word slot — ellipsis hint only on the trailing slot */
+.contextWordLast {
+  text-overflow: ellipsis;
 }

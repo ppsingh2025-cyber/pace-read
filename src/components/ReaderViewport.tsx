@@ -25,7 +25,7 @@
  *   - Both: Math.ceil(n/2) - 1
  */
 
-import { memo, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { Orientation } from '../context/readerContextDef';
 import styles from '../styles/ReaderViewport.module.css';
@@ -111,15 +111,23 @@ function computeOrpFontSize(
 function OrpAnchorLayout({
   word,
   highlightColor,
+  shouldColorOrp,
+  orpCharRef,
 }: {
   word: string;
   highlightColor: string;
+  shouldColorOrp: boolean;
+  orpCharRef: React.RefObject<HTMLSpanElement | null>;
 }) {
   const idx = calcOrpIndex(word);
   return (
     <div className={styles.focalWordGrid}>
       <span className={styles.focalWordLeft}>{word.slice(0, idx)}</span>
-      <span className={styles.focalWordOrp} style={{ color: highlightColor }}>
+      <span
+        ref={orpCharRef}
+        className={styles.focalWordOrp}
+        style={{ color: shouldColorOrp ? highlightColor : 'inherit' }}
+      >
         {word[idx]}
       </span>
       <span className={styles.focalWordRight}>{word.slice(idx + 1)}</span>
@@ -192,6 +200,10 @@ const ReaderViewport = memo(function ReaderViewport({
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Attached to the outermost viewport div — used to measure ORP char position */
+  const viewportRef = useRef<HTMLDivElement>(null);
+  /** Attached to the ORP character span — used to compute tick mark X position */
+  const orpCharRef = useRef<HTMLSpanElement>(null);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -205,17 +217,40 @@ const ReaderViewport = memo(function ReaderViewport({
   };
 
   const userScale = mainWordFontSize / 100;
-  // Focal line and ORP only make sense in single-word mode (wordWindow.length === 1).
-  // In multi-word mode the eye has context and no fixed anchor is needed.
   const isSingleWord = wordWindow.length === 1;
   const isMultiWord = !isSingleWord;
-  // Color the entire center word only when focalLine is OFF or vertical orientation.
-  // When focalLine is ON + horizontal (single-word), only the ORP character gets highlightColor.
+
+  // ORP coloring: focalLine always wins — colors ORP regardless of orpEnabled
+  const shouldColorOrp = orpEnabled || focalLine;
+
+  // Focal ticks appear in horizontal orientation regardless of windowSize
+  const showFocalTicks = focalLine && orientation === 'horizontal';
+
+  // Grid layout for single-word focal line (centers ORP char at viewport midpoint)
   const showFocalLayout = isSingleWord && focalLine && orientation === 'horizontal';
+
+  // Color the entire center word span only when NOT using focal grid layout
   const shouldColorCenterWord = !showFocalLayout;
+
+  // ORP index for slot 0 (used in multi-word split render when focalLine ON)
+  const slot0Word = wordWindow[0] ?? '';
+  const slot0OrpIdx = calcOrpIndex(slot0Word);
+
+  // Measure ORP character position after each word change and update CSS variable
+  // for accurate tick mark placement. Only runs when ticks are visible.
+  // getBoundingClientRect is ONLY called here — never in the rAF loop.
+  useEffect(() => {
+    if (!showFocalTicks) return;
+    if (!orpCharRef.current || !viewportRef.current) return;
+    const orpRect = orpCharRef.current.getBoundingClientRect();
+    const vpRect = viewportRef.current.getBoundingClientRect();
+    const orpCenterX = orpRect.left + orpRect.width / 2 - vpRect.left;
+    viewportRef.current.style.setProperty('--focal-tick-x', `${orpCenterX}px`);
+  }, [wordWindow, showFocalTicks]);
 
   return (
     <div
+      ref={viewportRef}
       className={`${styles.viewport}${fullHeight ? ` ${styles.viewportFull}` : ''}`}
       aria-live="assertive"
       aria-atomic="true"
@@ -288,7 +323,7 @@ const ReaderViewport = memo(function ReaderViewport({
               >
                 {word
                   ? isCenter && showFocalLayout
-                    ? <OrpAnchorLayout word={word} highlightColor={highlightColor} />
+                    ? <OrpAnchorLayout word={word} highlightColor={highlightColor} shouldColorOrp={shouldColorOrp} orpCharRef={orpCharRef} />
                     : isCenter && isSingleWord && orpEnabled
                       ? <WordWithOrp word={word} baseColor={highlightColor} focusMarkerEnabled={focusMarkerEnabled} />
                       : word
@@ -301,19 +336,22 @@ const ReaderViewport = memo(function ReaderViewport({
         /*
          * Multi-word horizontal layout — left-anchored flex row.
          *
-         * Slot 0 (main word) is always full opacity, never clipped, uses the
-         * same font size as single-word mode. Slots 1+ (context words) are
-         * smaller, dimmed, and self-clip with ellipsis.
+         * Slot 0 (main word): large, flex-shrink 0, overflow visible, never clipped.
+         * When focalLine ON: split into 3 parts so orpCharRef measures ORP position.
+         * When focalLine OFF: plain span.
          *
-         * Rules:
-         *  - Container overflow: visible — slot 0 must never be clipped.
-         *  - align-items: baseline — mixed font sizes stay on the same baseline.
-         *  - Slot 0: flex-shrink 0, overflow visible.
-         *  - Slots 1+: flex-shrink 1, overflow hidden, text-overflow: ellipsis.
+         * Slots 1+ (context words): smaller font, self-clip.
+         * Last slot: .contextWordLast adds ellipsis hint.
+         * Empty slots: display:none — invisible, takes no space.
          */
         <div className={styles.wordLayoutMulti}>
           {wordWindow.map((word, slotIndex) => {
-            const opacity = slotOpacity(slotIndex);
+
+            // Empty trailing slot — invisible, takes no space
+            if (word === '') {
+              return <span key={slotIndex} style={{ display: 'none' }} aria-hidden="true" />;
+            }
+
             if (slotIndex === 0) {
               const scaledFont = computeOrpFontSize(fullHeight ?? false, userScale);
               return (
@@ -321,23 +359,37 @@ const ReaderViewport = memo(function ReaderViewport({
                   key={slotIndex}
                   className={`${styles.wordSlotCenter} ${styles.mainWordInRow}`}
                   style={{
-                    ...(shouldColorCenterWord ? { color: highlightColor } : undefined),
                     ...(scaledFont ? { fontSize: scaledFont } : undefined),
                   }}
-                  aria-hidden={word === '' ? true : undefined}
                 >
-                  {word || EMPTY_SLOT_PLACEHOLDER}
+                  {focalLine ? (
+                    // Split for ORP ref — precise tick position measurement
+                    <>
+                      {word.slice(0, slot0OrpIdx)}
+                      <span
+                        ref={orpCharRef}
+                        style={{ color: shouldColorOrp ? highlightColor : 'inherit' }}
+                      >
+                        {word[slot0OrpIdx]}
+                      </span>
+                      {word.slice(slot0OrpIdx + 1)}
+                    </>
+                  ) : word}
                 </span>
               );
             }
+
+            // Context words (slots 1+)
+            const isLastSlot = slotIndex === wordWindow.length - 1;
             return (
               <span
                 key={slotIndex}
-                className={styles.contextWord}
-                style={opacity < 1 ? { opacity } : undefined}
-                aria-hidden={word === '' ? true : undefined}
+                className={`${styles.contextWord}${isLastSlot ? ` ${styles.contextWordLast}` : ''}`}
+                style={{
+                  opacity: slotOpacity(slotIndex),
+                }}
               >
-                {word || EMPTY_SLOT_PLACEHOLDER}
+                {word}
               </span>
             );
           })}
@@ -366,7 +418,7 @@ const ReaderViewport = memo(function ReaderViewport({
                 >
                   {word
                     ? showFocalLayout
-                      ? <OrpAnchorLayout word={word} highlightColor={highlightColor} />
+                      ? <OrpAnchorLayout word={word} highlightColor={highlightColor} shouldColorOrp={shouldColorOrp} orpCharRef={orpCharRef} />
                       : isSingleWord && orpEnabled
                         ? <WordWithOrp word={word} baseColor={highlightColor} focusMarkerEnabled={focusMarkerEnabled} />
                         : word
@@ -377,7 +429,7 @@ const ReaderViewport = memo(function ReaderViewport({
           </div>
         </div>
       )}
-      {showFocalLayout && (
+      {showFocalTicks && (
         <>
           <div className={styles.focalTickTop} aria-hidden="true" />
           <div className={styles.focalTickBottom} aria-hidden="true" />
