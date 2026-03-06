@@ -137,7 +137,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [focalLine, setFocalLineState] = useState<boolean>(() => {
     const saved = localStorage.getItem(LS_KEY_FOCAL_LINE);
     if (saved !== null) return saved === 'true';
-    return isNewUser ? true : DEFAULT_FOCAL_LINE;
+    return DEFAULT_FOCAL_LINE;
   });
 
   const [activeMode, setActiveModeState] = useState<ModeId>(() => {

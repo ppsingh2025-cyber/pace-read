@@ -382,6 +382,7 @@ export default function App() {
             onShowPaste={togglePaste}
             focusMarkerEnabled={focusMarkerEnabled}
             focalLine={focalLine}
+            words={words}
           />
           {/* Maximize / minimize button */}
           <button

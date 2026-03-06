@@ -4,8 +4,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;     /* children fill full viewport width */
+  justify-content: center;  /* vertically center the word row */
   width: 100%;
   height: 300px;
   background: var(--vp-bg, #0a0a0a);
@@ -264,36 +264,6 @@
  *
  * No overflow: hidden anywhere — words are always fully visible.
  */
-.focalWordGrid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: baseline;
-  /* Fill full viewport width so ORP char lands at true 50% */
-  width: 100%;
-  /* Guard against extreme expansion on very long words */
-  max-width: 80ch;
-}
-
-/* Left text — right-aligns prefix into the left half */
-.focalWordLeft {
-  text-align: right;
-  white-space: nowrap;
-  /* overflow visible — never hidden, words must never clip */
-}
-
-/* ORP char — auto-sized center column, always at 50% of container */
-.focalWordOrp {
-  font-size: 1.08em;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-/* Right text — left-aligns suffix into the right half */
-.focalWordRight {
-  text-align: left;
-  white-space: nowrap;
-  /* overflow visible — never hidden */
-}
 
 /* ── Focal Line tick marks ───────────────────────────────────────── */
 
@@ -301,7 +271,7 @@
   position: absolute;
   /* 20px from vertical center — closer to word than before */
   bottom: calc(50% + 20px);
-  left: var(--focal-tick-x, 50%);  /* measured ORP position; fallback 50% for first frame */
+  left: var(--focal-tick-x, 16px);  /* fallback = padding-left only */
   transform: translateX(-50%);
   width: 0;
   /* Short 16px ticks — absolute pixels, never percentage */
@@ -309,18 +279,20 @@
   border-left: 1.5px solid #666;
   pointer-events: none;
   z-index: 0;
+  /* No transition — ticks must never animate between positions */
 }
 
 .focalTickBottom {
   position: absolute;
   top: calc(50% + 20px);
-  left: var(--focal-tick-x, 50%);  /* measured ORP position; fallback 50% for first frame */
+  left: var(--focal-tick-x, 16px);  /* fallback = padding-left only */
   transform: translateX(-50%);
   width: 0;
   height: 16px;
   border-left: 1.5px solid #666;
   pointer-events: none;
   z-index: 0;
+  /* No transition — ticks must never animate between positions */
 }
 
 [data-theme='day'] .focalTickTop,
@@ -328,51 +300,108 @@
   border-color: #999;
 }
 
-/* ── Multi-word layout container ─────────────────────────────────── */
+/* ── Main word (slot 0) — shared between single and multi-word modes ─ */
 
 /*
- * MUST be overflow: visible — NOT overflow: hidden.
- * Slot 0 (main word) is sacred and must never be clipped.
- * Context words (slots 1+) handle their own clipping individually.
+ * .mainWord is the canonical CSS class for the focal/current word.
+ * Also applied to the hidden measuring span used for tick X calculation.
+ * Font properties must match exactly between both uses.
  */
-.wordLayoutMulti {
+.mainWord {
+  font-size: clamp(1.1rem, 8vw, 3.2rem);
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--vp-text, #d4d4d4);
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* ── Single-word layout container ────────────────────────────────── */
+
+/*
+ * Left-aligned, same padding-left as .wordLayoutMulti.
+ * Zero visual jump when switching windowSize 1 ↔ 2.
+ */
+.wordLayoutSingle {
   display: flex;
   flex-direction: row;
   align-items: baseline;
-  justify-content: flex-start;
-  padding-left: var(--space-4, 16px);
+  justify-content: flex-start;         /* left-aligned, NOT centered */
+  padding-left: var(--space-4, 16px);  /* 16px — same as .wordLayoutMulti */
   padding-right: var(--space-4, 16px);
   width: 100%;
   box-sizing: border-box;
-  gap: 0.35em;
   white-space: nowrap;
   overflow: visible;
   position: relative;
   z-index: 1;
 }
 
-/* Slot 0 modifier — applied only in multi-word mode */
-.mainWordInRow {
-  flex-shrink: 0;    /* never compressed by context word siblings */
-  overflow: visible; /* never clipped */
-  white-space: nowrap;
-  /* Font size NOT defined here — inherits from .wordSlotCenter (single-word size) */
+/* ── Multi-word layout container ─────────────────────────────────── */
+
+/*
+ * MUST be overflow: visible — NOT overflow: hidden.
+ * Slot 0 (main word) is sacred and must never be clipped.
+ * Context words (contextWrapper) handle their own clipping.
+ */
+.wordLayoutMulti {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  padding-left: var(--space-4, 16px);  /* 16px — same as .wordLayoutSingle */
+  padding-right: var(--space-4, 16px);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
-/* Slots 1+ — context/upcoming words */
+/* ── Slot 0 modifier — applied only in multi-word mode ───────────── */
+.mainWordInRow {
+  flex-shrink: 0;     /* never compressed by context word siblings */
+  overflow: visible;  /* never clipped */
+  white-space: nowrap;
+  margin-right: 0.35em; /* gap between main word and context wrapper */
+}
+
+/* ── Context word wrapper ────────────────────────────────────────── */
+
+/*
+ * Flexible container that takes remaining space after slot 0.
+ * overflow:hidden clips context words but never touches slot 0.
+ */
+.contextWrapper {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.35em;
+  white-space: nowrap;
+}
+
+/* ── Context words (slots 1 to n-2) — natural content width ─────── */
 .contextWord {
+  flex: 0 0 auto;     /* natural content width — NO equal columns */
+  white-space: nowrap;
+  overflow: visible;
   font-size: clamp(1.1rem, 5vw, 1.8rem);
   font-family: 'Georgia', serif;
   letter-spacing: 0.01em;
-  white-space: nowrap;
-  flex: 1;       /* share remaining space equally */
-  min-width: 0;  /* allow shrink below content size */
-  overflow: hidden;
-  /* NO text-overflow: ellipsis — only .contextWordLast gets that */
-  flex-shrink: 1;
 }
 
-/* Last context word slot — ellipsis hint only on the trailing slot */
+/* ── Last context word — may ellipse ────────────────────────────── */
 .contextWordLast {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(1.1rem, 5vw, 1.8rem);
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.01em;
 }
