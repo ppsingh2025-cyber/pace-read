@@ -80,7 +80,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [windowSize, setWindowSizeState] = useState<WindowSize>(() => {
     const saved = localStorage.getItem(LS_KEY_WINDOW_SIZE);
     const parsed = saved ? parseInt(saved, 10) : DEFAULT_WINDOW_SIZE;
-    return ([1, 2, 3, 4, 5].includes(parsed) ? parsed : DEFAULT_WINDOW_SIZE) as WindowSize;
+    return ([1, 2, 3].includes(parsed) ? parsed : DEFAULT_WINDOW_SIZE) as WindowSize;
   });
   const [highlightColor, setHighlightColorState] = useState<string>(() => {
     return localStorage.getItem(LS_KEY_HIGHLIGHT_COLOR) ?? DEFAULT_HIGHLIGHT_COLOR;

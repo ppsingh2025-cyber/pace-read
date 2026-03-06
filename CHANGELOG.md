@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3]
+### Changed
+- Maximum word window reduced from 5 to 3
+- Word layout redesigned: ORP character always aligned with tick marks
+- Pre-ORP column fixed at 3 character widths — accommodates any English word
+- Tick position derived from font metrics, identical in 1-word and multi-word mode
+- Both modes share same left edge and ORP anchor point
+
 ## [1.0.2]
 ### Fixed
 - Single-word mode now left-aligned — same starting X as multi-word mode

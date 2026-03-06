@@ -152,7 +152,7 @@ isLoading: boolean
 loadingProgress: number           // 0–100
 
 // Display settings (all persisted to localStorage)
-windowSize: 1 | 2 | 3 | 4 | 5
+windowSize: 1 | 2 | 3
 highlightColor: string            // CSS color, default '#ff0000'
 orientation: 'horizontal' | 'vertical'
 theme: 'day' | 'night'

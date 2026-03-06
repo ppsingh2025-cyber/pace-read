@@ -63,7 +63,6 @@ export default function App() {
     theme,
     mainWordFontSize,
     chunkMode,
-    focusMarkerEnabled,
     focalLine,
     setWords,
     setCurrentWordIndex,
@@ -380,7 +379,6 @@ export default function App() {
             mainWordFontSize={mainWordFontSize}
             onFileSelect={handleFileSelect}
             onShowPaste={togglePaste}
-            focusMarkerEnabled={focusMarkerEnabled}
             focalLine={focalLine}
             words={words}
           />

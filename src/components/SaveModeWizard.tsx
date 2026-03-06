@@ -26,7 +26,7 @@ interface SaveModeWizardProps {
 }
 
 type WizardSettings = {
-  windowSize: 1 | 2 | 3 | 5;
+  windowSize: 1 | 2 | 3;
   orpEnabled: boolean;
   focalLine: boolean;
   peripheralFade: boolean;
@@ -58,9 +58,9 @@ export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizar
 
   // Pre-populate with current settings
   const [settings, setSettings] = useState<WizardSettings>(() => ({
-    windowSize: ([1, 2, 3, 5].includes(currentWindowSize)
+    windowSize: ([1, 2, 3].includes(currentWindowSize)
       ? currentWindowSize
-      : 1) as 1 | 2 | 3 | 5,
+      : 1) as 1 | 2 | 3,
     orpEnabled: currentOrp,
     focalLine: currentFocalLine,
     peripheralFade: currentPeripheralFade,
@@ -150,7 +150,7 @@ export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizar
             <div className={styles.stepContent}>
               <p className={styles.question}>How many words at once?</p>
               <div className={styles.options}>
-                {([1, 2, 3, 5] as const).map((n) => (
+                {([1, 2, 3] as const).map((n) => (
                   <button
                     key={n}
                     className={`${styles.optionBtn} ${settings.windowSize === n ? styles.optionBtnActive : ''}`}

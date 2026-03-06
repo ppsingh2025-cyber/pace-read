@@ -290,8 +290,6 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                     <option value={1}>1 word</option>
                     <option value={2}>2 words</option>
                     <option value={3}>3 words</option>
-                    <option value={4}>4 words</option>
-                    <option value={5}>5 words</option>
                   </select>
                 </label>
 

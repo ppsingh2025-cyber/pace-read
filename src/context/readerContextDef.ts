@@ -25,7 +25,7 @@ export interface ReadingRecord {
 }
 
 /** Number of words displayed simultaneously in the rolling window */
-export type WindowSize = 1 | 2 | 3 | 4 | 5;
+export type WindowSize = 1 | 2 | 3;
 
 /** Display orientation of the word window */
 export type Orientation = 'horizontal' | 'vertical';

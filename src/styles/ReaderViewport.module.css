@@ -300,12 +300,14 @@
   border-color: #999;
 }
 
-/* ── Main word (slot 0) — shared between single and multi-word modes ─ */
+/* ── Main word — canonical font class ───────────────────────────────── */
 
 /*
- * .mainWord is the canonical CSS class for the focal/current word.
- * Also applied to the hidden measuring span used for tick X calculation.
- * Font properties must match exactly between both uses.
+ * .mainWord is applied to:
+ *   1. The hidden measuring span (for font metrics)
+ *   2. The pre-ORP, ORP char, and post-ORP spans in horizontal mode
+ *   3. The center word slot in vertical mode
+ * Font properties must be identical in all uses.
  */
 .mainWord {
   font-size: clamp(1.1rem, 8vw, 3.2rem);
@@ -317,63 +319,62 @@
   overflow: visible;
 }
 
-/* ── Single-word layout container ────────────────────────────────── */
+/* ── Unified word row (both single and multi-word modes) ────────────── */
 
 /*
- * Left-aligned, same padding-left as .wordLayoutMulti.
- * Zero visual jump when switching windowSize 1 ↔ 2.
+ * ORP-aligned layout:
+ *   [padding-left 16px]
+ *   [pre-ORP: right-aligned, width = --pre-orp-col = 3×charWidth]
+ *   [ORP char: exactly at tick X = padding-left + pre-orp-col + 0.5×charWidth]
+ *   [post-ORP + context words: fill remaining space]
+ *
+ * overflow:visible on the row — pre-ORP must never clip.
+ * The postOrpArea handles its own clipping for context words.
  */
-.wordLayoutSingle {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: flex-start;         /* left-aligned, NOT centered */
-  padding-left: var(--space-4, 16px);  /* 16px — same as .wordLayoutMulti */
-  padding-right: var(--space-4, 16px);
-  width: 100%;
-  box-sizing: border-box;
-  white-space: nowrap;
-  overflow: visible;
-  position: relative;
-  z-index: 1;
-}
-
-/* ── Multi-word layout container ─────────────────────────────────── */
-
-/*
- * MUST be overflow: visible — NOT overflow: hidden.
- * Slot 0 (main word) is sacred and must never be clipped.
- * Context words (contextWrapper) handle their own clipping.
- */
-.wordLayoutMulti {
+.wordRow {
   display: flex;
   flex-direction: row;
   align-items: baseline;
   justify-content: flex-start;
-  padding-left: var(--space-4, 16px);  /* 16px — same as .wordLayoutSingle */
+  padding-left: 16px;               /* --space-4 hardcoded to match PADDING_LEFT in JS */
   padding-right: var(--space-4, 16px);
   width: 100%;
   box-sizing: border-box;
   overflow: visible;
   position: relative;
   z-index: 1;
-}
-
-/* ── Slot 0 modifier — applied only in multi-word mode ───────────── */
-.mainWordInRow {
-  flex-shrink: 0;     /* never compressed by context word siblings */
-  overflow: visible;  /* never clipped */
   white-space: nowrap;
-  margin-right: 0.35em; /* gap between main word and context wrapper */
 }
 
-/* ── Context word wrapper ────────────────────────────────────────── */
+/* ── Pre-ORP span — right-aligned fixed-width column ────────────────── */
 
 /*
- * Flexible container that takes remaining space after slot 0.
- * overflow:hidden clips context words but never touches slot 0.
+ * Fixed width = --pre-orp-col (set by JS as 3 × charWidth).
+ * text-align: right — short pre-ORP text hugs the tick from the left.
+ * For single-char words (ORP index 0), this span is empty; width still reserved.
  */
-.contextWrapper {
+.preOrp {
+  width: var(--pre-orp-col, 3ch);   /* fallback 3ch before first measurement */
+  flex-shrink: 0;
+  text-align: right;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+/* ── ORP character — sits exactly at tick X ─────────────────────────── */
+.orpChar {
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* ── Post-ORP area — post-ORP text + context words ──────────────────── */
+
+/*
+ * Takes remaining width. overflow:hidden here clips context words only.
+ * The pre-ORP and ORP char (outside this div) are never clipped.
+ */
+.postOrpArea {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -384,9 +385,16 @@
   white-space: nowrap;
 }
 
-/* ── Context words (slots 1 to n-2) — natural content width ─────── */
+/* ── Post-ORP text of current word ──────────────────────────────────── */
+.postOrp {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+/* ── Context words (slots 1 to n-2) — natural content width ─────────── */
 .contextWord {
-  flex: 0 0 auto;     /* natural content width — NO equal columns */
+  flex: 0 0 auto;
   white-space: nowrap;
   overflow: visible;
   font-size: clamp(1.1rem, 5vw, 1.8rem);
@@ -394,7 +402,7 @@
   letter-spacing: 0.01em;
 }
 
-/* ── Last context word — may ellipse ────────────────────────────── */
+/* ── Last context word — may ellipse ────────────────────────────────── */
 .contextWordLast {
   flex: 0 1 auto;
   min-width: 0;
