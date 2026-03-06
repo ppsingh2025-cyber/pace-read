@@ -116,12 +116,12 @@ function OrpAnchorLayout({
 }) {
   const idx = calcOrpIndex(word);
   return (
-    <div className={styles.orpAnchor}>
-      <span className={styles.orpAnchorLeft}>{word.slice(0, idx)}</span>
-      <span className={styles.orpAnchorChar} style={{ color: highlightColor }}>
+    <div className={styles.focalWordContainer}>
+      <span className={styles.focalWordLeft}>{word.slice(0, idx)}</span>
+      <span className={styles.focalWordOrp} style={{ color: highlightColor }}>
         {word[idx]}
       </span>
-      <span className={styles.orpAnchorRight}>{word.slice(idx + 1)}</span>
+      <span className={styles.focalWordRight}>{word.slice(idx + 1)}</span>
     </div>
   );
 }

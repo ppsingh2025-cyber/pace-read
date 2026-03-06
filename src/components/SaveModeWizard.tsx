@@ -94,7 +94,8 @@ export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizar
       nextModes = [...existingModes];
       nextModes[replaceIndex] = newMode;
     } else {
-      nextModes = [...existingModes, newMode];
+      // Add newest first — keeps up to 2 oldest existing modes to maintain 3-slot limit
+      nextModes = [newMode, ...existingModes.slice(0, 2)];
     }
     setSavedCustomModes(nextModes);
     setActiveMode('custom');

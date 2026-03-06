@@ -253,57 +253,66 @@
 /* ── Focal Line: ORP-anchored center layout ─────────────────────── */
 
 /*
- * When focalLine is ON, the center word is wrapped in .orpAnchor so that
+ * When focalLine is ON, the center word is wrapped in .focalWordContainer so that
  * the ORP character is forced to the horizontal center of the viewport.
- * This makes the tick marks (at left: 50%) align correctly with the ORP char.
+ * The container is a flex row; left text right-aligns into the left half,
+ * right text left-aligns into the right half, putting the ORP char at 50%.
  */
-.orpAnchor {
+.focalWordContainer {
   display: flex;
   align-items: baseline;
   width: 10ch;
+  overflow: hidden;
 }
 
-/* Left text — pushes ORP char rightward to the center column */
-.orpAnchorLeft {
+/* Left text — right-aligns so ORP char is pushed to the center of the container */
+.focalWordLeft {
   flex: 1;
   text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-/* ORP char — sits exactly at the flex center of the container */
-.orpAnchorChar {
+/* ORP char — sits at the exact center of the flex container */
+.focalWordOrp {
   flex: 0 0 auto;
   font-size: 1.08em;
   font-weight: 900;
 }
 
-/* Right text — fills right column without affecting ORP position */
-.orpAnchorRight {
+/* Right text — left-aligns to fill the right half */
+.focalWordRight {
   flex: 1;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 /* ── Focal Line tick marks ───────────────────────────────────────── */
 
 .focalTickTop {
   position: absolute;
-  top: calc(50% - 80px);
+  /* Sits above the vertical midpoint of the viewport */
+  bottom: calc(50% + 28px);
   left: 50%;
   transform: translateX(-50%);
   width: 0;
-  height: 35px;
-  border-left: 1.5px solid #555;
+  /* Short fixed height — never percentage */
+  height: 32px;
+  border-left: 1.5px solid #666;
   pointer-events: none;
   z-index: 0;
 }
 
 .focalTickBottom {
   position: absolute;
-  top: calc(50% + 45px);
+  /* Sits below the vertical midpoint of the viewport */
+  top: calc(50% + 28px);
   left: 50%;
   transform: translateX(-50%);
   width: 0;
-  height: 35px;
-  border-left: 1.5px solid #555;
+  height: 32px;
+  border-left: 1.5px solid #666;
   pointer-events: none;
   z-index: 0;
 }
