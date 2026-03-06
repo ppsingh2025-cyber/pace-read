@@ -493,7 +493,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 <label className={styles.row}>
                   <span className={styles.label}>
                     Focal Line
-                    <span className={styles.hint}> (vertical guide + letter highlight)</span>
+                    <span className={styles.hint}> (two guide lines + letter anchor)</span>
                   </span>
                   <input
                     type="checkbox"

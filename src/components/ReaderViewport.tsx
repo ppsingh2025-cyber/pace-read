@@ -172,6 +172,9 @@ const ReaderViewport = memo(function ReaderViewport({
   };
 
   const userScale = mainWordFontSize / 100;
+  // Color the entire center word only when ORP mode is on, OR when focalLine is off
+  // (focalLine-only mode: just the ORP character is colored, not the whole word)
+  const shouldColorCenterWord = orpEnabled || !focalLine;
 
   return (
     <div
@@ -239,7 +242,7 @@ const ReaderViewport = memo(function ReaderViewport({
                 key={i}
                 className={`${styles.wordSlot}${isCenter ? ` ${styles.wordSlotCenter}` : ''}`}
                 style={{
-                  ...(isCenter ? { color: highlightColor } : undefined),
+                  ...(isCenter && shouldColorCenterWord ? { color: highlightColor } : undefined),
                   ...(opacity < 1 ? { opacity } : undefined),
                   ...(scaledFont ? { fontSize: scaledFont } : undefined),
                 }}
@@ -293,7 +296,7 @@ const ReaderViewport = memo(function ReaderViewport({
                 <span
                   className={`${styles.wordSlot} ${styles.wordSlotCenter}`}
                   style={{
-                    color: highlightColor,
+                    ...(shouldColorCenterWord ? { color: highlightColor } : undefined),
                     ...(scaledFont ? { fontSize: scaledFont } : undefined),
                   }}
                 >
@@ -326,11 +329,10 @@ const ReaderViewport = memo(function ReaderViewport({
         </div>
       )}
       {focalLine && (
-        <div
-          className={styles.focalLine}
-          style={{ borderColor: highlightColor }}
-          aria-hidden="true"
-        />
+        <>
+          <div className={styles.focalLineTop} aria-hidden="true" />
+          <div className={styles.focalLineBottom} aria-hidden="true" />
+        </>
       )}
     </div>
   );
