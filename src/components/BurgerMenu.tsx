@@ -105,6 +105,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     records,
     setRecords,
     isPlaying,
+    focalLine, setFocalLine,
   } = useReaderContext();
 
   const { user } = useAuth();
@@ -487,6 +488,20 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                     <option value="fixed">Fixed window</option>
                     <option value="intelligent">Intelligent phrases</option>
                   </select>
+                </label>
+
+                <label className={styles.row}>
+                  <span className={styles.label}>
+                    Focal Line
+                    <span className={styles.hint}> (vertical guide + letter highlight)</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={focalLine}
+                    onChange={(e) => setFocalLine(e.target.checked)}
+                    aria-label="Vertical guide line and letter highlight to anchor your eye"
+                  />
                 </label>
               </section>
               </>) /* end (!isPlaying || showAdvancedDuringReading) */}

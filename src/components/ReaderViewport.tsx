@@ -56,6 +56,8 @@ interface ReaderViewportProps {
   onShowPaste?: () => void;
   /** Whether to show the subtle focus marker dot beneath the ORP character */
   focusMarkerEnabled?: boolean;
+  /** When true, renders a vertical focal guide line and ORP letter highlight */
+  focalLine?: boolean;
 }
 
 /** Non-breaking space used to keep empty window slots visible without text */
@@ -141,6 +143,7 @@ const ReaderViewport = memo(function ReaderViewport({
   onFileSelect,
   onShowPaste,
   focusMarkerEnabled = true,
+  focalLine = false,
 }: ReaderViewportProps) {
   /**
    * Peripheral fade: opacity decreases with distance from the center slot.
@@ -243,7 +246,7 @@ const ReaderViewport = memo(function ReaderViewport({
                 aria-hidden={word === '' ? true : undefined}
               >
                 {word
-                  ? isCenter && orpEnabled
+                  ? isCenter && (orpEnabled || focalLine)
                     ? <WordWithOrp word={word} baseColor={highlightColor} focusMarkerEnabled={focusMarkerEnabled} />
                     : word
                   : EMPTY_SLOT_PLACEHOLDER}
@@ -295,7 +298,7 @@ const ReaderViewport = memo(function ReaderViewport({
                   }}
                 >
                   {word
-                    ? orpEnabled
+                    ? orpEnabled || focalLine
                       ? <WordWithOrp word={word} baseColor={highlightColor} focusMarkerEnabled={focusMarkerEnabled} />
                       : word
                     : EMPTY_SLOT_PLACEHOLDER}
@@ -321,6 +324,13 @@ const ReaderViewport = memo(function ReaderViewport({
             </div>
           </div>
         </div>
+      )}
+      {focalLine && (
+        <div
+          className={styles.focalLine}
+          style={{ borderColor: highlightColor }}
+          aria-hidden="true"
+        />
       )}
     </div>
   );

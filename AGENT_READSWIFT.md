@@ -189,6 +189,8 @@ sessionStats: SessionStats        // { wordsRead, startTime, activeTimeMs, effec
 | `fastread_adaptive_wpm` | set by `useAdaptiveSpeed` |
 | `fastread_reading_profile` | `balanced` |
 | `fastread_onboarding_complete` | set on onboarding finish |
+| `fastread_focus_marker` | `true` |
+| `fastread_focal_line` | `false` |
 
 ---
 

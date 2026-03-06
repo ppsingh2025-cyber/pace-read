@@ -65,6 +65,7 @@ export default function App() {
     mainWordFontSize,
     chunkMode,
     focusMarkerEnabled,
+    focalLine,
     setWords,
     setCurrentWordIndex,
     setFileMetadata,
@@ -381,6 +382,7 @@ export default function App() {
             onFileSelect={handleFileSelect}
             onShowPaste={togglePaste}
             focusMarkerEnabled={focusMarkerEnabled}
+            focalLine={focalLine}
           />
           {/* Maximize / minimize button */}
           <button

@@ -99,6 +99,8 @@ interface ReaderState {
   sessionStats: SessionStats;
   /** Whether to show the focus marker dot beneath the ORP character */
   focusMarkerEnabled: boolean;
+  /** Whether to show the vertical focal guide line + ORP letter highlight */
+  focalLine: boolean;
 }
 
 interface ReaderActions {
@@ -133,6 +135,7 @@ interface ReaderActions {
   /** Reset session analytics (called when a new file is loaded) */
   resetSessionStats: () => void;
   setFocusMarkerEnabled: (enabled: boolean) => void;
+  setFocalLine: (v: boolean) => void;
 }
 
 export type ReaderContextValue = ReaderState & ReaderActions;

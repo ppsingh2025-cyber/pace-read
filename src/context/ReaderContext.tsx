@@ -28,6 +28,7 @@ const LS_KEY_MAIN_FONT_SIZE = 'fastread_main_font_size';
 const LS_KEY_CHUNK_MODE = 'fastread_chunk_mode';
 const LS_KEY_SESSION_STATS = 'fastread_session_stats';
 const LS_KEY_FOCUS_MARKER = 'fastread_focus_marker';
+const LS_KEY_FOCAL_LINE = 'fastread_focal_line';
 const DEFAULT_WPM = 250;
 const DEFAULT_WINDOW_SIZE: WindowSize = 3;
 const DEFAULT_HIGHLIGHT_COLOR = '#ff0000';
@@ -40,6 +41,7 @@ const DEFAULT_LONG_WORD_COMP = true;
 const DEFAULT_MAIN_FONT_SIZE = 100;
 const DEFAULT_CHUNK_MODE: ChunkMode = 'fixed';
 const DEFAULT_FOCUS_MARKER = true;
+const DEFAULT_FOCAL_LINE = false;
 
 const EMPTY_SESSION_STATS: SessionStats = {
   wordsRead: 0,
@@ -123,6 +125,10 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [focusMarkerEnabled, setFocusMarkerEnabledState] = useState<boolean>(() => {
     const saved = localStorage.getItem(LS_KEY_FOCUS_MARKER);
     return saved === null ? DEFAULT_FOCUS_MARKER : saved === 'true';
+  });
+  const [focalLine, setFocalLineState] = useState<boolean>(() => {
+    const saved = localStorage.getItem(LS_KEY_FOCAL_LINE);
+    return saved === null ? DEFAULT_FOCAL_LINE : saved === 'true';
   });
 
   // Derive 1-indexed current page via binary search over pageBreaks
@@ -283,6 +289,11 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LS_KEY_FOCUS_MARKER, String(enabled));
   }, []);
 
+  const setFocalLine = useCallback((v: boolean) => {
+    setFocalLineState(v);
+    localStorage.setItem(LS_KEY_FOCAL_LINE, String(v));
+  }, []);
+
   return (
     <ReaderContext.Provider
       value={{
@@ -311,6 +322,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         chunkMode,
         sessionStats,
         focusMarkerEnabled,
+        focalLine,
         setWords,
         setCurrentWordIndex,
         setIsPlaying,
@@ -338,6 +350,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         updateSessionStats,
         resetSessionStats,
         setFocusMarkerEnabled,
+        setFocalLine,
       }}
     >
       {children}
