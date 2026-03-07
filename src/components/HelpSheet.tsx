@@ -6,7 +6,7 @@ interface Item { icon: string; title: string; summary: string; detail?: string }
 
 const DATA: { [k in Tab]: Item[] } = {
   start: [
-    { icon: '📂', title: 'Upload a file', summary: 'Tap UPLOAD to load a .txt or .epub file.', detail: 'Supported: .txt .epub .pdf. App splits into words, starts from beginning.' },
+    { icon: '📂', title: 'Upload a file', summary: 'Tap UPLOAD to load a document.', detail: 'Supported: PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT. App splits into words, starts from beginning.' },
     { icon: '📋', title: 'Paste text', summary: 'Tap PASTE to open the paste sheet.', detail: 'Type or paste text, check word count, tap "Start Reading". Does not auto-play.' },
     { icon: '▶', title: 'Start reading', summary: 'Press PLAY. Words flash one at a time at your speed.', detail: 'RSVP shows words at a fixed point so eyes never move. Increases reading speed.' },
     { icon: '⚡', title: 'Set your speed', summary: 'Drag the slider or tap − / + to change WPM.', detail: '250 WPM = natural pace. 300–400 WPM reachable with practice. Start slow.' },

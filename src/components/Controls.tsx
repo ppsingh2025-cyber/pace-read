@@ -11,6 +11,10 @@ import React, { useCallback, useRef } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/Controls.module.css';
 
+const MIN_WPM = 100;
+const MAX_WPM = 1000;
+const WPM_STEP = 10;
+
 interface ControlsProps {
   onFileSelect: (file: File) => void;
   onPlay: () => void;
@@ -50,7 +54,7 @@ export default function Controls({
   const handleReset = useCallback(() => onReset(), [onReset]);
 
   const adjustWpm = useCallback((delta: number) => {
-    setWpm(Math.min(1000, Math.max(100, wpm + delta)));
+    setWpm(Math.min(MAX_WPM, Math.max(MIN_WPM, wpm + delta)));
   }, [wpm, setWpm]);
 
   return (
@@ -121,9 +125,9 @@ export default function Controls({
           <input
             type="range"
             className={styles.wpmSlider}
-            min={100}
-            max={1000}
-            step={10}
+            min={MIN_WPM}
+            max={MAX_WPM}
+            step={WPM_STEP}
             value={wpm}
             onChange={e => setWpm(Number(e.target.value))}
             aria-label={`Reading speed: ${wpm} words per minute`}

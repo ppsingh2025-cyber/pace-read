@@ -19,6 +19,7 @@ import { PRESET_MODES } from '../config/readingModePresets';
 import styles from '../styles/BurgerMenu.module.css';
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/dCBSTs4SjvhmA3Zh6';
+const COLOR_BLIND_SAFE_CYAN = '#5bc8dc';
 
 const THEME_SWATCHES: Record<'midnight' | 'warm' | 'day', string> = {
   midnight: '#5b8dee',
@@ -26,12 +27,7 @@ const THEME_SWATCHES: Record<'midnight' | 'warm' | 'day', string> = {
   day: '#2a7a6e',
 };
 
-interface BurgerMenuProps {
-  onFileSelect?: (file: File) => void;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function BurgerMenu(_props: BurgerMenuProps) {
+export default function BurgerMenu() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -283,7 +279,7 @@ export default function BurgerMenu(_props: BurgerMenuProps) {
                 </div>
                 <input type="checkbox" className={styles.toggle} checked={colorBlindMode} onChange={e => {
                   setColorBlindMode(e.target.checked);
-                  if (e.target.checked) setHighlightColor('#5bc8dc');
+                  if (e.target.checked) setHighlightColor(COLOR_BLIND_SAFE_CYAN);
                 }} />
               </div>
               <div className={styles.toggleRow}>

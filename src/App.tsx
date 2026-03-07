@@ -272,7 +272,7 @@ export default function App() {
         {/* ── 1. Top bar ──────────────────────────────────────────── */}
         <header className="topBar">
           <div className="topBarLeft">
-            <BurgerMenu onFileSelect={handleFileSelect} />
+            <BurgerMenu />
           </div>
           <div className="topBarBrand">
             <img
