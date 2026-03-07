@@ -4,11 +4,19 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from '../styles/OnboardingOverlay.module.css';
+import type { Theme } from '../context/readerContextDef';
+import type { PresetModeId } from '../types/readingModes';
 
-const DEMO_WORDS =
-  'Your eyes stay perfectly still. Each word appears exactly where you are looking. ' +
-  'No scanning. No movement. Just words arriving at full speed. This is how ReadSwift works.'
-  .split(/\s+/).filter(Boolean);
+const DEMO_WORDS = (
+  'The human brain can process written words far faster than the eye can move across a page. ' +
+  'Traditional reading forces your eyes to scan left to right, line by line, losing time ' +
+  'at every saccade. Rapid Serial Visual Presentation eliminates that bottleneck entirely. ' +
+  'Each word appears at a single fixed point on the screen. Your eyes stay completely still. ' +
+  'Your brain receives each word directly, without the delay of physical eye movement. ' +
+  'Studies at MIT and Stanford confirm that comprehension stays high well above four hundred ' +
+  'words per minute with just one week of daily practice. You are now reading at two hundred ' +
+  'and fifty words per minute. Notice how effortless it feels.'
+).split(/\s+/).filter(Boolean);
 
 const DEMO_WPM = 250;
 const DEMO_INTERVAL_MS = Math.round(60_000 / DEMO_WPM);
@@ -24,18 +32,22 @@ function calcOrpIndex(word: string): number {
 }
 
 const MODES = [
-  { label: 'Speed',  emoji: '⚡', wpm: '400–600', desc: 'One word, no focal line. Pure velocity.',          accent: '#f59e0b' },
-  { label: 'Focus',  emoji: '🎯', wpm: '250–350', desc: 'ORP + focal line. Precision reading.',            accent: 'var(--color-accent)', recommended: true },
-  { label: 'Read',   emoji: '📖', wpm: '150–250', desc: '3 words at once with context fading.',            accent: '#34d399' },
+  { id: 'speed' as PresetModeId, label: 'Speed',  emoji: '⚡', wpm: '400–600', desc: 'One word, no focal line. Pure velocity.',   setupDesc: 'Fast, no anchor',    accent: '#f59e0b' },
+  { id: 'focus' as PresetModeId, label: 'Focus',  emoji: '🎯', wpm: '250–350', desc: 'ORP + focal line. Precision reading.',       setupDesc: 'ORP + focal line',   accent: 'var(--color-accent)', recommended: true },
+  { id: 'read'  as PresetModeId, label: 'Read',   emoji: '📖', wpm: '150–250', desc: '3 words at once with context fading.',      setupDesc: '3 words, context',   accent: '#34d399' },
 ];
 
-interface OnboardingOverlayProps { onComplete: () => void; }
+interface OnboardingOverlayProps {
+  onComplete: (prefs: { theme: Theme; modeId: PresetModeId }) => void;
+}
 
 export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
   const [step, setStep]       = useState(0);
   const [visible, setVisible] = useState(false);
   const [demoIndex, setDemoIndex] = useState(-1);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [pickedTheme, setPickedTheme] = useState<Theme>('midnight');
+  const [pickedMode,  setPickedMode]  = useState<PresetModeId>('focus');
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setVisible(true));
@@ -61,17 +73,20 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
   useEffect(() => () => clearDemo(), [clearDemo]);
 
   const advance = useCallback(() => {
-    if (step < 3) {
+    if (step < 4) {
       const next = step + 1;
       setStep(next);
       if (next === 1) launchDemo();
       else clearDemo();
     } else {
-      onComplete();
+      onComplete({ theme: pickedTheme, modeId: pickedMode });
     }
-  }, [step, onComplete, launchDemo, clearDemo]);
+  }, [step, onComplete, launchDemo, clearDemo, pickedTheme, pickedMode]);
 
-  const skip = useCallback(() => onComplete(), [onComplete]);
+  const skip = useCallback(
+    () => onComplete({ theme: 'midnight', modeId: 'focus' }),
+    [onComplete],
+  );
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === 'Enter') advance(); if (e.key === 'Escape') skip(); };
@@ -91,8 +106,8 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
          role="dialog" aria-modal="true" aria-label="Welcome to ReadSwift">
       <div className={styles.panel}>
 
-        <div className={styles.dots} aria-label={`Step ${step + 1} of 4`}>
-          {[0,1,2,3].map(i => (
+        <div className={styles.dots} aria-label={`Step ${step + 1} of 5`}>
+          {[0,1,2,3,4].map(i => (
             <span key={i} className={`${styles.dot} ${i === step ? styles.dotActive : ''}`} aria-hidden="true" />
           ))}
         </div>
@@ -204,12 +219,66 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
             </div>
           )}
 
+          {/* Step 4 — Setup: theme + mode */}
+          {step === 4 && (
+            <div className={styles.step}>
+              <h1 className={styles.heading}>Quick setup</h1>
+              <p className={styles.body}>Pick a theme and reading mode. You can change both anytime.</p>
+
+              {/* Theme picker */}
+              <div className={styles.setupSection}>
+                <p className={styles.setupLabel}>Theme</p>
+                <div className={styles.themeRow}>
+                  {([
+                    { id: 'midnight', label: 'Midnight', bg: '#0f0f12', accent: '#5b8dee' },
+                    { id: 'warm',     label: 'Warm',     bg: '#120f0a', accent: '#e8a830' },
+                    { id: 'day',      label: 'Day',      bg: '#f5f0e8', accent: '#2a7a6e' },
+                  ] as const).map(t => (
+                    <button
+                      key={t.id}
+                      className={`${styles.themeBtn} ${pickedTheme === t.id ? styles.themeBtnActive : ''}`}
+                      onClick={() => setPickedTheme(t.id)}
+                      aria-pressed={pickedTheme === t.id}
+                    >
+                      <span
+                        className={styles.themeSwatch}
+                        style={{ background: t.bg, boxShadow: `inset 0 0 0 3px ${t.accent}` }}
+                        aria-hidden="true"
+                      />
+                      <span className={styles.themeLabel}>{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mode picker */}
+              <div className={styles.setupSection}>
+                <p className={styles.setupLabel}>Reading Mode</p>
+                <div className={styles.modeRow}>
+                  {MODES.map(m => (
+                    <button
+                      key={m.id}
+                      className={`${styles.modeBtn} ${pickedMode === m.id ? styles.modeBtnActive : ''}`}
+                      onClick={() => setPickedMode(m.id)}
+                      aria-pressed={pickedMode === m.id}
+                    >
+                      <span className={styles.modeBtnEmoji} aria-hidden="true">{m.emoji}</span>
+                      <span className={styles.modeBtnLabel}>{m.label}</span>
+                      <span className={styles.modeBtnDesc}>{m.setupDesc}</span>
+                      {m.recommended && <span className={styles.modeBtnBadge}>Recommended</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
         <div className={styles.actions}>
           {step === 1 && <button className={styles.btnSecondary} onClick={launchDemo}>Replay</button>}
           <button className={styles.btnPrimary} onClick={advance}>
-            {step < 3 ? 'Next →' : 'Start Reading →'}
+            {step < 4 ? 'Next →' : 'Start Reading →'}
           </button>
           <button className={styles.btnSkip} onClick={skip}>Skip</button>
         </div>
