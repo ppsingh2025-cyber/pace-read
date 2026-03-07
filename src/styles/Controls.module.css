@@ -1,4 +1,4 @@
-/* Controls.module.css — v1.0.6: unified button system, no progress bar */
+/* Controls.module.css — v2: two-row layout, WPM pill stepper */
 
 /* ─── Wrapper ───────────────────────────────────────────────────── */
 
@@ -61,24 +61,7 @@
   }
 }
 
-/* ─── Row 1: Info ─────────────────────────────────────────────────── */
-
-.infoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 28px;
-}
-
-.wordCount {
-  font-size: var(--font-size-xs, 0.75rem);
-  color: var(--text-faint);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-/* ─── Row 2: Action buttons ──────────────────────────────────────── */
+/* ─── Row 1: Action buttons ──────────────────────────────────────── */
 
 .actionRow {
   display: flex;
@@ -255,157 +238,6 @@
   user-select: none;
 }
 
-/* ─── Row 3: WPM ─────────────────────────────────────────────────── */
-
-.wpmRow {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-2, 8px);
-}
-
-/* WPM +/- buttons — same visual family as controlBtn but text-only */
-.wpmAdjBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm, 8px);
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-muted);
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1;
-
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.wpmAdjBtn:hover:not(:disabled) {
-  background: var(--state-hover);
-  color: var(--text);
-}
-
-.wpmAdjBtn:active:not(:disabled) {
-  background: var(--state-active);
-}
-
-.wpmAdjBtn:disabled {
-  opacity: var(--state-disabled, 0.35);
-  cursor: not-allowed;
-}
-
-.wpmSlider {
-  flex: 1;
-  accent-color: var(--color-accent);
-  cursor: pointer;
-}
-
-.wpmLabel {
-  font-size: var(--font-size-sm, 0.83rem);
-  font-weight: 700;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  min-width: 5ch;
-  text-align: right;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* ─── Page nav ───────────────────────────────────────────────────── */
-
-.pageNav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1, 4px);
-  flex-shrink: 0;
-  position: relative;
-}
-
-.pageSkipBtn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-
-.pageSkipBtn:disabled {
-  opacity: var(--state-disabled);
-  cursor: not-allowed;
-}
-
-.pageSkipBtn:hover:not(:disabled) {
-  background: var(--state-hover);
-  color: var(--text);
-}
-
-.pagePill {
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  white-space: nowrap;
-  min-height: 28px;
-  display: flex;
-  align-items: center;
-  transition: background 0.15s, color 0.15s;
-}
-
-.pagePill:hover {
-  background: var(--state-hover);
-  color: var(--text);
-}
-
-.pageJumpPopover {
-  position: absolute;
-  bottom: calc(100% + var(--space-2));
-  right: 0;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  z-index: 100;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.pageJumpInput {
-  width: 80px;
-  padding: var(--space-2);
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: var(--font-size-md);
-  text-align: center;
-}
-
-.pageJumpHint {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  text-align: center;
-}
-
 /* ─── Mobile tweaks ──────────────────────────────────────────────── */
 
 @media (max-width: 360px) {
@@ -459,15 +291,89 @@
   .resetBtnLabel {
     display: none;
   }
-
-  .wpmAdjBtn {
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
-  }
-
-  .wpmLabel {
-    font-size: 0.68rem;
-    min-width: 3.4rem;
-  }
 }
+
+/* ── WPM pill stepper ── */
+.wpmPill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-self: center;
+  height: 38px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.wpmPillBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.wpmPillBtn:hover:not(:disabled) { background: var(--state-hover); color: var(--text); }
+.wpmPillBtn:disabled { opacity: var(--state-disabled, 0.35); cursor: not-allowed; }
+
+.wpmPillValue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  min-width: 90px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: text;
+  transition: background 0.12s;
+  white-space: nowrap;
+  padding: 0 0.5rem;
+}
+.wpmPillValue:hover { background: var(--state-hover); }
+
+.wpmUnit {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wpmPillInput {
+  min-width: 90px;
+  height: 100%;
+  background: var(--bg-panel);
+  border: none;
+  border-left: 1px solid var(--color-accent);
+  border-right: 1px solid var(--color-accent);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+  padding: 0 0.5rem;
+  -moz-appearance: textfield;
+}
+.wpmPillInput::-webkit-outer-spin-button,
+.wpmPillInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .wpmPill { height: 32px; }
+  .wpmPillBtn { width: 32px; }
+  .wpmPillValue { min-width: 78px; font-size: 0.8rem; }
+}
+
