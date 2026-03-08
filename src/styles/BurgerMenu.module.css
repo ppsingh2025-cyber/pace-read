@@ -801,3 +801,66 @@
   white-space: nowrap;
 }
 
+
+/* ── Icon-prefixed label ── */
+.labelWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm, 0.82rem);
+  color: var(--text-muted, #888);
+  flex: 1;
+}
+.labelWithIcon svg {
+  flex-shrink: 0;
+  color: var(--text-faint, #555);
+}
+
+/* ── Advanced collapsible section ── */
+.advancedSection {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: var(--space-1, 0.25rem);
+}
+
+.advancedToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  touch-action: manipulation;
+}
+.advancedToggle:hover { background: var(--state-hover); }
+
+.advancedToggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint, #555);
+}
+
+.advancedChevron {
+  font-size: 0.5rem;
+  color: var(--text-faint, #555);
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.advancedBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem) var(--space-3, 0.75rem);
+  border-top: 1px solid var(--border);
+  background: var(--bg-input);
+}

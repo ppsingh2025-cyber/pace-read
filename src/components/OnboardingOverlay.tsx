@@ -46,7 +46,7 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
   const [visible, setVisible] = useState(false);
   const [demoIndex, setDemoIndex] = useState(-1);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [pickedTheme, setPickedTheme] = useState<Theme>('midnight');
+  const [pickedTheme, setPickedTheme] = useState<Theme>('obsidian');
   const [pickedMode,  setPickedMode]  = useState<PresetModeId>('focus');
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
   }, [step, onComplete, launchDemo, clearDemo, pickedTheme, pickedMode]);
 
   const skip = useCallback(
-    () => onComplete({ theme: 'midnight', modeId: 'focus' }),
+    () => onComplete({ theme: 'obsidian', modeId: 'focus' }),
     [onComplete],
   );
 

@@ -9,7 +9,7 @@ export const PRESET_MODES: Record<PresetModeId, {
   speed: {
     label: 'Sprint',
     icon: '⚡',
-    description: 'Pure velocity. No pauses, no distractions.',
+    description: 'Maximum speed. One word at a time, no anchor, no pauses.',
     settings: {
       windowSize: 1,
       orpEnabled: false,
@@ -39,7 +39,7 @@ export const PRESET_MODES: Record<PresetModeId, {
   read: {
     label: 'Flow',
     icon: '🌊',
-    description: 'Natural reading with context and rhythm.',
+    description: 'Natural rhythm. Three words, phrase grouping, full context.',
     settings: {
       windowSize: 3,            // 3 words — max (v11)
       orpEnabled: false,

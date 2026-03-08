@@ -65,6 +65,7 @@ export default function ReadingModes() {
       <div className={styles.tabRow} role="tablist">
         {(['speed', 'focus', 'read'] as PresetModeId[]).map((id) => (
           <button
+            type="button"
             key={id}
             role="tab"
             aria-selected={activeMode === id}
@@ -76,13 +77,14 @@ export default function ReadingModes() {
           </button>
         ))}
         <button
+          type="button"
           role="tab"
           aria-selected={activeMode === 'custom'}
           className={`${styles.tab} ${activeMode === 'custom' ? styles.tabActive : ''}`}
           onClick={() => setActiveMode('custom')}
         >
           <span className={styles.tabEmoji}>⚙️</span>
-          <span className={styles.tabLabel}>Custom</span>
+          <span className={styles.tabLabel}>My Setup</span>
         </button>
       </div>
 
@@ -97,6 +99,15 @@ export default function ReadingModes() {
       {activeMode === 'custom' && (
         <div className={styles.customPanel}>
 
+          {/* Explanation callout */}
+          <div className={styles.customCallout}>
+            <span className={styles.customCalloutIcon} aria-hidden="true">⚙️</span>
+            <span className={styles.customCalloutText}>
+              Fine-tune every setting. Changes apply live.
+              {savedCustomModes.length < 3 && ' Tap ＋ below to save as a preset.'}
+            </span>
+          </div>
+
           {/* Saved mode chips */}
           {savedCustomModes.length > 0 && (
             <div className={styles.savedSection}>
@@ -104,6 +115,7 @@ export default function ReadingModes() {
               {savedCustomModes.map((mode) => (
                 <div key={mode.id} className={styles.chipRow}>
                   <button
+                    type="button"
                     className={`${styles.chip} ${activeCustomModeId === mode.id ? styles.chipActive : ''}`}
                     onClick={() => selectCustomMode(mode)}
                     aria-pressed={activeCustomModeId === mode.id}
@@ -111,6 +123,7 @@ export default function ReadingModes() {
                     {activeCustomModeId === mode.id ? '✓ ' : ''}{mode.name}
                   </button>
                   <button
+                    type="button"
                     className={styles.chipDelete}
                     onClick={() => deleteCustomMode(mode)}
                     aria-label={`Delete "${mode.name}"`}
@@ -124,7 +137,7 @@ export default function ReadingModes() {
 
           {/* Save / full-slots message */}
           {savedCustomModes.length < 3 ? (
-            <button className={styles.saveBtn} onClick={() => setWizardOpen(true)}>
+            <button type="button" className={styles.saveBtn} onClick={() => setWizardOpen(true)}>
               ＋ Save current settings as a mode
             </button>
           ) : (
