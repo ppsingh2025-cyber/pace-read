@@ -25,10 +25,12 @@
 
 .bar {
   display: block;
+  width: 100%;
   height: 2px;
   background: var(--text-muted, #888);
   border-radius: 2px;
   transition: background 0.15s;
+  flex-shrink: 0;
 }
 
 .burgerBtn:hover .bar {
@@ -530,7 +532,7 @@
 
 .profileBtnActive {
   border-color: var(--color-accent, #22d3ee);
-  background: color-mix(in srgb, var(--color-accent, #22d3ee) 10%, var(--bg-input, #1a1a1a));
+  background: var(--color-accent-10);
 }
 
 .profileName {
@@ -557,8 +559,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: color-mix(in srgb, var(--color-accent, #22d3ee) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent, #22d3ee) 30%, transparent);
+  background: var(--color-accent-8);
+  border: 1px solid var(--color-accent-30);
   border-radius: 8px;
   margin-bottom: 0.5rem;
 }
@@ -735,6 +737,7 @@
 .themeSwatch[data-swatch="midnight"] { background: #5b8dee; }
 .themeSwatch[data-swatch="warm"]     { background: #e8a830; }
 .themeSwatch[data-swatch="day"]      { background: #2a7a6e; }
+.themeSwatch[data-swatch="obsidian"] { background: #000000; border-color: #00d4ff; }
 
 .themeLabel {
   font-size: var(--font-size-xs);
@@ -798,3 +801,66 @@
   white-space: nowrap;
 }
 
+
+/* ── Icon-prefixed label ── */
+.labelWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-sm, 0.82rem);
+  color: var(--text-muted, #888);
+  flex: 1;
+}
+.labelWithIcon svg {
+  flex-shrink: 0;
+  color: var(--text-faint, #555);
+}
+
+/* ── Advanced collapsible section ── */
+.advancedSection {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: var(--space-1, 0.25rem);
+}
+
+.advancedToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+  touch-action: manipulation;
+}
+.advancedToggle:hover { background: var(--state-hover); }
+
+.advancedToggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-faint, #555);
+}
+
+.advancedChevron {
+  font-size: 0.5rem;
+  color: var(--text-faint, #555);
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.advancedBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem) var(--space-3, 0.75rem);
+  border-top: 1px solid var(--border);
+  background: var(--bg-input);
+}

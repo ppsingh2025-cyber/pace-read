@@ -51,6 +51,7 @@ export default function PageNavigator() {
       <span className={styles.pageLabel}>{label}</span>
 
       <button
+        type="button"
         className={styles.navBtn}
         onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage <= 1}
@@ -76,6 +77,7 @@ export default function PageNavigator() {
         />
       ) : (
         <button
+          type="button"
           className={styles.pageDisplay}
           onClick={startEditing}
           title={`Jump to a specific ${label.toLowerCase()}`}
@@ -86,6 +88,7 @@ export default function PageNavigator() {
       )}
 
       <button
+        type="button"
         className={styles.navBtn}
         onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage >= totalPages}

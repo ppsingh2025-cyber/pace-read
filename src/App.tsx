@@ -14,6 +14,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { APP_VERSION } from './version';
+import WhatsNewModal from './components/WhatsNewModal';
 import OnboardingOverlay from './components/OnboardingOverlay';
 import { useReaderContext } from './context/useReaderContext';
 import { useRSVPEngine } from './hooks/useRSVPEngine';
@@ -118,8 +120,17 @@ export default function App() {
   const [isFocused, setIsFocused] = useState(false);
   const [showPaste, setShowPaste] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem('fastread_onboarding_complete'),
+  const [contextExpanded, setContextExpanded] = useState(false);
+
+  // What's New: shown when stored version ≠ current version
+  const [showWhatsNew, setShowWhatsNew] = useState<boolean>(
+    () => localStorage.getItem('fastread_seen_version') !== APP_VERSION,
+  );
+  // Onboarding: not shown immediately — triggered by handleWhatsNewDismiss
+  // if user has never completed it, or shown directly if no version bump
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(
+    () => !localStorage.getItem('fastread_seen_version')
+         && !localStorage.getItem('fastread_onboarding_complete'),
   );
 
   /** Apply theme as a data attribute on <html> so CSS variables cascade */
@@ -343,9 +354,21 @@ export default function App() {
     [setTheme, applyMode, setActiveMode],
   );
 
+  const handleWhatsNewDismiss = useCallback(() => {
+    localStorage.setItem('fastread_seen_version', APP_VERSION);
+    setShowWhatsNew(false);
+    // After dismissing What's New, show onboarding if it has never been completed
+    if (!localStorage.getItem('fastread_onboarding_complete')) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
   return (
     <AuthProvider>
-    {showOnboarding && (
+    {showWhatsNew && (
+      <WhatsNewModal onDismiss={handleWhatsNewDismiss} />
+    )}
+    {!showWhatsNew && showOnboarding && (
       <OnboardingOverlay onComplete={completeOnboarding} />
     )}
     <div className={`appShell${isFocused ? ' appShellFocused' : ''}`}>
@@ -420,7 +443,7 @@ export default function App() {
 
       {!isFocused && (
         <div className="contextStrip">
-          <ContextPreview />
+          <ContextPreview onExpandChange={setContextExpanded} />
         </div>
       )}
 
@@ -461,7 +484,7 @@ export default function App() {
       <Toaster position="bottom-center" />
 
       {/* ── Footer ──────────────────────────────────────────────── */}
-      {!isFocused && <AppFooter />}
+      {!isFocused && !contextExpanded && <AppFooter />}
     </div>
     </AuthProvider>
   );

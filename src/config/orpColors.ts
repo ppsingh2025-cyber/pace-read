@@ -96,6 +96,32 @@ export const ORP_COLORS: Record<Theme, OrpColorOption[]> = {
       reason: 'Gentle — same family as body text, minimal disruption',
     },
   ],
+  obsidian: [
+    {
+      id: 'cyan',
+      label: 'Cyan',
+      value: '#00d4ff',
+      reason: 'Default — maximum pop-out on pure black; color-blind safe; lowest fatigue on OLED',
+    },
+    {
+      id: 'amber',
+      label: 'Amber',
+      value: '#ffb830',
+      reason: 'Research-validated lowest fatigue; vivid on pure black without blue-channel bleed',
+    },
+    {
+      id: 'green',
+      label: 'Mint',
+      value: '#39ff6e',
+      reason: 'Fastest pre-attentive pop-out on true black OLED backgrounds',
+    },
+    {
+      id: 'subtle',
+      label: 'Soft White',
+      value: '#e8e8e8',
+      reason: 'Minimal disruption; comfortable for extended OLED sessions',
+    },
+  ],
 };
 
 /** Returns the accent color for the given theme (first/default option). */

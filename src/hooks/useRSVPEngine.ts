@@ -26,19 +26,29 @@ import { useReaderContext } from '../context/useReaderContext';
 
 const LONG_WORD_THRESHOLD = 8;   // characters — pause bonus kicks in above this
 const LONG_WORD_BONUS = 0.04;    // +4% per extra character
-const PUNCT_SENTENCE_MULT = 1.25; // pause multiplier after . ? ! — reduced from 1.4 (Masson 1983)
+const PUNCT_SENTENCE_MULT  = 2.0;
+const PUNCT_SENTENCE_FLOOR = 180; // ms minimum extra on top of base delay
+const PUNCT_MINOR_MULT     = 1.3;
+const PUNCT_MINOR_FLOOR    = 80;  // ms minimum extra on top of base delay
 /** Minimum active reading time (ms) before WPM is considered valid */
 const MIN_VALID_ACTIVE_MS = 2_000;
 
 /** Calculate the delay multiplier for a given word */
-function wordDelayMultiplier(word: string, punctuationPause: boolean, longWordComp: boolean): number {
+function wordDelayMultiplier(
+  word: string,
+  punctuationPause: boolean,
+  longWordComp: boolean,
+): number {
   let mult = 1.0;
 
   if (punctuationPause) {
     const last = word.slice(-1);
-    // Sentence-ending punctuation only — research-validated (Masson 1983)
-    if (/[.?!]/.test(last)) mult *= PUNCT_SENTENCE_MULT;
-    // Minor punctuation (,;:) — no pause, not research-validated
+    const isAbbreviation = word.slice(0, -1).includes('.');
+    if (/[.?!]/.test(last) && !isAbbreviation) {
+      mult *= PUNCT_SENTENCE_MULT;
+    } else if (/[,;:\u2014]/.test(last)) {
+      mult *= PUNCT_MINOR_MULT;
+    }
   }
 
   if (longWordComp) {
@@ -159,9 +169,21 @@ export function useRSVPEngine() {
 
         // Calculate delay for the NEXT word (the one just shown)
         const currentWord = wordsRef.current[nextIndex] ?? '';
-        const mult = wordDelayMultiplier(currentWord, punctuationPauseRef.current, longWordCompRef.current);
-        const nextBaseMs = 60_000 / wpmRef.current;
-        nextTickRef.current = now + nextBaseMs * mult;
+        const baseMs  = 60_000 / wpmRef.current;
+        const rawMult = wordDelayMultiplier(currentWord, punctuationPauseRef.current, longWordCompRef.current);
+        let delayMs = baseMs * rawMult;
+
+        if (punctuationPauseRef.current) {
+          const lastChar = currentWord.slice(-1);
+          const isAbbreviation = currentWord.slice(0, -1).includes('.');
+          if (/[.?!]/.test(lastChar) && !isAbbreviation && rawMult > 1) {
+            delayMs = Math.max(delayMs, baseMs + PUNCT_SENTENCE_FLOOR);
+          } else if (/[,;:\u2014]/.test(lastChar) && rawMult > 1) {
+            delayMs = Math.max(delayMs, baseMs + PUNCT_MINOR_FLOOR);
+          }
+        }
+
+        nextTickRef.current = now + delayMs;
       }
 
       rafRef.current = requestAnimationFrame(tick);

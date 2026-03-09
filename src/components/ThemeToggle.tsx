@@ -11,16 +11,18 @@ import { useReaderContext } from '../context/useReaderContext';
 import type { Theme } from '../context/readerContextDef';
 import styles from '../styles/ThemeToggle.module.css';
 
-const THEME_CYCLE: Theme[] = ['midnight', 'warm', 'day'];
+const THEME_CYCLE: Theme[] = ['obsidian', 'midnight', 'warm', 'day'];
 const THEME_ICONS: Record<Theme, string> = {
+  obsidian: '🌑',
   midnight: '🌙',
   warm: '🕯',
-  day: '☀',
+  day: '☀️',
 };
 const THEME_LABELS: Record<Theme, string> = {
+  obsidian: 'Switch to Midnight theme',
   midnight: 'Switch to Warm theme',
   warm: 'Switch to Day theme',
-  day: 'Switch to Midnight theme',
+  day: 'Switch to Obsidian theme',
 };
 
 export default function ThemeToggle() {
@@ -34,6 +36,7 @@ export default function ThemeToggle() {
 
   return (
     <button
+      type="button"
       className={styles.toggleBtn}
       onClick={handleClick}
       aria-label={THEME_LABELS[theme] ?? 'Switch theme'}

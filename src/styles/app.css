@@ -76,6 +76,18 @@
   --color-accent:        #5b8dee;
   --color-accent-dim:    rgba(91,141,238,0.15);
 
+  /* iOS-safe opacity variants — replaces color-mix() */
+  --color-accent-8:      rgba(91,141,238,0.08);
+  --color-accent-10:     rgba(91,141,238,0.10);
+  --color-accent-12:     rgba(91,141,238,0.12);
+  --color-accent-15:     rgba(91,141,238,0.15);
+  --color-accent-22:     rgba(91,141,238,0.22);
+  --color-accent-25:     rgba(91,141,238,0.25);
+  --color-accent-30:     rgba(91,141,238,0.30);
+  --color-accent-bright: #79a2f1;
+  --color-accent-deep:   #4063a7;
+  --color-error-8:       rgba(229,115,115,0.10);
+
   /* Surfaces */
   --bg:           #0f0f12;
   --bg-panel:     #1a1a22;
@@ -120,6 +132,18 @@
   --color-accent:        #e8a830;
   --color-accent-dim:    rgba(232,168,48,0.15);
 
+  /* iOS-safe opacity variants */
+  --color-accent-8:      rgba(232,168,48,0.08);
+  --color-accent-10:     rgba(232,168,48,0.10);
+  --color-accent-12:     rgba(232,168,48,0.12);
+  --color-accent-15:     rgba(232,168,48,0.15);
+  --color-accent-22:     rgba(232,168,48,0.22);
+  --color-accent-25:     rgba(232,168,48,0.25);
+  --color-accent-30:     rgba(232,168,48,0.30);
+  --color-accent-bright: #ecb855;
+  --color-accent-deep:   #a27622;
+  --color-error-8:       rgba(229,115,115,0.10);
+
   --bg:            #120f0a;
   --bg-panel:      #1e1810;
   --bg-input:      #2a2218;
@@ -158,6 +182,18 @@
   --color-accent:        #2a7a6e;
   --color-accent-dim:    rgba(42,122,110,0.12);
 
+  /* iOS-safe opacity variants */
+  --color-accent-8:      rgba(42,122,110,0.08);
+  --color-accent-10:     rgba(42,122,110,0.10);
+  --color-accent-12:     rgba(42,122,110,0.12);
+  --color-accent-15:     rgba(42,122,110,0.15);
+  --color-accent-22:     rgba(42,122,110,0.22);
+  --color-accent-25:     rgba(42,122,110,0.25);
+  --color-accent-30:     rgba(42,122,110,0.30);
+  --color-accent-bright: #509288;
+  --color-accent-deep:   #1d554d;
+  --color-error-8:       rgba(229,115,115,0.10);
+
   --bg:            #f5f0e8;
   --bg-panel:      #ffffff;
   --bg-input:      #ede8e0;
@@ -184,6 +220,61 @@
   --state-hover:   rgba(0,0,0,0.05);
   --state-active:  rgba(0,0,0,0.08);
   --state-focus:   rgba(42,122,110,0.30);
+  --state-disabled: 0.38;
+}
+
+/* ── Obsidian theme — pure black for OLED/AMOLED screens ─────────── */
+/* All surfaces use #000000 so OLED pixels are physically turned off.  */
+/* Electric cyan accent chosen for maximum contrast (15:1) + colour-   */
+/* blind safety on true black.                                          */
+[data-theme="obsidian"] {
+  color-scheme: dark;
+
+  --color-primary:       #003a5c;
+  --color-primary-hover: #004a78;
+  --color-accent:        #00d4ff;
+  --color-accent-dim:    rgba(0,212,255,0.12);
+
+  /* iOS-safe opacity variants */
+  --color-accent-8:      rgba(0,212,255,0.08);
+  --color-accent-10:     rgba(0,212,255,0.10);
+  --color-accent-12:     rgba(0,212,255,0.12);
+  --color-accent-15:     rgba(0,212,255,0.15);
+  --color-accent-22:     rgba(0,212,255,0.22);
+  --color-accent-25:     rgba(0,212,255,0.25);
+  --color-accent-30:     rgba(0,212,255,0.30);
+  --color-accent-bright: #2edcff;
+  --color-accent-deep:   #0094b2;
+  --color-error-8:       rgba(229,115,115,0.10);
+
+  /* Pure black — OLED pixels off */
+  --bg:           #000000;
+  --bg-panel:     #0a0a0a;
+  --bg-input:     #111111;
+  --border:       #1c1c1c;
+  --border-input: #252525;
+
+  --text:           #f0f0f0;
+  --text-muted:     #888888;
+  --text-faint:     #444444;
+  --text-secondary: #888888;
+
+  --accent: #00d4ff;
+
+  --kbd-bg:     #111111;
+  --kbd-border: #252525;
+  --kbd-text:   #888888;
+
+  /* Viewport — true black */
+  --vp-bg:          #000000;
+  --vp-border:      #111111;
+  --vp-text:        #e8e8e8;
+  --vp-placeholder: #444444;
+  --slot-width:     10ch;
+
+  --state-hover:    rgba(255,255,255,0.07);
+  --state-active:   rgba(255,255,255,0.12);
+  --state-focus:    rgba(0,212,255,0.35);
   --state-disabled: 0.38;
 }
 
@@ -331,11 +422,11 @@ body {
 }
 
 .contextStrip {
-  padding: 0 1rem;
+  padding: 0.5rem 1rem 0;
   flex-shrink: 0;
 }
 @media (max-width: 640px) {
-  .contextStrip { padding: 0 0.75rem; }
+  .contextStrip { padding: 0.4rem 0.75rem 0; }
 }
 
 /* ─── Controls bar wrapper ──────────────────────────────────── */

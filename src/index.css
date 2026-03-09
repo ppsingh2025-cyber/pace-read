@@ -5,6 +5,18 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  /* Remove grey tap flash on iOS Safari */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Eliminate 300 ms tap delay on all interactive elements */
+button,
+[role="button"],
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
 body {

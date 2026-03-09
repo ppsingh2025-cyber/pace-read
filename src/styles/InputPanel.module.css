@@ -15,8 +15,8 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.4rem 0.85rem;
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+  background: var(--color-accent-10);
+  border-bottom: 1px solid var(--color-accent-25);
   font-size: 0.73rem;
   color: var(--color-accent);
   line-height: 1;

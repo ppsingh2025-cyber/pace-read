@@ -44,7 +44,7 @@ const LS_KEY_ORP_COLORED = 'fastread_orp_colored';
 const DEFAULT_WPM = 250;
 const DEFAULT_WINDOW_SIZE: WindowSize = 1;
 const DEFAULT_ORIENTATION: Orientation = 'horizontal';
-const DEFAULT_THEME: Theme = 'midnight';
+const DEFAULT_THEME: Theme = 'obsidian';
 const DEFAULT_HIGHLIGHT_COLOR = getThemeOrpAccent(DEFAULT_THEME); // matches DEFAULT_THEME accent
 const DEFAULT_ORP = true;
 const DEFAULT_PUNCT_PAUSE = true;
@@ -100,7 +100,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   });
   const [theme, setThemeState] = useState<Theme>(() => {
     const saved = localStorage.getItem(LS_KEY_THEME) as Theme | null;
-    const valid: Theme[] = ['midnight', 'warm', 'day'];
+    const valid: Theme[] = ['obsidian', 'midnight', 'warm', 'day'];
     const resolved = (saved && valid.includes(saved)) ? saved : DEFAULT_THEME;
     // Apply theme immediately so the DOM reflects the saved preference before first paint
     document.documentElement.setAttribute('data-theme', resolved);
@@ -480,9 +480,12 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
 
   const selectCustomMode = useCallback((mode: CustomMode) => {
     applyMode(mode.settings);
+    if (mode.wpm !== undefined) {
+      setWpm(mode.wpm);
+    }
     setActiveModeState('custom');
     setActiveCustomModeIdState(mode.id);
-  }, [applyMode]);
+  }, [applyMode, setWpm]);
 
   return (
     <ReaderContext.Provider

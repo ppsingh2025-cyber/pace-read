@@ -44,10 +44,11 @@ const DEFAULT_HIGHLIGHT_COLOR = getThemeOrpAccent(DEFAULT_THEME); // midnight ac
 const DEFAULT_ORIENTATION = 'horizontal' as Orientation;
 const DEFAULT_MAIN_FONT_SIZE = 100;
 
-const THEME_LABELS: Record<'midnight' | 'warm' | 'day', string> = {
+const THEME_LABELS: Record<'midnight' | 'warm' | 'day' | 'obsidian', string> = {
   midnight: 'Midnight',
   warm: 'Warm',
   day: 'Day',
+  obsidian: 'Obsidian',
 };
 
 // localStorage keys cleared when user resets to defaults
@@ -79,16 +80,28 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     setFocalLine,
     setOrpEnabled,
     orpColored, setOrpColored,
-    setPeripheralFade,
-    setPunctuationPause,
-    setLongWordCompensation,
-    setChunkMode,
+    peripheralFade, setPeripheralFade,
+    punctuationPause, setPunctuationPause,
+    longWordCompensation, setLongWordCompensation,
+    chunkMode, setChunkMode,
     setActiveMode,
     setActiveCustomModeId,
   } = useReaderContext();
   const { user } = useAuth();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+
+  // Advanced settings collapsible — persisted to localStorage
+  const [advancedOpen, setAdvancedOpen] = useState<boolean>(() => {
+    return localStorage.getItem('fastread_advanced_open') === 'true';
+  });
+  const toggleAdvanced = useCallback(() => {
+    setAdvancedOpen(prev => {
+      const next = !prev;
+      localStorage.setItem('fastread_advanced_open', String(next));
+      return next;
+    });
+  }, []);
 
   // During active reading, advanced settings are collapsed unless user expands them.
   // Resets every time the menu is opened while playing (so re-opening the menu during
@@ -187,6 +200,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
     <>
       {/* Hamburger button */}
       <button
+        type="button"
         className={styles.burgerBtn}
         onClick={handleOpen}
         aria-label="Open settings menu"
@@ -215,6 +229,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
             <div className={styles.drawerHeader}>
               <span className={styles.drawerTitle}>ReadSwift</span>
               <button
+                type="button"
                 className={styles.closeBtn}
                 onClick={close}
                 aria-label="Close settings menu"
@@ -237,6 +252,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   <span className={styles.readingActiveDot} aria-hidden="true" />
                   <span className={styles.readingActiveLabel}>Reading in progress</span>
                   <button
+                    type="button"
                     className={styles.showSettingsBtn}
                     onClick={() => setShowAdvancedDuringReading(true)}
                   >
@@ -252,6 +268,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 <div className={styles.sectionHeader}>
                   <h3 className={styles.sectionTitle}>Display</h3>
                   <button
+                    type="button"
                     className={styles.sectionActionBtn}
                     onClick={handleResetDefaults}
                     title="Reset to Default Settings"
@@ -266,7 +283,13 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 </div>
 
                 <label className={styles.row}>
-                  <span className={styles.label}>Orientation</span>
+                  <span className={styles.labelWithIcon}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                    </svg>
+                    Layout
+                  </span>
                   <select
                     className={styles.select}
                     value={orientation}
@@ -280,7 +303,13 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
 
                 {/* Highlight key letter toggle */}
                 <label className={styles.row}>
-                  <span className={styles.label}>Highlight key letter</span>
+                  <span className={styles.labelWithIcon}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" strokeDasharray="2 3"/>
+                    </svg>
+                    Highlight key letter
+                  </span>
                   <input
                     type="checkbox"
                     checked={orpColored}
@@ -295,6 +324,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   <div className={styles.orpColorRow}>
                     {ORP_COLORS[theme].map(option => (
                       <button
+                        type="button"
                         key={option.id}
                         className={`${styles.orpColorBtn} ${highlightColor === option.value ? styles.orpColorBtnActive : ''}`}
                         onClick={() => setHighlightColor(option.value)}
@@ -312,9 +342,12 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 </div>
 
                 <label className={styles.row}>
-                  <span className={styles.label}>
-                    Main word size
-                    <span className={styles.hint}> (focus word)</span>
+                  <span className={styles.labelWithIcon}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>
+                    </svg>
+                    Focus word size
                   </span>
                   <select
                     className={styles.select}
@@ -331,12 +364,114 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   </select>
                 </label>
 
+                {/* ── Advanced settings (collapsible) ── */}
+                <div className={styles.advancedSection}>
+                  <button
+                    type="button"
+                    className={styles.advancedToggle}
+                    onClick={toggleAdvanced}
+                    aria-expanded={advancedOpen}
+                  >
+                    <span className={styles.advancedToggleLabel}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                      </svg>
+                      Advanced
+                    </span>
+                    <span
+                      className={styles.advancedChevron}
+                      style={{ transform: advancedOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      aria-hidden="true"
+                    >▼</span>
+                  </button>
+
+                  {advancedOpen && (
+                    <div className={styles.advancedBody}>
+
+                      <label className={styles.row}>
+                        <span className={styles.labelWithIcon}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M12 2a10 10 0 0 1 0 20"/><path d="M12 2a10 10 0 0 0 0 20"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                          </svg>
+                          Dim context words
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={peripheralFade}
+                          onChange={(e) => setPeripheralFade(e.target.checked)}
+                          aria-label="Dim surrounding context words"
+                        />
+                      </label>
+
+                      <label className={styles.row}>
+                        <span className={styles.labelWithIcon}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                          </svg>
+                          Pause at punctuation
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={punctuationPause}
+                          onChange={(e) => setPunctuationPause(e.target.checked)}
+                          aria-label="Pause briefly at sentence-ending punctuation"
+                        />
+                      </label>
+
+                      <label className={styles.row}>
+                        <span className={styles.labelWithIcon}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                            <polyline points="13 2 13 9 20 9"/>
+                          </svg>
+                          Slow down on long words
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={longWordCompensation}
+                          onChange={(e) => setLongWordCompensation(e.target.checked)}
+                          aria-label="Slow down when displaying long words"
+                        />
+                      </label>
+
+                      <label className={styles.row}>
+                        <span className={styles.labelWithIcon}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <rect x="2" y="7" width="6" height="10" rx="1"/>
+                            <rect x="9" y="7" width="6" height="10" rx="1"/>
+                            <rect x="16" y="7" width="6" height="10" rx="1"/>
+                          </svg>
+                          Phrase grouping
+                        </span>
+                        <select
+                          className={styles.select}
+                          value={chunkMode}
+                          onChange={(e) => setChunkMode(e.target.value as 'fixed' | 'intelligent')}
+                          aria-label="Word grouping mode"
+                        >
+                          <option value="fixed">Off</option>
+                          <option value="intelligent">On</option>
+                        </select>
+                      </label>
+
+                    </div>
+                  )}
+                </div>
+
                 {/* ── Theme switcher ──────────────────────────── */}
                 <div className={styles.themeSection}>
                   <span className={styles.sectionLabel}>THEME</span>
                   <div className={styles.themeRow}>
-                    {(['midnight', 'warm', 'day'] as const).map(t => (
+                    {(['midnight', 'warm', 'day', 'obsidian'] as const).map(t => (
                       <button
+                        type="button"
                         key={t}
                         className={`${styles.themeBtn} ${theme === t ? styles.themeBtnActive : ''}`}
                         onClick={() => setTheme(t)}
@@ -358,6 +493,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <button
+                    type="button"
                     className={styles.accordionToggle}
                     onClick={() => setHistoryOpen((v) => !v)}
                     aria-expanded={historyOpen}
@@ -374,6 +510,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   </button>
                   {records.length > 0 && (
                   <button
+                    type="button"
                     className={`${styles.sectionActionBtn} ${styles.sectionActionBtnDanger}`}
                     onClick={handleClearHistory}
                     title="Clear Reading History"
@@ -414,12 +551,14 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                     <span className={styles.confirmResetText}>Reset all settings to defaults?</span>
                     <div className={styles.confirmResetActions}>
                       <button
+                        type="button"
                         className={styles.confirmResetYes}
                         onClick={handleResetDefaults}
                       >
                         Yes, reset
                       </button>
                       <button
+                        type="button"
                         className={styles.confirmResetNo}
                         onClick={() => setConfirmReset(false)}
                       >
@@ -429,6 +568,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   </div>
                 ) : (
                   <button
+                    type="button"
                     className={styles.resetBtn}
                     onClick={() => setConfirmReset(true)}
                   >

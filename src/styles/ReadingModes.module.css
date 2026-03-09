@@ -1,230 +1,133 @@
-/* ReadingModes.module.css */
+.root { display: flex; flex-direction: column; gap: var(--space-3, 10px); }
 
-/* ── Tab row ─────────────────────────────────────────────────────── */
-
-.tabRow {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: nowrap;
-  margin-bottom: var(--space-2);
+/* Preset row */
+.presetRow { display: flex; gap: 6px; }
+.presetTile {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; height: 52px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg-input); color: var(--text-muted); cursor: pointer;
+  overflow: hidden; transition: background 0.12s, border-color 0.12s, color 0.12s;
+  touch-action: manipulation;
 }
-
-.tab {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;     /* emoji on top, label below */
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: var(--space-2) var(--space-1);
-  height: 52px;               /* fixed height — no overflow */
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-muted);
-  cursor: pointer;
-  overflow: hidden;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+.presetTile:hover { background: var(--state-hover); color: var(--text); }
+.presetTileActive { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-10); }
+.tileIcon { font-size: 1rem; line-height: 1; display: block; }
+.tileLabel {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; line-height: 1; display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%; padding: 0 4px;
 }
+.tileWpm { font-size: 9px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.specStrip { font-size: 0.72rem; color: var(--text-faint); margin: -2px 0 0; line-height: 1.4; }
 
-.tab:hover {
-  background: var(--state-hover);
-  color: var(--text);
+/* Custom grid */
+.customGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  max-height: 200px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
 }
-
-.tabActive {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+.customGrid::-webkit-scrollbar { width: 3px; }
+.customGrid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.customTileWrapper { position: relative; display: flex; }
+.customTile {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  height: 52px; padding: 0 20px 0 8px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg-input); color: var(--text-muted); cursor: pointer;
+  overflow: hidden; text-align: center;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  touch-action: manipulation;
 }
-
-.tabEmoji {
-  font-size: 1.1rem;
-  line-height: 1;
-  display: block;
+.customTile:hover { background: var(--state-hover); color: var(--text); }
+.customTileActive { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-10); }
+.deleteTileBtn {
+  position: absolute; top: 4px; right: 4px; width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; color: var(--text-faint);
+  font-size: 0.85rem; cursor: pointer; border-radius: 3px;
+  transition: color 0.1s, background 0.1s; touch-action: manipulation;
 }
-
-.tabLabel {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  display: block;
-  white-space: nowrap;
+.deleteTileBtn:hover { color: #e57373; background: rgba(229,115,115,0.1); }
+.wizardTile {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; height: 52px;
+  border-radius: var(--radius-sm); border: 1px dashed var(--border-input);
+  background: transparent; color: var(--text-faint); cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  touch-action: manipulation;
 }
+.wizardTile:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-8); }
 
-/* ── Active preset description ───────────────────────────────────── */
-
-.modeDesc {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin: 0 0 var(--space-3);
-  min-height: 1.4em;
+/* Fine-tune accordion */
+.accordion { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.accordionToggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 8px 12px; background: transparent; border: none;
+  cursor: pointer; transition: background 0.12s; touch-action: manipulation;
 }
-
-/* ── Custom panel ─────────────────────────────────────────────────── */
-
-.customPanel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.accordionToggle:hover { background: var(--state-hover); }
+.accordionLabel {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--text-faint);
 }
+.accordionChevron { font-size: 0.5rem; color: var(--text-faint); transition: transform 0.2s ease; display: inline-block; }
+.accordionBody { display: flex; flex-direction: column; gap: 1px; border-top: 1px solid var(--border); background: var(--bg-input); }
 
-/* Saved modes section */
-.savedSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+/* Fine-tune rows */
+.fineRow {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 8px 12px; transition: background 0.1s;
 }
+.fineRow:hover { background: var(--state-hover); }
+.fineName { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
 
-.savedLabel {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
+/* WPM stepper */
+.wpmStepper { display: flex; align-items: center; gap: 6px; }
+.wpmStepBtn {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-panel); border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-size: 1rem; font-weight: 700; cursor: pointer;
+  transition: background 0.1s, border-color 0.1s; touch-action: manipulation; flex-shrink: 0;
 }
+.wpmStepBtn:hover { background: var(--state-hover); border-color: var(--color-accent); color: var(--color-accent); }
+.wpmValue { font-size: 0.82rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text); min-width: 3ch; text-align: center; }
 
-.chipRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+/* Segmented control */
+.segmented { display: flex; gap: 3px; }
+.segBtn {
+  width: 28px; height: 26px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-panel); border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s; touch-action: manipulation;
 }
+.segBtn:hover { background: var(--state-hover); color: var(--text); }
+.segBtnActive { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-10); }
 
-.chip {
-  flex: 1;
-  font-size: var(--font-size-xs);
-  padding: var(--space-1) var(--space-2);
-  background: var(--bg-input);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  cursor: pointer;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+/* Toggle checkbox */
+.toggle { width: 16px; height: 16px; accent-color: var(--color-accent); cursor: pointer; flex-shrink: 0; }
+
+/* Inline save */
+.inlineSave { display: flex; gap: 6px; padding: 10px 12px; border-top: 1px solid var(--border); background: var(--bg-panel); }
+.saveNameInput {
+  flex: 1; min-width: 0; padding: 6px 10px;
+  background: var(--bg-input); border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-size: 0.8rem; transition: border-color 0.15s;
 }
-
-.chip:hover {
-  background: var(--state-hover);
-  color: var(--text);
-}
-
-.chipActive {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-}
-
-.chipDelete {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--text-faint);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  padding: var(--space-1) var(--space-2);
-  line-height: 1;
-  transition: color 0.15s;
-  min-width: 28px;
-  text-align: center;
-}
-
-.chipDelete:hover {
-  color: #e57373;
-}
-
-/* Save button and full-slots message */
+.saveNameInput::placeholder { color: var(--text-faint); }
+.saveNameInput:focus { outline: none; border-color: var(--color-accent); }
 .saveBtn {
-  width: 100%;
-  font-size: var(--font-size-xs);
-  padding: var(--space-2) var(--space-3);
-  background: none;
-  border: 1px dashed var(--border-input);
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  cursor: pointer;
-  text-align: center;
-  transition: border-color 0.15s, color 0.15s;
+  padding: 6px 14px; background: var(--color-accent); border: none;
+  border-radius: var(--radius-sm); color: var(--bg);
+  font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  white-space: nowrap; transition: opacity 0.15s; touch-action: manipulation;
 }
-
-.saveBtn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.slotsFull {
-  font-size: var(--font-size-xs);
-  color: var(--text-faint);
-  font-style: italic;
-  margin: 0;
-}
-
-.customPanelDivider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: var(--space-1) 0;
-}
-
-/* ── Inline toggles (Custom panel) ──────────────────────────────── */
-
-.toggleList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.toggleRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  cursor: pointer;
-}
-
-.toggleInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.toggleName {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.toggleDesc {
-  font-size: var(--font-size-xs);
-  color: var(--text-faint);
-}
-
-.select {
-  background: var(--bg-input);
-  color: var(--text);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  min-width: 3rem;
-  transition: border-color 0.15s;
-}
-
-.select:hover {
-  border-color: var(--color-accent);
-}
-
-.checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-accent);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
+.saveBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.saveBtn:not(:disabled):hover { opacity: 0.85; }
+.saveError { font-size: 0.72rem; color: #e57373; padding: 0 12px 8px; margin: 0; }

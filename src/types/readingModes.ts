@@ -18,5 +18,6 @@ export interface CustomMode {
   id: string;
   name: string;       // user-provided, max 20 chars
   settings: ModeSettings;
+  wpm?: number;       // optional — applied when mode is activated
   createdAt: string;  // ISO 8601
 }

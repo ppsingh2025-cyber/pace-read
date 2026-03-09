@@ -86,6 +86,7 @@ export default function Controls({
 
         {!focused && (
           <button
+            type="button"
             className={styles.controlBtn}
             onClick={handleFileClick}
             disabled={isLoading}
@@ -103,6 +104,7 @@ export default function Controls({
 
         {!focused && (
           <button
+            type="button"
             className={`${styles.controlBtn}${pasteOpen ? ` ${styles.controlBtnActive}` : ''}`}
             onClick={onPasteToggle}
             title="Paste text"
@@ -121,6 +123,7 @@ export default function Controls({
         )}
 
         <button
+          type="button"
           className={styles.controlBtn}
           onClick={onPrevWord}
           disabled={!hasWords || currentWordIndex <= 0}
@@ -135,6 +138,7 @@ export default function Controls({
         </button>
 
         <button
+          type="button"
           className={styles.playBtn}
           onClick={isPlaying ? onPause : onPlay}
           disabled={!hasWords}
@@ -155,6 +159,7 @@ export default function Controls({
         </button>
 
         <button
+          type="button"
           className={styles.controlBtn}
           onClick={onNextWord}
           disabled={!hasWords || currentWordIndex >= words.length - 1}
@@ -169,6 +174,7 @@ export default function Controls({
         </button>
 
         <button
+          type="button"
           className={styles.resetBtn}
           onClick={onReset}
           disabled={!hasWords}
@@ -187,6 +193,7 @@ export default function Controls({
       {/* ── WPM pill stepper ── */}
       <div className={styles.wpmPill}>
         <button
+          type="button"
           className={styles.wpmPillBtn}
           onClick={onSlower}
           disabled={isLoading}
@@ -222,6 +229,7 @@ export default function Controls({
           />
         ) : (
           <button
+            type="button"
             className={styles.wpmPillValue}
             onClick={() => { setWpmDraft(String(wpm)); setWpmEditing(true); }}
             aria-label={`${wpm} words per minute, tap to edit`}
@@ -232,6 +240,7 @@ export default function Controls({
         )}
 
         <button
+          type="button"
           className={styles.wpmPillBtn}
           onClick={onFaster}
           disabled={isLoading}
