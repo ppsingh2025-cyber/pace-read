@@ -13,11 +13,11 @@ interface WhatsNewEntry {
 }
 
 const WHATS_NEW: WhatsNewEntry[] = [
-  { icon: '🏃', title: 'PaceRead',               body: 'ReadSwift is now PaceRead. Same app, sharper identity. Read Faster. Understand Better.' },
-  { icon: '📍', title: 'Context Below Controls', body: 'The context preview now lives below the playback bar — cleaner reading, easier reference.' },
-  { icon: '▸',  title: 'Reading Cursor',         body: 'A small cursor icon marks your exact word in context, mirrored in the top bar.' },
-  { icon: '📊', title: 'Session History',        body: 'Full session history with per-session stats and one-tap resume replaces the old file list.' },
-  { icon: '⚡', title: 'Custom Mode Updates',    body: 'Edit any custom mode and tap "Update" to save. Name input now sits at the top of Fine-tune.' },
+  { icon: '📖', title: 'Page Preview Redesigned', body: 'Prev/Next arrows now sit directly around the page number in the header. Clean and reachable.' },
+  { icon: '⚙️', title: 'Fine-tune Reading Mode',  body: 'Layout, word size, and key letter color moved into Fine-tune. Display is now theme-only.' },
+  { icon: '✅', title: 'Custom Mode Updates Fixed', body: 'Changing any fine-tune setting on a saved custom mode now always shows the Update button.' },
+  { icon: '📌', title: 'Auto-scroll in Preview',  body: 'The highlighted word in Page Preview automatically scrolls into view as you read.' },
+  { icon: '☕', title: 'Buy Me a Coffee — Sticky', body: 'The support link now stays pinned at the bottom so it\'s always reachable.' },
 ];
 
 interface WhatsNewModalProps {

@@ -24,7 +24,7 @@ import ReadingModes from './ReadingModes';
 import type { Orientation } from '../context/readerContextDef';
 import { APP_VERSION } from '../version';
 import { IndexedDBService } from '../sync/IndexedDBService';
-import { ORP_COLORS, getThemeOrpAccent } from '../config/orpColors';
+import { getThemeOrpAccent } from '../config/orpColors';
 import toast from 'react-hot-toast';
 import styles from '../styles/BurgerMenu.module.css';
 
@@ -55,9 +55,9 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
 
   const {
     setWindowSize,
-    orientation, setOrientation,
-    highlightColor, setHighlightColor,
-    mainWordFontSize, setMainWordFontSize,
+    setOrientation,
+    setHighlightColor,
+    setMainWordFontSize,
     theme, setTheme,
     setWpm,
     isPlaying,
@@ -218,7 +218,7 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                   <h3 className={styles.sectionTitle}>Display</h3>
                 </div>
 
-                {/* 1. Theme switcher */}
+                {/* Theme switcher */}
                 <div className={styles.themeSection}>
                   <span className={styles.sectionLabel}>THEME</span>
                   <div className={styles.themeRow}>
@@ -233,73 +233,6 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                       >
                         <span className={styles.themeSwatch} data-swatch={t} />
                         <span className={styles.themeLabel}>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. Layout */}
-                <label className={styles.row}>
-                  <span className={styles.labelWithIcon}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
-                    </svg>
-                    Layout
-                  </span>
-                  <select
-                    className={styles.select}
-                    value={orientation}
-                    onChange={(e) => setOrientation(e.target.value as Orientation)}
-                    aria-label="Word window orientation"
-                  >
-                    <option value="horizontal">Horizontal</option>
-                    <option value="vertical">Vertical</option>
-                  </select>
-                </label>
-
-                {/* 3. Focus word size */}
-                <label className={styles.row}>
-                  <span className={styles.labelWithIcon}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>
-                    </svg>
-                    Focus word size
-                  </span>
-                  <select
-                    className={styles.select}
-                    value={mainWordFontSize}
-                    onChange={(e) => setMainWordFontSize(parseInt(e.target.value, 10))}
-                    aria-label="Main word font size"
-                  >
-                    <option value={70}>Small (70%)</option>
-                    <option value={85}>Medium (85%)</option>
-                    <option value={100}>Normal (100%)</option>
-                    <option value={120}>Large (120%)</option>
-                    <option value={150}>Extra Large (150%)</option>
-                    <option value={180}>Huge (180%)</option>
-                  </select>
-                </label>
-
-                {/* 4. ORP key letter color: 4 science-backed options per theme */}
-                <div className={styles.orpColorSection}>
-                  <span className={styles.sectionLabel}>KEY LETTER COLOR</span>
-                  <div className={styles.orpColorRow}>
-                    {ORP_COLORS[theme].map(option => (
-                      <button
-                        type="button"
-                        key={option.id}
-                        className={`${styles.orpColorBtn} ${highlightColor === option.value ? styles.orpColorBtnActive : ''}`}
-                        onClick={() => setHighlightColor(option.value)}
-                        aria-label={`${option.label}: ${option.reason}`}
-                        title={option.reason}
-                      >
-                        <span
-                          className={styles.orpColorSwatch}
-                          style={{ background: option.value }}
-                        />
-                        <span className={styles.orpColorLabel}>{option.label}</span>
                       </button>
                     ))}
                   </div>

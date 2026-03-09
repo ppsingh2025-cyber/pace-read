@@ -87,11 +87,11 @@
 | Layer | Element | Visibility |
 |-------|---------|-----------|
 | **1 — Top bar** | `<header class="topBar">` — BurgerMenu · brand · SyncStatusIndicator · UserAvatar · Help `?` · ThemeToggle | Always |
-| **2 — Reading main** | `<main class="readingMain">` — `ReaderViewport` + `ContextPreview` | Always; ContextPreview hidden in focus mode |
-| **3 — Nav layer** | `<section class="navLayer">` — `PageNavigator` | Hidden in focus mode |
+| **2 — Reading main** | `<main class="readingMain">` — `ReaderViewport` | Always |
 | **Paste area** | `<div class="pasteArea">` — `InputPanel` | Toggled by 📋 button; hidden in focus mode |
-| **4 — Controls bar** | `<div class="controlsBar">` — `Controls` | Always (sticky bottom) |
-| Footer | `<AppFooter>` | Hidden in focus mode |
+| **4 — Controls bar** | `<div class="controlsBar">` — `Controls` | Always |
+| **5 — Context strip** | `<div class="contextStrip">` — `ContextPreview` | Hidden in focus mode |
+| **6 — Footer (sticky)** | `<AppFooter>` | `position:sticky; bottom:0` — hidden in focus mode |
 
 **Focus mode** (`isFocused` state): sets `appShellFocused` on the shell → `position:fixed; inset:0`. Reading viewport fills all available height. Toggled by the ⊞/⊡ button on the viewport.
 
@@ -105,11 +105,11 @@
 |-----------|------|---------|
 | `ReaderViewport` | `components/ReaderViewport.tsx` | Word display with ORP split, peripheral fade, focus mode. `React.memo` wrapped. |
 | `Controls` | `components/Controls.tsx` | Progress bar, playback buttons, logarithmic WPM slider. |
-| `BurgerMenu` | `components/BurgerMenu.tsx` | Slide-in settings drawer: profiles, display, reading features, history, feedback. |
+| `BurgerMenu` | `components/BurgerMenu.tsx` | Slide-in settings drawer: Reading Mode (presets + fine-tune), Display (theme only), Session Analytics, Reset. Layout/font size/key letter color moved to Fine-tune in ReadingModes. |
 | `Settings` | `components/Settings.tsx` | Legacy collapsible settings (used inside BurgerMenu). |
 | `PageNavigator` | `components/PageNavigator.tsx` | Page/chapter jump (prev/next/direct input). |
 | `WordNavigator` | `components/WordNavigator.tsx` | Word-level step controls + jump to specific word. |
-| `ContextPreview` | `components/ContextPreview.tsx` | Paragraph context panel beside viewport. Uses `structureMap`. |
+| `ContextPreview` | `components/ContextPreview.tsx` | Page Preview panel below controls. Uses fixed `PAGE_SIZE=80` word chunks (not `pageBreaks`). Header has compact `‹ N/total ›` cluster + chevron collapse toggle. Active word auto-scrolls into view. |
 | `InputPanel` | `components/InputPanel.tsx` | Paste-text textarea + URL fetch field. |
 | `ReadingHistory` | `components/ReadingHistory.tsx` | Per-file history list with progress %; deletes individual records. |
 | `SessionStats` | `components/SessionStats.tsx` | Words read, active time, effective WPM for current session. |
