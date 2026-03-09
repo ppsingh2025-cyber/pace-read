@@ -679,21 +679,6 @@
 
 /* ── Theme switcher ──────────────────────────────────────────────── */
 
-.themeSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-.sectionLabel {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
 .themeRow {
   display: flex;
   gap: var(--space-2);
@@ -725,19 +710,12 @@
   background: var(--color-accent-dim);
 }
 
-/* Colour swatch circle */
-.themeSwatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+/* Emoji icon inside each theme button */
+.themeIcon {
+  font-size: 1.15rem;
+  line-height: 1;
   display: block;
-  border: 2px solid var(--border);
-  flex-shrink: 0;
 }
-.themeSwatch[data-swatch="midnight"] { background: #5b8dee; }
-.themeSwatch[data-swatch="warm"]     { background: #e8a830; }
-.themeSwatch[data-swatch="day"]      { background: #2a7a6e; }
-.themeSwatch[data-swatch="obsidian"] { background: #000000; border-color: #00d4ff; }
 
 .themeLabel {
   font-size: var(--font-size-xs);
