@@ -5,7 +5,7 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Served at the root of the readswift.techscript.ca subdomain
+  // Served at the root of the paceread.techscript.ca subdomain
   base: '/',
   plugins: [
     react(),
@@ -13,9 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
-        name: 'ReadSwift — RSVP Speed Reader',
-        short_name: 'ReadSwift',
-        description: 'RSVP speed reader: Read PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT at 60-1500 WPM. Intelligent chunking, cross-device sync, offline-first. Free, no ads, no tracking.',
+        name: 'PaceRead — Read Faster',
+        short_name: 'PaceRead',
+        description: 'PaceRead: RSVP speed reader. Read Faster. Understand Better. PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT at 60–1500 WPM. Intelligent chunking, offline-first. Free, no ads, no tracking.',
         theme_color: '#060606',
         background_color: '#060606',
         display: 'standalone',

@@ -1,4 +1,4 @@
-# AGENT_READSWIFT.md — Architecture Brain
+# AGENT_PACEREAD.md — Architecture Brain
 
 > **Purpose:** Authoritative reference for AI coding agents working in this repository. Read this before writing any code. Cross-reference `/READING_ENGINE.md` for engine details and `/DESIGN_SYSTEM.md` for UI rules.
 
@@ -8,10 +8,10 @@
 
 | Field | Value |
 |-------|-------|
-| App name | **ReadSwift** |
-| Bundle ID | `ca.techscript.readswift` |
+| App name | **PaceRead** |
+| Bundle ID | `ca.techscript.paceread` |
 | Author | TechScript Limited |
-| Live URL | https://readswift.techscript.ca |
+| Live URL | https://paceread.techscript.ca |
 | Description | Browser-only RSVP speed-reader — PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT |
 
 ---
@@ -44,7 +44,7 @@
 ├── capacitor.config.ts          # Mobile bundle ID, webDir, server settings
 ├── .env.example                 # VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY
 ├── public/
-│   ├── CNAME                    # readswift.techscript.ca (GitHub Pages)
+│   ├── CNAME                    # paceread.techscript.ca (GitHub Pages)
 │   └── icons/                   # icon-day.svg, icon-night.svg, icon-192.png, icon-512.png
 ├── docs/
 │   ├── AUTH_ARCHITECTURE.md
@@ -87,11 +87,11 @@
 | Layer | Element | Visibility |
 |-------|---------|-----------|
 | **1 — Top bar** | `<header class="topBar">` — BurgerMenu · brand · SyncStatusIndicator · UserAvatar · Help `?` · ThemeToggle | Always |
-| **2 — Reading main** | `<main class="readingMain">` — `ReaderViewport` + `ContextPreview` | Always; ContextPreview hidden in focus mode |
-| **3 — Nav layer** | `<section class="navLayer">` — `PageNavigator` | Hidden in focus mode |
+| **2 — Reading main** | `<main class="readingMain">` — `ReaderViewport` | Always |
 | **Paste area** | `<div class="pasteArea">` — `InputPanel` | Toggled by 📋 button; hidden in focus mode |
-| **4 — Controls bar** | `<div class="controlsBar">` — `Controls` | Always (sticky bottom) |
-| Footer | `<AppFooter>` | Hidden in focus mode |
+| **4 — Controls bar** | `<div class="controlsBar">` — `Controls` | Always |
+| **5 — Context strip** | `<div class="contextStrip">` — `ContextPreview` | Hidden in focus mode |
+| **6 — Footer (sticky)** | `<AppFooter>` | `position:sticky; bottom:0` — hidden in focus mode |
 
 **Focus mode** (`isFocused` state): sets `appShellFocused` on the shell → `position:fixed; inset:0`. Reading viewport fills all available height. Toggled by the ⊞/⊡ button on the viewport.
 
@@ -105,11 +105,11 @@
 |-----------|------|---------|
 | `ReaderViewport` | `components/ReaderViewport.tsx` | Word display with ORP split, peripheral fade, focus mode. `React.memo` wrapped. |
 | `Controls` | `components/Controls.tsx` | Progress bar, playback buttons, logarithmic WPM slider. |
-| `BurgerMenu` | `components/BurgerMenu.tsx` | Slide-in settings drawer: profiles, display, reading features, history, feedback. |
+| `BurgerMenu` | `components/BurgerMenu.tsx` | Slide-in settings drawer: Reading Mode (presets + fine-tune), Display (theme only), Session Analytics, Reset. Layout/font size/key letter color moved to Fine-tune in ReadingModes. |
 | `Settings` | `components/Settings.tsx` | Legacy collapsible settings (used inside BurgerMenu). |
 | `PageNavigator` | `components/PageNavigator.tsx` | Page/chapter jump (prev/next/direct input). |
 | `WordNavigator` | `components/WordNavigator.tsx` | Word-level step controls + jump to specific word. |
-| `ContextPreview` | `components/ContextPreview.tsx` | Paragraph context panel beside viewport. Uses `structureMap`. |
+| `ContextPreview` | `components/ContextPreview.tsx` | Page Preview panel below controls. Uses fixed `PAGE_SIZE=80` word chunks (not `pageBreaks`). Header has compact `‹ N/total ›` cluster + chevron collapse toggle. Active word auto-scrolls into view. |
 | `InputPanel` | `components/InputPanel.tsx` | Paste-text textarea + URL fetch field. |
 | `ReadingHistory` | `components/ReadingHistory.tsx` | Per-file history list with progress %; deletes individual records. |
 | `SessionStats` | `components/SessionStats.tsx` | Words read, active time, effective WPM for current session. |
@@ -185,6 +185,7 @@ sessionStats: SessionStats        // { wordsRead, startTime, activeTimeMs, effec
 | `fastread_main_font_size` | `100` |
 | `fastread_chunk_mode` | `fixed` |
 | `fastread_session_stats` | JSON of empty `SessionStats` |
+| `fastread_session_history` | JSON array of up to 20 `StoredSession[]` — persisted by `saveCurrentSession` |
 | `fastread_records` | JSON array of `ReadingRecord[]` |
 | `fastread_adaptive_wpm` | set by `useAdaptiveSpeed` |
 | `fastread_reading_profile` | `balanced` |
@@ -299,7 +300,7 @@ Profiles apply a full bundle of settings atomically. Users can still override in
 
 | Workflow | Trigger | Output |
 |----------|---------|--------|
-| `deploy-web.yml` | Push → `main` | Build + deploy to GitHub Pages (`readswift.techscript.ca`) |
+| `deploy-web.yml` | Push → `main` | Build + deploy to GitHub Pages (`paceread.techscript.ca`) |
 | `build-android.yml` | Push → `main` | Debug APK artifact `fast-read-debug-apk` |
 | `build-android.yml` | Push tag `v*` | Signed release AAB (4 repo secrets required) |
 | `build-ios.yml` | Push → `main` | iOS archive (macOS runner) |

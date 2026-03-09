@@ -1,7 +1,7 @@
-# ReadSwift — Global Visibility Execution Plan
+# PaceRead — Global Visibility Execution Plan
 
 **Company:** Techscript Limited  
-**Product:** ReadSwift  
+**Product:** PaceRead  
 **Document version:** 1.0  
 **Execution model:** Single developer  
 **Timeline:** 90 days from public launch
@@ -22,14 +22,14 @@ This plan assumes a single developer executing all visibility work. It is sequen
 
 ### Step 1.1 — Publish the privacy policy
 
-- Deploy `readswift/legal/privacy-policy.html` (or `release-package/legal/privacy-policy.html`) to `https://techscript.ca/privacy`
+- Deploy `paceread/legal/privacy-policy.html` (or `release-package/legal/privacy-policy.html`) to `https://techscript.ca/privacy`
 - Verify it returns HTTP 200 from a mobile connection
 - This is required before Play Store submission and before Google will trust the domain
 
 ### Step 1.2 — Deploy structured data
 
-- Copy the `<script type="application/ld+json">` blocks from `readswift/seo/meta.html` into every page of the site
-- Copy the full `readswift/seo/schema.jsonld` content as an inline script block on the homepage
+- Copy the `<script type="application/ld+json">` blocks from `paceread/seo/meta.html` into every page of the site
+- Copy the full `paceread/seo/schema.jsonld` content as an inline script block on the homepage
 - Validate using Google's Rich Results Test: https://search.google.com/test/rich-results
 
 ### Step 1.3 — Create `sitemap.xml`
@@ -78,7 +78,7 @@ Explicitly allow AI crawlers to index the site. Place at `https://techscript.ca/
 
 ### Step 1.5 — Create `llms.txt`
 
-Copy the `## Section 7 — llms.txt Content Block` from `readswift/ai-discoverability/ai-description.md` to `https://techscript.ca/llms.txt`.
+Copy the `## Section 7 — llms.txt Content Block` from `paceread/ai-discoverability/ai-description.md` to `https://techscript.ca/llms.txt`.
 
 This file is consumed by AI indexing systems that follow the emerging llms.txt standard (Anthropic, Perplexity, and others have announced support).
 
@@ -86,7 +86,7 @@ This file is consumed by AI indexing systems that follow the emerging llms.txt s
 
 Create a 1200×630 px PNG at `https://techscript.ca/og-image.png`:
 - Background: `#060606`
-- Text: "ReadSwift" in Segoe UI 72px `#f0f0f0` + "Read faster. One word at a time." in 36px `#888888`
+- Text: "PaceRead" in Segoe UI 72px `#f0f0f0` + "Read faster. One word at a time." in 36px `#888888`
 - This image appears when links are shared on LinkedIn, WhatsApp, Slack, and social platforms
 
 ### Step 1.7 — Submit to Google Search Console
@@ -114,7 +114,7 @@ Download the signed APK from GitHub Actions → Artifacts.
 ### Step 2.2 — Complete Play Console submission
 
 Follow `release-package/README.md` Part 4 using:
-- Listing content from `readswift/play-store/listing.md`
+- Listing content from `paceread/play-store/listing.md`
 - Icons from `release-package/icons/`
 - Feature graphic from `release-package/feature-graphic/feature-graphic.png`
 - Screenshots from `release-package/screenshots/`
@@ -169,7 +169,7 @@ Submit the product to these directories within the first two weeks:
 Write a single page at `https://techscript.ca/what-is-rsvp-reading`:
 
 - H1: "What is RSVP Reading? How to Read Faster With One Word at a Time"
-- ~800 words explaining RSVP technique with a CTA to ReadSwift
+- ~800 words explaining RSVP technique with a CTA to PaceRead
 - Target keywords: "what is RSVP reading", "how to read faster", "rapid serial visual presentation"
 - This page will rank for informational queries and drive organic traffic to the tool
 
@@ -190,11 +190,11 @@ Common Crawl is the dataset that powers many AI training corpora. Coverage incre
 
 ### Step 4.3 — Wikipedia disambiguation (long-term)
 
-If the product gains sufficient real-world use, a Wikipedia entry under "RSVP reading applications" or similar will significantly increase AI retrieval accuracy. This is a 6–12 month play, not a day-one action. Do not create a Wikipedia page for ReadSwift immediately — it will be deleted as promotional.
+If the product gains sufficient real-world use, a Wikipedia entry under "RSVP reading applications" or similar will significantly increase AI retrieval accuracy. This is a 6–12 month play, not a day-one action. Do not create a Wikipedia page for PaceRead immediately — it will be deleted as promotional.
 
 ### Step 4.4 — Wikidata entry
 
-Create a Wikidata item for ReadSwift. Wikidata is used by many AI knowledge graphs. Minimum threshold: the product is live on the Play Store and the site has been indexed.
+Create a Wikidata item for PaceRead. Wikidata is used by many AI knowledge graphs. Minimum threshold: the product is live on the Play Store and the site has been indexed.
 
 Structure:
 - Instance of: software application, mobile application, web application
@@ -220,7 +220,7 @@ Track weekly ranking for:
 - "RSVP reader"
 - "PDF speed reader"
 - "read faster app"
-- "ReadSwift"
+- "PaceRead"
 
 ### Step 5.2 — First rating push
 
@@ -230,7 +230,7 @@ After the first 20 installs (friends, colleagues, beta users):
 
 ### Step 5.3 — A/B test short description (Day 30)
 
-After collecting initial install data, test variant 2 from `readswift/keywords/keyword-strategy.md` Section 3 against the primary short description. Play Console supports A/B testing via the Experiments feature. Run for 14 days, pick the higher-converting variant.
+After collecting initial install data, test variant 2 from `paceread/keywords/keyword-strategy.md` Section 3 against the primary short description. Play Console supports A/B testing via the Experiments feature. Run for 14 days, pick the higher-converting variant.
 
 ### Step 5.4 — Add a second screenshot set (Day 45)
 
@@ -254,7 +254,7 @@ Three additional pages targeting RSVP and speed-reading queries:
 | `/rsvp-reading-technique` | "RSVP reading technique" | rapid serial visual presentation |
 | `/read-pdf-faster` | "read PDF faster android" | PDF speed reader |
 
-Each page: 600–900 words. Factual, technique-focused. CTA to ReadSwift at the bottom.
+Each page: 600–900 words. Factual, technique-focused. CTA to PaceRead at the bottom.
 
 ### Step 6.2 — Developer blog post (optional, high impact)
 

@@ -24,15 +24,15 @@
 
 /* Custom grid */
 .customGrid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-  max-height: 200px; overflow-y: auto;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  max-height: 180px; overflow-y: auto;
   scrollbar-width: thin; scrollbar-color: var(--border) transparent;
 }
 .customGrid::-webkit-scrollbar { width: 3px; }
 .customGrid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.customTileWrapper { position: relative; display: flex; }
+.customTileWrapper { position: relative; display: flex; flex: 1; min-width: 72px; max-width: 96px; }
 .customTile {
-  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 3px;
   height: 52px; padding: 0 20px 0 8px;
   border-radius: var(--radius-sm); border: 1px solid var(--border);
@@ -131,3 +131,53 @@
 .saveBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 .saveBtn:not(:disabled):hover { opacity: 0.85; }
 .saveError { font-size: 0.72rem; color: #e57373; padding: 0 12px 8px; margin: 0; }
+.updateModeBtn {
+  width: 100%;
+  padding: 6px 10px;
+  background: var(--color-accent-15);
+  border: 1px solid var(--color-accent-30);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.12s;
+  touch-action: manipulation;
+}
+.updateModeBtn:hover { background: var(--color-accent-22); }
+
+.fineSelect {
+  font-size: 0.72rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.colorSwatches {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.swatchBtn {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.1s;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: manipulation;
+}
+.swatchBtn:hover { border-color: var(--text-muted); }
+.swatchBtnActive { border-color: var(--text) !important; }
+
+.swatchDot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  display: block;
+}

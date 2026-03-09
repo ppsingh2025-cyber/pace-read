@@ -48,6 +48,9 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
       - name: Deploy custom Android icons
         run: |
           # Create mipmap directories
@@ -58,32 +61,77 @@ jobs:
           mkdir -p android/app/src/main/res/mipmap-xxxhdpi
           mkdir -p android/app/src/main/res/mipmap-anydpi-v26
 
-          # Copy foreground icons
-          if [ -f release-package/icons/ic_launcher_foreground.mdpi.png ]; then
-            cp release-package/icons/ic_launcher_foreground.mdpi.png android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
-            cp release-package/icons/ic_launcher_foreground.hdpi.png android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png
-            cp release-package/icons/ic_launcher_foreground.xhdpi.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_foreground.png
-            cp release-package/icons/ic_launcher_foreground.xxhdpi.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.png
-            cp release-package/icons/ic_launcher_foreground.xxxhdpi.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png
-            echo "✓ Copied Android foreground icons"
-          fi
+          for DENSITY in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            FG="release-package/icons/ic_launcher_foreground.${DENSITY}.png"
+            BG="release-package/icons/ic_launcher_background.${DENSITY}.png"
+            OUT_DIR="android/app/src/main/res/mipmap-${DENSITY}"
 
-          # Copy background icons
-          if [ -f release-package/icons/ic_launcher_background.mdpi.png ]; then
-            cp release-package/icons/ic_launcher_background.mdpi.png android/app/src/main/res/mipmap-mdpi/ic_launcher_background.png
-            cp release-package/icons/ic_launcher_background.hdpi.png android/app/src/main/res/mipmap-hdpi/ic_launcher_background.png
-            cp release-package/icons/ic_launcher_background.xhdpi.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_background.png
-            cp release-package/icons/ic_launcher_background.xxhdpi.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_background.png
-            cp release-package/icons/ic_launcher_background.xxxhdpi.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_background.png
-            echo "✓ Copied Android background icons"
-          fi
+            if [ -f "$FG" ] && [ -f "$BG" ]; then
+              # Copy adaptive layers
+              cp "$FG" "$OUT_DIR/ic_launcher_foreground.png"
+              cp "$BG" "$OUT_DIR/ic_launcher_background.png"
+              echo "✓ Copied adaptive layers for ${DENSITY}"
+            fi
+          done
 
-          # Copy XML files
-          if [ -f release-package/icons/ic_launcher.xml ]; then
+          # Copy adaptive icon XML
+          if [ -f "release-package/icons/ic_launcher.xml" ]; then
             cp release-package/icons/ic_launcher.xml android/app/src/main/res/mipmap-anydpi-v26/
             cp release-package/icons/ic_launcher_round.xml android/app/src/main/res/mipmap-anydpi-v26/
-            echo "✓ Copied Android adaptive icon XML"
+            echo "✓ Copied adaptive icon XML"
           fi
+
+          # Generate legacy ic_launcher.png at each density by compositing fg over bg.
+          # These override the Capacitor placeholder and display on Android <8 and
+          # any launcher that bypasses adaptive icons.
+          #
+          # Correct legacy icon sizes (dp × density factor):
+          #   mdpi=48, hdpi=72, xhdpi=96, xxhdpi=144, xxxhdpi=192
+          declare -A LEGACY_SIZE=(
+            ["mdpi"]="48"
+            ["hdpi"]="72"
+            ["xhdpi"]="96"
+            ["xxhdpi"]="144"
+            ["xxxhdpi"]="192"
+          )
+
+          for DENSITY in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            SIZE="${LEGACY_SIZE[$DENSITY]}"
+            FG="release-package/icons/ic_launcher_foreground.${DENSITY}.png"
+            BG="release-package/icons/ic_launcher_background.${DENSITY}.png"
+            OUT_DIR="android/app/src/main/res/mipmap-${DENSITY}"
+
+            if [ -f "$FG" ] && [ -f "$BG" ]; then
+              # Build a single composite once to avoid double-resize work:
+              # resize background to legacy size, composite foreground centered on top.
+              COMPOSITE_TMP="$OUT_DIR/ic_launcher_tmp.png"
+              convert "$BG" -resize "${SIZE}x${SIZE}!" \
+                \( "$FG" -resize "${SIZE}x${SIZE}!" \) \
+                -gravity center -composite \
+                "$COMPOSITE_TMP"
+
+              # Square legacy icon — just copy the composite
+              cp "$COMPOSITE_TMP" "$OUT_DIR/ic_launcher.png"
+
+              # Round icon — apply circle mask to the composite.
+              # Circle formula: center = (SIZE/2, SIZE/2); radius point = (SIZE/2, 0)
+              # which gives radius = SIZE/2, producing a circle that fills the canvas.
+              convert "$COMPOSITE_TMP" \
+                \( +clone -threshold 0 -negate \
+                   -draw "fill white circle $((SIZE/2)),$((SIZE/2)) $((SIZE/2)),0" \
+                   -alpha off \) \
+                -compose copy_opacity -composite \
+                "$OUT_DIR/ic_launcher_round.png"
+
+              rm "$COMPOSITE_TMP"
+
+              echo "✓ Generated ic_launcher.png (${SIZE}x${SIZE}) for ${DENSITY}"
+            else
+              echo "⚠ Missing icon files for ${DENSITY}, skipping legacy generation"
+            fi
+          done
+
+          echo "✓ All Android icons deployed"
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
@@ -96,7 +144,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fast-read-debug-apk
+          name: paceread-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
@@ -122,6 +170,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
-          name: fast-read-release-aab
+          name: paceread-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 90
