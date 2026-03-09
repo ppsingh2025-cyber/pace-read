@@ -60,6 +60,7 @@ Once configured, a **Sign In with Google** button appears in the burger menu. Wi
 - **Auto-Save Progress:** Resume exactly where you left off
 - **Reading History:** Track up to 20 documents with progress percentages
 - **Session Analytics:** Words read, active time, effective WPM
+- **Page Preview:** Jitter-free, threshold-based scroll. Active word walks down, snaps back up. Tap ↩ to return to reading position after browsing.
 
 ### Reading Profiles (Quick Presets)
 - **Max Speed:** 700 WPM, single word, no pauses — document triage

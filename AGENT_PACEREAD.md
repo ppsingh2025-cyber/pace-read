@@ -1,6 +1,7 @@
 # AGENT_PACEREAD.md — Architecture Brain
 
 > **Purpose:** Authoritative reference for AI coding agents working in this repository. Read this before writing any code. Cross-reference `/READING_ENGINE.md` for engine details and `/DESIGN_SYSTEM.md` for UI rules.
+> **Current version:** v1.3.0
 
 ---
 
@@ -86,7 +87,7 @@
 
 | Layer | Element | Visibility |
 |-------|---------|-----------|
-| **1 — Top bar** | `<header class="topBar">` — BurgerMenu · brand · SyncStatusIndicator · UserAvatar · Help `?` · ThemeToggle | Always |
+| **1 — Top bar** | `<header class="topBar">` — BurgerMenu · "PaceRead" brand · SyncStatus · UserAvatar · Help `?` · ThemeToggle | Always |
 | **2 — Reading main** | `<main class="readingMain">` — `ReaderViewport` | Always |
 | **Paste area** | `<div class="pasteArea">` — `InputPanel` | Toggled by 📋 button; hidden in focus mode |
 | **4 — Controls bar** | `<div class="controlsBar">` — `Controls` | Always |
@@ -109,7 +110,7 @@
 | `Settings` | `components/Settings.tsx` | Legacy collapsible settings (used inside BurgerMenu). |
 | `PageNavigator` | `components/PageNavigator.tsx` | Page/chapter jump (prev/next/direct input). |
 | `WordNavigator` | `components/WordNavigator.tsx` | Word-level step controls + jump to specific word. |
-| `ContextPreview` | `components/ContextPreview.tsx` | Page Preview panel below controls. Uses fixed `PAGE_SIZE=80` word chunks (not `pageBreaks`). Header has compact `‹ N/total ›` cluster + chevron collapse toggle. Active word auto-scrolls into view. |
+| `ContextPreview` | `components/ContextPreview.tsx` | Page Preview panel below controls. Uses fixed `PAGE_SIZE=80` word chunks (not `pageBreaks`). Header has compact `‹ N/total ›` cluster + chevron collapse toggle. When detached, shows `↩ current` button. Threshold-based instant scroll (no smooth). |
 | `InputPanel` | `components/InputPanel.tsx` | Paste-text textarea + URL fetch field. |
 | `ReadingHistory` | `components/ReadingHistory.tsx` | Per-file history list with progress %; deletes individual records. |
 | `SessionStats` | `components/SessionStats.tsx` | Words read, active time, effective WPM for current session. |
@@ -123,6 +124,44 @@
 | `DonateButton` | `components/DonateButton.tsx` | "Buy me a coffee" external link. |
 | `FeedbackButton` | `components/FeedbackButton.tsx` | Google Form feedback link. |
 | `AppFooter` | `components/AppFooter.tsx` | Version + copyright line. |
+
+---
+
+## ContextPreview ("Page Preview")
+
+- Located in `contextStrip`, **below the controls bar**
+- Uses 80-word chunking (`PAGE_SIZE = 80`) — independent of real PDF page breaks
+- Real PDF/EPUB page breaks live in `pageBreaks[]` state, used by PageNavigator separately
+
+**Header row** (left to right):
+```
+[Page Preview label] [↩ current button — only when detached] [‹ N/total ›] [▼ chevron]
+```
+- When the user navigates away from the current reading page (`isDetached = true`), a
+  `↩ current` button appears. Clicking it calls `snapToCurrent`: sets `viewPage = readingPage`
+  and clears `isDetached`. The button is `className={styles.returnBtn}` — styled with an
+  accent border and hover state.
+- `‹` / `›` buttons inside the page cluster call `e.stopPropagation()` — they do NOT
+  collapse the panel
+- The `▼` chevron is the **only** collapse/expand toggle
+- **No bottom navigation bar**
+
+**Scroll behaviour (jitter-free):**
+- A `contentRef` (type `useRef<HTMLDivElement>`) is attached to the scrollable content div
+- On every `currentWordIndex` change, a `useEffect` checks the active word's position
+  relative to the container:
+  - If the active word is **past 75% of container height** → instantly snap scroll so
+    word sits at 15% from top (word walks down, then snaps back up)
+  - If the active word is **above the visible area** → snap to 15% from top
+  - If the active word is in the **comfortable middle zone** → do nothing
+- **No `scrollIntoView` or `behavior: 'smooth'`** — instant scroll only, no competing
+  animations at reading speed
+
+**Why no font-weight change:**
+Both `.word` and `.activeWord` use `font-weight: 600`. Active word is differentiated
+by `color: var(--color-accent)` and a faint accent background only. Changing font-weight
+between states causes text reflow (words shift their rendered width), which was the root
+cause of the jitter visible at reading speeds.
 
 ---
 
@@ -350,3 +389,4 @@ Before adding any feature, confirm:
 - [ ] Does it handle the case where no file is loaded (`words.length === 0`)?
 - [ ] Are new settings persisted to localStorage and hydrated on startup?
 - [ ] Are new localStorage keys documented in the State Architecture section above?
+- [ ] If adding animated/transitioning elements near the reading flow, have you verified there is no layout reflow at 250+ WPM?

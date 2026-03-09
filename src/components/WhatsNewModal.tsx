@@ -13,11 +13,9 @@ interface WhatsNewEntry {
 }
 
 const WHATS_NEW: WhatsNewEntry[] = [
-  { icon: '📖', title: 'Page Preview Redesigned', body: 'Prev/Next arrows now sit directly around the page number in the header. Clean and reachable.' },
-  { icon: '⚙️', title: 'Fine-tune Reading Mode',  body: 'Layout, word size, and key letter color moved into Fine-tune. Display is now theme-only.' },
-  { icon: '✅', title: 'Custom Mode Updates Fixed', body: 'Changing any fine-tune setting on a saved custom mode now always shows the Update button.' },
-  { icon: '📌', title: 'Auto-scroll in Preview',  body: 'The highlighted word in Page Preview automatically scrolls into view as you read.' },
-  { icon: '☕', title: 'Buy Me a Coffee — Sticky', body: 'The support link now stays pinned at the bottom so it\'s always reachable.' },
+  { icon: '🔵', title: 'Smooth Page Preview', body: 'Page Preview no longer jitters. The highlighted word walks down and snaps back up — no more vibrating text.' },
+  { icon: '↩', title: 'Return to Current Position', body: 'When browsing away in Page Preview, tap "↩ current" to jump instantly back to where you\'re reading.' },
+  { icon: '🚫', title: 'Top Bar Simplified', body: 'Page number removed from the top bar — it\'s already visible in the viewport overlay and Page Preview.' },
 ];
 
 interface WhatsNewModalProps {

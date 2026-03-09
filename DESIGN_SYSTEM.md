@@ -547,3 +547,35 @@ Every interactive element must be in one of exactly 3 visual states:
 Primary action button (PLAY): background `var(--color-accent)`, color `var(--bg)`.
 
 No element may use a hardcoded color value for interactive states.
+
+### Page Preview (ContextPreview) Header Row
+
+```
+[Page Preview label]  [↩ current]  [‹ N/total ›]  [▼]
+```
+
+- `↩ current` button: only visible when `isDetached === true`. Styled as `.returnBtn` —
+  accent border, transparent background, uppercase tiny text. Clicking it returns the
+  view to the current reading page.
+- Page cluster `‹ › ` nav buttons: call `e.stopPropagation()` — do NOT collapse panel
+- `▼` chevron: only collapse/expand toggle
+- No bottom navigation bar
+
+### Scroll Jitter Rule
+
+**Never differentiate interactive states by font-weight alone** when the element is
+inside a flow-layout text container (e.g. inline words in Page Preview). Font-weight
+changes alter rendered glyph widths and cause surrounding inline elements to reflow.
+At reading speed (250+ WPM), this reflow fires multiple times per second and is visible
+as text jitter.
+
+**Correct approach:** use `color` and/or `background` changes only. Keep font-weight
+constant across active/inactive states.
+
+**Never use `scrollIntoView({ behavior: 'smooth' })`** in a component that updates on
+every word advance. Smooth scroll animations queue and compete — at 250 WPM a new
+animation starts before the previous finishes, creating continuous vibration.
+
+**Correct approach:** use a threshold-based instant scroll with a `ref` on the scroll
+container. Scroll only when the target has passed a threshold (e.g. 75% of container
+height); do nothing when the target is already in the comfortable zone.

@@ -61,16 +61,9 @@
   border-right: 1px solid var(--border, #1e1e1e);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden; /* header stays fixed; only drawerBody scrolls */
   outline: none;
-  /* Thin scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-input, #333) transparent;
 }
-
-.panel::-webkit-scrollbar { width: 4px; }
-.panel::-webkit-scrollbar-track { background: transparent; }
-.panel::-webkit-scrollbar-thumb { background: var(--border-input, #333); border-radius: 2px; }
 
 /* ── Drawer header ──────────────────────────────────────────────── */
 
@@ -81,6 +74,7 @@
   padding: 1rem 1.1rem 0.875rem;
   border-bottom: 1px solid var(--border, #1e1e1e);
   flex-shrink: 0;
+  /* Header stays pinned because only drawerBody (below) scrolls */
 }
 
 .drawerTitle {
@@ -115,7 +109,14 @@
   flex-direction: column;
   gap: 0;
   padding: 0.5rem 0 1rem;
+  overflow-y: auto;   /* body scrolls; header stays fixed above it */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-input, #333) transparent;
 }
+
+.drawerBody::-webkit-scrollbar { width: 4px; }
+.drawerBody::-webkit-scrollbar-track { background: transparent; }
+.drawerBody::-webkit-scrollbar-thumb { background: var(--border-input, #333); border-radius: 2px; }
 
 /* ── Sections ──────────────────────────────────────────────────── */
 
@@ -679,21 +680,6 @@
 
 /* ── Theme switcher ──────────────────────────────────────────────── */
 
-.themeSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-.sectionLabel {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
 .themeRow {
   display: flex;
   gap: var(--space-2);
@@ -725,19 +711,12 @@
   background: var(--color-accent-dim);
 }
 
-/* Colour swatch circle */
-.themeSwatch {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
+/* Emoji icon inside each theme button */
+.themeIcon {
+  font-size: 1.15rem;
+  line-height: 1;
   display: block;
-  border: 2px solid var(--border);
-  flex-shrink: 0;
 }
-.themeSwatch[data-swatch="midnight"] { background: #5b8dee; }
-.themeSwatch[data-swatch="warm"]     { background: #e8a830; }
-.themeSwatch[data-swatch="day"]      { background: #2a7a6e; }
-.themeSwatch[data-swatch="obsidian"] { background: #000000; border-color: #00d4ff; }
 
 .themeLabel {
   font-size: var(--font-size-xs);

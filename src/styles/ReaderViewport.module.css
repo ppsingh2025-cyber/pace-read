@@ -476,6 +476,22 @@
 }
 .wcSep { margin: 0 0.2em; opacity: 0.5; }
 
+/* ── Word nav overlay — mirrors pageNavOverlay but right-anchored ── */
+.wordNavOverlay {
+  display: flex; align-items: center; gap: 2px;
+  pointer-events: all; position: relative;
+  margin-left: auto; /* always push to the right edge */
+}
+
+/* Word-jump popover opens above, right-anchored so it never overflows the edge */
+.wordJumpPopover {
+  position: absolute; bottom: calc(100% + 6px); right: 0;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+  display: flex; flex-direction: column; gap: var(--space-1);
+  z-index: 50; box-shadow: 0 4px 16px rgba(0,0,0,0.4); min-width: 110px;
+}
+
 [data-theme='day'] .pageNavBtn,
 [data-theme='day'] .pagePillOverlay,
 [data-theme='day'] .wordCountOverlay {

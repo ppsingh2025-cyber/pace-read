@@ -100,18 +100,28 @@
   transition: transform 0.2s ease;
 }
 
-/* ── Detached badge (inside headingLabel) ── */
-.detachedBadge {
+/* ── Return-to-current button (shown when browsing away) ── */
+.returnBtn {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-accent);
-  background: var(--color-accent-10);
-  border: 1px solid var(--color-accent-30);
+  background: transparent;
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-full);
-  padding: 1px 6px;
+  padding: 1px 7px;
   white-space: nowrap;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.15s, background 0.15s;
+  touch-action: manipulation;
+}
+.returnBtn:hover {
+  opacity: 1;
+  background: var(--color-accent-10, rgba(91,141,238,0.12));
 }
 
 /* ── Content area ── */
@@ -131,10 +141,15 @@
 .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 /* ── Words ── */
+/* IMPORTANT: both .word and .activeWord must have the same font-weight.
+   Changing font-weight between states causes text reflow (words shift width)
+   which creates visible jitter at reading speeds. Differentiate by color only. */
 .word {
   cursor: pointer;
   border-radius: 2px;
   padding: 0 1px;
+  font-weight: 600;
+  color: var(--text-muted);
   transition: background 0.1s;
 }
 .word:hover { background: var(--color-accent-dim, rgba(255,255,255,0.08)); }
@@ -145,4 +160,5 @@
   cursor: pointer;
   border-radius: 2px;
   padding: 0 1px;
+  background: var(--color-accent-10, rgba(91,141,238,0.08));
 }
