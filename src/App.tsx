@@ -394,14 +394,7 @@ export default function App() {
         </div>
         <div className="topBarActions">
           <SyncStatusIndicator />
-          {words.length > 0 && (
-            <span className="topBarReadPos"
-                  aria-label={`Word ${currentWordIndex + 1} of ${words.length}`}
-                  title="Reading position">
-              <span className="topBarReadCursor" aria-hidden="true">▸</span>
-              {currentPage}/{totalPages || 1}
-            </span>
-          )}
+
           <UserAvatar />
           <button
             className={`helpBtn${pulseHelp ? ' helpBtnPulse' : ''}`}

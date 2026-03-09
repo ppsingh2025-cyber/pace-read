@@ -29,16 +29,35 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
   const [viewPage, setViewPage] = useState<number>(readingPage);
   const [isDetached, setIsDetached] = useState(false);
   const activeWordRef = useRef<HTMLSpanElement>(null);
+  const contentRef    = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isDetached) setViewPage(readingPage);
   }, [readingPage, isDetached]);
 
   // Auto-scroll active word into view when index changes
+  // Threshold-based instant scroll — no smooth animation to avoid jitter.
+  // The active word "walks" down the visible area. When it reaches 75% of
+  // the container height, the view snaps instantly so the active word sits
+  // at ~15% from the top, then walks down again.
   useEffect(() => {
-    if (!collapsed && activeWordRef.current) {
-      activeWordRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (collapsed || !activeWordRef.current || !contentRef.current) return;
+    const el        = activeWordRef.current;
+    const container = contentRef.current;
+    const elTop     = el.offsetTop;
+    const elBottom  = elTop + el.offsetHeight;
+    const ch        = container.clientHeight;
+    const scrollTop = container.scrollTop;
+
+    // Word is below the 75% threshold → snap so word is 15% from top
+    if (elBottom > scrollTop + ch * 0.75) {
+      container.scrollTop = Math.max(0, elTop - ch * 0.15);
     }
+    // Word is above the visible area (page changed, content replaced) → snap to top
+    else if (elTop < scrollTop) {
+      container.scrollTop = Math.max(0, elTop - ch * 0.15);
+    }
+    // Word is in the comfortable middle zone → do nothing (no scroll)
   }, [currentWordIndex, collapsed]);
 
   const totalPages = Math.ceil(words.length / PAGE_SIZE);
@@ -68,6 +87,12 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
     setIsDetached(true);
   }, [totalPages]);
 
+  const snapToCurrent = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewPage(readingPage);
+    setIsDetached(false);
+  }, [readingPage]);
+
   const { pageStart, pageWords } = useMemo(() => {
     const start = viewPage * PAGE_SIZE;
     const end   = Math.min(words.length, start + PAGE_SIZE);
@@ -86,9 +111,15 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
         <span className={styles.headingLabel}>
           Page Preview
           {isDetached && (
-            <span className={styles.detachedBadge} aria-label="Browsing away from current position">
-              browsing
-            </span>
+            <button
+              type="button"
+              className={styles.returnBtn}
+              onClick={snapToCurrent}
+              aria-label="Return to current reading position"
+              title="Return to current reading position"
+            >
+              ↩ current
+            </button>
           )}
         </span>
 
@@ -146,7 +177,7 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
 
       {/* ── Content ── */}
       {isExpanded && (
-        <div id="page-preview-content" className={styles.content}>
+        <div id="page-preview-content" className={styles.content} ref={contentRef}>
           {pageWords.map((word, i) => {
             const globalIndex = pageStart + i;
             const isActive    = globalIndex === currentWordIndex;
