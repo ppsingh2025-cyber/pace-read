@@ -442,8 +442,32 @@ export default function App() {
             title={isFocused ? 'Exit focus mode (Esc)' : 'Enter focus mode'}
             aria-label={isFocused ? 'Exit focus mode' : 'Enter focus mode'}
           >
-            {isFocused ? '⊡' : '⊞'}
+            {isFocused ? (
+              /* Collapse / exit-fullscreen icon — arrows pointing inward */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                   strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
+                <polyline points="4 14 10 14 10 20"/>
+                <polyline points="20 10 14 10 14 4"/>
+                <line x1="10" y1="14" x2="3" y2="21"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+              </svg>
+            ) : (
+              /* Expand / enter-fullscreen icon — arrows pointing outward */
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                   strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            )}
           </button>
+          {/* WPM badge — visible only in focus mode, mirrored at top-left */}
+          {isFocused && (
+            <div className="focusWpmBadge" role="status" aria-label={`${wpm} words per minute`}>
+              {wpm} <span className="focusWpmUnit">WPM</span>
+            </div>
+          )}
         </div>
         </main>
 
