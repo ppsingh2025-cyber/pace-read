@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0]
+### Fixed
+- Page Preview jitter eliminated: active word now uses threshold-based instant scroll
+  (snaps when past 75% of container) instead of competing smooth-scroll animations
+- Page Preview text reflow fixed: `.word` and `.activeWord` both use font-weight: 600;
+  active state is differentiated by color only, preventing width-change reflow
+- Top bar page number chip (topBarReadPos) removed — redundant with viewport overlay
+  and Page Preview header
+### Added
+- "↩ current" return button in Page Preview header — appears when user has browsed
+  away from the reading position (isDetached); clicking snaps view back to current
+  reading page and clears detached state
+
 ## [1.0.6]
 ### Changed
 - All control buttons unified into one visual system matching +/- style

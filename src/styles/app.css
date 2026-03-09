@@ -325,8 +325,12 @@ body {
   flex-shrink: 0;
   gap: 0.5rem;
   border-bottom: 1px solid var(--border);
-  position: relative;
+  /* Sticky at the top — mirrors footer's sticky-bottom behaviour.
+     Excluded from focus/fullscreen mode via appShellFocused rule below. */
+  position: sticky;
+  top: 0;
   z-index: 501;
+  background: var(--bg); /* covers content that scrolls beneath it */
 }
 
 .topBarBrand {
@@ -373,6 +377,14 @@ body {
   flex: 1;
   min-height: 0;
   padding: 0;
+}
+
+/* In focus mode, hide the top bar and controls bar — pure reading experience */
+.appShellFocused .topBar {
+  display: none;
+}
+.appShellFocused .controlsBar {
+  display: none;
 }
 
 .viewportWrapper {
@@ -495,6 +507,40 @@ body {
   background: rgba(255, 255, 255, 0.9);
 }
 
+/* ─── WPM badge inside viewport — shown only in focus mode ──── */
+
+.focusWpmBadge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0 0.55rem;
+  height: 30px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+}
+
+[data-theme='day'] .focusWpmBadge {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.focusWpmUnit {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* ─── Top bar left group (burger + upload + paste) ──────────── */
 
 .topBarLeft {
@@ -596,20 +642,6 @@ body {
   50% { box-shadow: 0 0 0 8px var(--color-accent-22); transform: scale(1.15); }
 }
 
-/* ─── Top bar reading position chip ─────────────────────────── */
-.topBarReadPos {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  white-space: nowrap;
-}
-.topBarReadCursor { color: var(--color-accent); font-size: 0.65em; }
 
 /* ─── Landscape mode on mobile ──────────────────────────────────── */
 /* 2-column grid: reading viewport (75%) | controls sidebar (25%).

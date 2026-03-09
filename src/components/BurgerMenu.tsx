@@ -21,12 +21,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import SessionStats from './SessionStats';
 import ReadingModes from './ReadingModes';
-import type { Orientation } from '../context/readerContextDef';
+import type { Orientation, Theme } from '../context/readerContextDef';
 import { APP_VERSION } from '../version';
 import { IndexedDBService } from '../sync/IndexedDBService';
 import { getThemeOrpAccent } from '../config/orpColors';
 import toast from 'react-hot-toast';
 import styles from '../styles/BurgerMenu.module.css';
+
+const THEME_ICONS: Record<Theme, string> = {
+  obsidian: '🌑',
+  midnight: '🌙',
+  warm: '🕯️',
+  day: '☀️',
+};
 
 const FEEDBACK_FORM_URL = 'https://forms.gle/dCBSTs4SjvhmA3Zh6';
 
@@ -48,9 +55,10 @@ const RESETTABLE_KEYS = [
 
 interface BurgerMenuProps {
   onFileSelect: (file: File) => void;
+  onReplayIntro?: () => void;
 }
 
-export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
+export default function BurgerMenu({ onFileSelect, onReplayIntro }: BurgerMenuProps) {
   const [open, setOpen] = useState(false);
 
   const {
@@ -210,32 +218,28 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 </div>
               )}
 
-              {/* ── Display ────────────────────────────────────────── */}
+              {/* ── Theme ────────────────────────────────────────── */}
               {(!isPlaying || showAdvancedDuringReading) && (
               <>
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>Display</h3>
+                  <h3 className={styles.sectionTitle}>Theme</h3>
                 </div>
 
-                {/* Theme switcher */}
-                <div className={styles.themeSection}>
-                  <span className={styles.sectionLabel}>THEME</span>
-                  <div className={styles.themeRow}>
-                    {(['midnight', 'warm', 'day', 'obsidian'] as const).map(t => (
-                      <button
-                        type="button"
-                        key={t}
-                        className={`${styles.themeBtn} ${theme === t ? styles.themeBtnActive : ''}`}
-                        onClick={() => setTheme(t)}
-                        aria-pressed={theme === t}
-                        title={t.charAt(0).toUpperCase() + t.slice(1)}
-                      >
-                        <span className={styles.themeSwatch} data-swatch={t} />
-                        <span className={styles.themeLabel}>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className={styles.themeRow}>
+                  {(['midnight', 'warm', 'day', 'obsidian'] as const).map(t => (
+                    <button
+                      type="button"
+                      key={t}
+                      className={`${styles.themeBtn} ${theme === t ? styles.themeBtnActive : ''}`}
+                      onClick={() => setTheme(t)}
+                      aria-pressed={theme === t}
+                      title={t.charAt(0).toUpperCase() + t.slice(1)}
+                    >
+                      <span className={styles.themeIcon} aria-hidden="true">{THEME_ICONS[t]}</span>
+                      <span className={styles.themeLabel}>{t.charAt(0).toUpperCase() + t.slice(1)}</span>
+                    </button>
+                  ))}
                 </div>
 
               </section>
@@ -306,6 +310,15 @@ export default function BurgerMenu({ onFileSelect }: BurgerMenuProps) {
                 >
                   💬 Send Feedback
                 </a>
+                {onReplayIntro && (
+                  <button
+                    type="button"
+                    className={styles.linkBtn}
+                    onClick={() => { close(); onReplayIntro(); }}
+                  >
+                    ↩ Replay intro
+                  </button>
+                )}
               </section>
 
             </div>

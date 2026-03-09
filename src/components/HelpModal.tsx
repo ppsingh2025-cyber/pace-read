@@ -1,8 +1,11 @@
 /**
- * HelpModal — iOS Settings-style reference list.
- * Single scroll, 4 sections, every item always visible.
- * No tabs, no accordions, no expand/collapse.
+ * HelpModal — iOS Settings-style reference list with two tabs.
+ * Tab 1 "How to use": feature reference (Getting Started, Playback & Navigation,
+ *   Display & Modes, Tips & Shortcuts)
+ * Tab 2 "Training guide": Speed Training Guide coaching content.
+ * Default tab on open: "How to use".
  */
+import { useRef, useState } from 'react';
 import styles from '../styles/HelpModal.module.css';
 
 interface HelpModalProps { onClose: () => void; }
@@ -10,6 +13,19 @@ interface HelpItem { icon: string; color: string; title: string; desc: string; }
 interface HelpSection { heading: string; items: HelpItem[]; }
 
 const SECTIONS: HelpSection[] = [
+  {
+    heading: 'Speed Training Guide',
+    items: [
+      { icon: '🎯', color: '#4a7a6a', title: 'Set honest expectations',   desc: 'Most people reach 350–450 WPM with good comprehension after 4–6 weeks of consistent daily practice — roughly 1.5–2× their starting speed. Claims of 1000+ WPM with full retention are not supported by research. The goal is meaningful improvement, not miracles.' },
+      { icon: '📏', color: '#5a6a8a', title: 'Find your baseline first',   desc: 'Before going faster, find the speed where you read comfortably and recall what you just read. For most people this is 200–250 WPM. This is your starting floor, not a ceiling. Every session begins here.' },
+      { icon: '👁',  color: '#4a4a7a', title: 'Master the gaze first',    desc: 'The single most important RSVP habit is keeping your eyes completely still on the focal point — the tick marks and ORP letter. Spend your entire first week on this one habit at comfortable WPM. Every speed gain after this builds on it.' },
+      { icon: '⚡', color: '#8a6a20', title: 'Increase gradually',         desc: 'Once your gaze holds and you can recall what you read, increase WPM by 25–50 per session using the slider or − / + buttons. Do not jump multiple levels at once. The brain adapts to incremental overload, not shock.' },
+      { icon: '💬', color: '#5a4a7a', title: 'Subvocalization is normal', desc: 'You will still hear words in your head at higher speeds, and that is fine. Even expert speed readers subvocalize — they just do it faster. RSVP naturally encourages this by presenting words faster than you can speak them aloud.' },
+      { icon: '📊', color: '#4a7a5a', title: 'Test comprehension',         desc: 'After each section, pause and try to recall three specific things you just read. If you can\'t, drop 25 WPM next session. A good heuristic: if you follow roughly 80% of the meaning, your speed is well calibrated.' },
+      { icon: '📅', color: '#6a4a7a', title: 'Short sessions, every day', desc: '5–10 minutes of focused daily practice outperforms 30 minutes once a week. RSVP is cognitively intense at higher speeds — shorter sessions keep quality high. Consistency over weeks is the only thing that produces lasting gains.' },
+      { icon: '📖', color: '#4a6a4a', title: 'Train on easy material',     desc: 'Train on familiar, easy content: news articles, light non-fiction, genres you know well. Save technical documents and complex arguments for reading to understand, not to build speed. Hard material at speed destroys both.' },
+    ],
+  },
   {
     heading: 'Getting Started',
     items: [
@@ -56,7 +72,24 @@ const SECTIONS: HelpSection[] = [
   },
 ];
 
+// "How to use" tab: all sections except Speed Training Guide
+const HOW_TO_USE_SECTIONS = SECTIONS.filter(s => s.heading !== 'Speed Training Guide');
+// "Training guide" tab: Speed Training Guide only
+const TRAINING_SECTIONS = SECTIONS.filter(s => s.heading === 'Speed Training Guide');
+
+type TabId = 'how-to-use' | 'training';
+
 export default function HelpModal({ onClose }: HelpModalProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('how-to-use');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleTabChange = (tab: TabId) => {
+    setActiveTab(tab);
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  };
+
+  const visibleSections = activeTab === 'how-to-use' ? HOW_TO_USE_SECTIONS : TRAINING_SECTIONS;
+
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div
@@ -71,8 +104,30 @@ export default function HelpModal({ onClose }: HelpModalProps) {
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close help">✕</button>
         </div>
 
-        <div className={styles.scroll}>
-          {SECTIONS.map((section) => (
+        {/* Sticky tab bar */}
+        <div className={styles.tabBar} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'how-to-use'}
+            className={`${styles.tab} ${activeTab === 'how-to-use' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('how-to-use')}
+          >
+            How to use
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'training'}
+            className={`${styles.tab} ${activeTab === 'training' ? styles.tabActive : ''}`}
+            onClick={() => handleTabChange('training')}
+          >
+            Training guide
+          </button>
+        </div>
+
+        <div className={styles.scroll} ref={scrollRef}>
+          {visibleSections.map((section) => (
             <div key={section.heading} className={styles.section}>
               <p className={styles.sectionHeading}>{section.heading}</p>
               {section.items.map((item) => (

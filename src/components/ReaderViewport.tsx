@@ -165,6 +165,22 @@ const ReaderViewport = memo(function ReaderViewport({
     return () => document.removeEventListener('mousedown', handler);
   }, [showPageJump]);
 
+  /* ── Word-jump popover ──────────────────────────────────────── */
+  const [showWordJump, setShowWordJump] = useState(false);
+  const [wordJumpDraft, setWordJumpDraft] = useState('');
+  const wordJumpRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showWordJump) return;
+    const handler = (e: MouseEvent) => {
+      if (wordJumpRef.current && !wordJumpRef.current.contains(e.target as Node)) {
+        setShowWordJump(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showWordJump]);
+
   const userScale   = mainWordFontSize / 100;
   const isMultiWord = wordWindow.length > 1;
 
@@ -487,26 +503,60 @@ const ReaderViewport = memo(function ReaderViewport({
             </div>
           )}
 
-          {currentWordIndex !== undefined && totalWordCount !== undefined && (
-            <span
-              className={styles.wordCountOverlay}
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                const raw = prompt(`Jump to word (1–${totalWordCount}):`, String(currentWordIndex + 1));
-                if (raw === null) return;
-                const n = parseInt(raw, 10);
-                if (!isNaN(n) && n >= 1 && n <= totalWordCount) {
-                  goToWord?.(n - 1);
-                }
-              }}
-              title="Word position"
-              aria-label={`Word ${(currentWordIndex ?? 0) + 1} of ${totalWordCount}`}
-            >
-              <span className={styles.wcLabel}>Word</span>
-              {' '}{((currentWordIndex ?? 0) + 1).toLocaleString()}
-              <span className={styles.wcSep}>/</span>
-              {(totalWordCount ?? 0).toLocaleString()}
-            </span>
+          {currentWordIndex !== undefined && totalWordCount !== undefined && goToWord && (
+            <div className={styles.wordNavOverlay} ref={wordJumpRef}>
+              <button
+                className={styles.pageNavBtn}
+                onClick={() => { if (currentWordIndex > 0) goToWord(currentWordIndex - 1); }}
+                disabled={currentWordIndex <= 0}
+                aria-label="Previous word"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                     strokeLinecap="round" strokeLinejoin="round" width="10" height="10" aria-hidden="true">
+                  <polyline points="15 6 9 12 15 18"/>
+                </svg>
+              </button>
+              <button
+                className={styles.pagePillOverlay}
+                onClick={() => { setWordJumpDraft(String(currentWordIndex + 1)); setShowWordJump(p => !p); }}
+                aria-label={`Word ${currentWordIndex + 1} of ${totalWordCount}`}
+              >
+                Word {(currentWordIndex + 1).toLocaleString()}
+                <span className={styles.wcSep}>/</span>
+                {totalWordCount.toLocaleString()}
+              </button>
+              <button
+                className={styles.pageNavBtn}
+                onClick={() => { if (currentWordIndex < totalWordCount - 1) goToWord(currentWordIndex + 1); }}
+                disabled={currentWordIndex >= totalWordCount - 1}
+                aria-label="Next word"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                     strokeLinecap="round" strokeLinejoin="round" width="10" height="10" aria-hidden="true">
+                  <polyline points="9 6 15 12 9 18"/>
+                </svg>
+              </button>
+              {showWordJump && (
+                <div className={styles.wordJumpPopover}>
+                  <input
+                    type="number" min={1} max={totalWordCount}
+                    value={wordJumpDraft}
+                    className={styles.pageJumpInput}
+                    onChange={e => setWordJumpDraft(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        const v = parseInt(wordJumpDraft, 10);
+                        if (v >= 1 && v <= totalWordCount) { goToWord(v - 1); setShowWordJump(false); }
+                      }
+                      if (e.key === 'Escape') setShowWordJump(false);
+                    }}
+                    autoFocus
+                    aria-label="Jump to word"
+                  />
+                  <span className={styles.pageJumpHint}>Enter to jump</span>
+                </div>
+              )}
+            </div>
           )}
 
         </div>
