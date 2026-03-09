@@ -2,7 +2,8 @@ import { useCallback, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import { PRESET_MODES } from '../config/readingModePresets';
 import type { PresetModeId, CustomMode, ModeSettings } from '../types/readingModes';
-import type { WindowSize } from '../context/readerContextDef';
+import type { WindowSize, Orientation } from '../context/readerContextDef';
+import { ORP_COLORS } from '../config/orpColors';
 import SaveModeWizard from './SaveModeWizard';
 import styles from '../styles/ReadingModes.module.css';
 
@@ -36,6 +37,10 @@ export default function ReadingModes() {
     longWordCompensation, setLongWordCompensation,
     chunkMode, setChunkMode,
     wpm, setWpm,
+    orientation, setOrientation,
+    highlightColor, setHighlightColor,
+    mainWordFontSize, setMainWordFontSize,
+    theme,
   } = useReaderContext();
 
   const [wizardOpen, setWizardOpen]     = useState(false);
@@ -202,7 +207,7 @@ export default function ReadingModes() {
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
             </svg>
-            Fine-tune
+            Fine-tune Reading Mode
           </span>
           <span className={styles.accordionChevron}
                 style={{ transform: finetuneOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -212,42 +217,45 @@ export default function ReadingModes() {
         {finetuneOpen && (
           <div className={styles.accordionBody}>
 
-            {/* Inline save — at top of Fine-tune */}
+            {/* 0 — Name & save at the very top */}
             <div className={styles.inlineSave}>
               <input type="text" className={styles.saveNameInput}
-                     placeholder="Name &amp; save this setup…" maxLength={24} value={saveName}
+                     placeholder="Name this setup…" maxLength={24} value={saveName}
                      onChange={e => { setSaveName(e.target.value); setSaveError(''); }}
                      onKeyDown={e => { if (e.key === 'Enter') handleInlineSave(); }}
-                     aria-label="Name and save current mode" />
+                     aria-label="Custom mode name" />
               <button type="button" className={styles.saveBtn}
                       onClick={handleInlineSave} disabled={!saveName.trim()}
                       aria-label="Save current settings as custom mode">Save</button>
             </div>
             {saveError && <p className={styles.saveError}>{saveError}</p>}
 
-            {/* Update button when editing a custom mode */}
-            {isDirty && activeMode === 'custom' && activeCustomModeId && (
-              <button type="button" className={styles.updateModeBtn}
-                      onClick={updateActiveCustomMode}>
-                ✓ Update "{savedCustomModes.find(m => m.id === activeCustomModeId)?.name}"
-              </button>
-            )}
+            {/* Update button when editing a saved custom mode */}
+            {isDirty && activeMode === 'custom' && activeCustomModeId && (() => {
+              const activeName = savedCustomModes.find(m => m.id === activeCustomModeId)?.name;
+              return activeName ? (
+                <button type="button" className={styles.updateModeBtn}
+                        onClick={updateActiveCustomMode}>
+                  ✓ Update "{activeName}"
+                </button>
+              ) : null;
+            })()}
 
-            {/* WPM */}
+            {/* 1 — Speed (WPM) */}
             <div className={styles.fineRow}>
               <span className={styles.fineName}>Speed</span>
               <div className={styles.wpmStepper}>
                 <button type="button" className={styles.wpmStepBtn}
                         onClick={() => handleFinetuneChange(() => setWpm(Math.max(60, wpm - 10)))}
                         aria-label="Decrease WPM">−</button>
-                <span className={styles.wpmValue}>{wpm}</span>
+                <span className={styles.wpmValue}>{wpm} WPM</span>
                 <button type="button" className={styles.wpmStepBtn}
                         onClick={() => handleFinetuneChange(() => setWpm(Math.min(1500, wpm + 10)))}
                         aria-label="Increase WPM">+</button>
               </div>
             </div>
 
-            {/* Words shown */}
+            {/* 2 — Words shown */}
             <div className={styles.fineRow}>
               <span className={styles.fineName}>Words shown</span>
               <div className={styles.segmented}>
@@ -260,7 +268,54 @@ export default function ReadingModes() {
               </div>
             </div>
 
-            {/* Boolean toggles */}
+            {/* 3 — Layout (orientation) */}
+            <div className={styles.fineRow}>
+              <span className={styles.fineName}>Layout</span>
+              <select className={styles.fineSelect}
+                      value={orientation}
+                      onChange={e => handleFinetuneChange(() => setOrientation(e.target.value as Orientation))}
+                      aria-label="Word window orientation">
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+              </select>
+            </div>
+
+            {/* 4 — Focus word size */}
+            <div className={styles.fineRow}>
+              <span className={styles.fineName}>Word size</span>
+              <select className={styles.fineSelect}
+                      value={mainWordFontSize}
+                      onChange={e => handleFinetuneChange(() => setMainWordFontSize(parseInt(e.target.value, 10)))}
+                      aria-label="Main word font size">
+                <option value={70}>Small</option>
+                <option value={85}>Medium</option>
+                <option value={100}>Normal</option>
+                <option value={120}>Large</option>
+                <option value={150}>X-Large</option>
+                <option value={180}>Huge</option>
+              </select>
+            </div>
+
+            {/* 5 — Key letter color */}
+            <div className={styles.fineRow}>
+              <span className={styles.fineName}>Key letter color</span>
+              <div className={styles.colorSwatches}>
+                {ORP_COLORS[theme].map(option => (
+                  <button
+                    type="button"
+                    key={option.id}
+                    className={`${styles.swatchBtn} ${highlightColor === option.value ? styles.swatchBtnActive : ''}`}
+                    onClick={() => handleFinetuneChange(() => setHighlightColor(option.value))}
+                    aria-label={option.label}
+                    title={option.reason}
+                  >
+                    <span className={styles.swatchDot} style={{ background: option.value }} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 6 — Boolean toggles */}
             {toggleRows.map(item => (
               <label key={item.key} className={styles.fineRow} style={{ cursor: 'pointer' }}>
                 <span className={styles.fineName}>{item.label}</span>
@@ -269,7 +324,7 @@ export default function ReadingModes() {
               </label>
             ))}
 
-            {/* Phrase grouping */}
+            {/* 7 — Phrase grouping */}
             <label className={styles.fineRow} style={{ cursor: 'pointer' }}>
               <span className={styles.fineName}>Phrase grouping</span>
               <input type="checkbox" className={styles.toggle}

@@ -1,4 +1,4 @@
-/* ContextPreview.module.css — scrollable page context panel */
+/* ContextPreview.module.css — page preview panel */
 
 .preview {
   width: 100%;
@@ -10,90 +10,112 @@
   border: 1px solid var(--border);
 }
 
-/* ── Header row with nav buttons ── */
-.headingRow {
+/* ── Header row ── */
+.headerRow {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  gap: 0.4rem;
+  padding: 0 0.85rem;
+  min-height: 34px;
+  flex-shrink: 0;
   border-bottom: 1px solid var(--border);
 }
 
-/* ── Heading toggle button (inside headingRow) ── */
-.heading {
+.headingLabel {
   display: flex;
   align-items: center;
-  flex: 1;
-  min-width: 0;
-  justify-content: space-between;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: left;
   gap: 0.4rem;
-  padding: 0.3rem 0.35rem;
-  border-radius: var(--radius-sm);
-  transition: background 0.12s;
-}
-.heading:hover { background: var(--state-hover); }
-
-.headingLabel {
   font-size: 0.68rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--text-faint);
   font-weight: 600;
-  flex-shrink: 0;
+  flex: 1;           /* takes remaining space */
+  min-width: 0;
 }
 
-.headingChevron {
-  font-size: 0.55rem;
-  color: var(--text-faint);
-  flex-shrink: 0;
-}
-
-/* ── Page pill (clickable to enter edit mode) ── */
-.pagePill {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: border-color 0.1s, color 0.1s;
-  font-variant-numeric: tabular-nums;
-}
-.pagePill:hover { border-color: var(--color-accent); color: var(--color-accent); }
-
-/* ── Page number input (edit mode) ── */
-.pageInput {
-  width: 60px;
-  font-size: 0.72rem;
-  text-align: center;
-  background: var(--bg-input);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: 1px 4px;
-}
-
-/* ── Body ── */
-.body {
+/* ‹ 3/42 › cluster */
+.pageCluster {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
-/* ── Detached bar ── */
-.detachedBar {
+.pageNavBtn {
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 0.25rem 0.5rem;
-  border-bottom: 1px solid var(--border);
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  touch-action: manipulation;
+}
+.pageNavBtn:hover:not(:disabled) {
+  background: var(--state-hover);
+  color: var(--text-muted);
+}
+.pageNavBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.pageNum {
+  font-size: 0.65rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+  padding: 0 0.35rem;
+  white-space: nowrap;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  line-height: 22px;
 }
 
-/* ── Scrollable word area ── */
-.scrollArea {
+/* Chevron-only collapse button */
+.collapseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-faint);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: background 0.1s;
+  touch-action: manipulation;
+}
+.collapseBtn:hover { background: var(--state-hover); }
+
+.chevron {
+  font-size: 0.55rem;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+/* ── Detached badge (inside headingLabel) ── */
+.detachedBadge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  background: var(--color-accent-10);
+  border: 1px solid var(--color-accent-30);
+  border-radius: var(--radius-full);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* ── Content area ── */
+.content {
   overflow-y: auto;
   max-height: clamp(120px, 25vh, 300px);
   padding: 0.5rem 0.75rem;
@@ -104,9 +126,9 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
-.scrollArea::-webkit-scrollbar { width: 3px; }
-.scrollArea::-webkit-scrollbar-track { background: transparent; }
-.scrollArea::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.content::-webkit-scrollbar { width: 3px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 /* ── Words ── */
 .word {
@@ -117,59 +139,10 @@
 }
 .word:hover { background: var(--color-accent-dim, rgba(255,255,255,0.08)); }
 
-.wordActive {
+.activeWord {
   color: var(--color-accent);
   font-weight: 600;
-}
-
-/* ── Reading cursor icon ── */
-.wordCursor {
-  color: var(--color-accent);
-  font-size: 0.6em;
-  vertical-align: middle;
-  margin-right: 2px;
-}
-
-/* ── Nav buttons (in headingRow) ── */
-.navBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 26px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text-faint);
   cursor: pointer;
-  flex-shrink: 0;
-  font-size: 1rem;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
-  touch-action: manipulation;
+  border-radius: 2px;
+  padding: 0 1px;
 }
-.navBtn:hover:not(:disabled) {
-  background: var(--state-hover);
-  color: var(--text-muted);
-  border-color: var(--border-input);
-}
-.navBtn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.snapBtn {
-  flex-shrink: 0;
-  white-space: nowrap;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 0.18rem 0.55rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  background: var(--color-accent-8);
-  cursor: pointer;
-  transition: background 0.12s, opacity 0.12s;
-  touch-action: manipulation;
-}
-.snapBtn:hover { background: var(--color-accent-15); }
