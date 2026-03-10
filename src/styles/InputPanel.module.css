@@ -106,3 +106,24 @@
   padding: 0 0.85rem 0.6rem;
   line-height: 1.4;
 }
+
+/* Session title row */
+.titleRow {
+  padding: 0.35rem 0.75rem 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.titleInput {
+  width: 100%;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.titleInput::placeholder { color: var(--text-faint); }
+.titleInput:focus { border-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent-12); }

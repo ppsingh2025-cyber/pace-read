@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.3.1 (in progress)
+### Added
+- InputPanel now wires urlParser.ts for URL inputs (CORS-aware, honest error on blocked sites)
+- Reset to Beginning shows a 5s undo toast — position fully recoverable
+- Sign-in prompt fires only at ≥95% document completion, not on every pause
+- Post-onboarding: hint bar fades in above viewport + Upload button pulses for 4s
+- What's New converted from blocking modal to collapsible bottom banner
+- Burger menu pulse delayed 2s and extended to 6s post-onboarding
+- F key toggles focus mode
+- Focus mode entry/exit uses staggered fade transitions; "Esc or F to exit" hint fades in for 3s
+- WPM pill flashes accent briefly on every speed change
+- iOS back-swipe conflict fixed: left 20px excluded from swipe detection
+- Screen reader: aria-live="polite" region announces words at ≤300 WPM, silent above
+- Toasts include ARIA role="status" for screen reader announcement
+- Peripheral word contrast uses --vp-text-peripheral token (≥4.5:1 per theme) not opacity
+- HelpModal: F key + touch gesture documentation added
+- ContextPreview: "↩ current" button filled accent + appear animation when detached
+- Adaptive speed adjustments now show a toast explaining the change
+- InputPanel: optional session title auto-populated from first sentence of pasted text
+
 ## [1.3.0]
 ### Fixed
 - Page Preview jitter eliminated: active word now uses threshold-based instant scroll

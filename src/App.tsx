@@ -42,7 +42,7 @@ import SignInPrompt from './auth/SignInPrompt';
 import UserAvatar from './components/UserAvatar';
 import SyncStatusIndicator from './components/SyncStatusIndicator';
 import ResetConfirmModal from './components/ResetConfirmModal';
-import { Toaster } from 'react-hot-toast';
+import { Toaster, toast } from 'react-hot-toast';
 import { PRESET_MODES } from './config/readingModePresets';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
@@ -129,6 +129,12 @@ export default function App() {
   const [, setContextExpanded] = useState(false);
   const [pulseHelp, setPulseHelp] = useState(false);
   const [pulseBurger, setPulseBurger] = useState(false);
+  const [showPostOnboardingHint, setShowPostOnboardingHint] = useState(false);
+  const [pulseUpload, setPulseUpload] = useState(false);
+  const [showFocusHint, setShowFocusHint] = useState(false);
+
+  // Ref to store word index before reset (for undo)
+  const preResetIndexRef = useRef(0);
 
   // Ref to mirror isPlaying without stale closure issues (used by visibilitychange handler)
   const isPlayingRef = useRef(isPlaying);
@@ -161,6 +167,8 @@ export default function App() {
       const newBaseline = finalizeSession(wpm);
       if (!manualWpmRef.current && newBaseline !== wpm) {
         setWpm(newBaseline);
+        const direction = newBaseline > wpm ? '⚡' : '🐢';
+        toast(`${direction} Speed adjusted to ${newBaseline} WPM`, { duration: 4000 });
       }
       manualWpmRef.current = false; // reset manual flag after each session
 
@@ -174,7 +182,10 @@ export default function App() {
         });
         setRecords(updated);
       }
-      setSessionCompleted(true);
+      // Only fire sign-in prompt when user has read ≥95% of the document
+      if (currentWordIndex / words.length >= 0.95) {
+        setSessionCompleted(true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);
@@ -371,6 +382,16 @@ export default function App() {
           e.preventDefault();
           nextWord();
           break;
+        case 'f':
+        case 'F':
+          setIsFocused((f) => {
+            if (!f) {
+              setShowFocusHint(true);
+              setTimeout(() => setShowFocusHint(false), 3000);
+            }
+            return !f;
+          });
+          break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -393,7 +414,16 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleFocus = useCallback(() => setIsFocused((f) => !f), []);
+  const toggleFocus = useCallback(() => {
+    setIsFocused((f) => {
+      if (!f) {
+        // Entering focus mode — show hint briefly
+        setShowFocusHint(true);
+        setTimeout(() => setShowFocusHint(false), 3000);
+      }
+      return !f;
+    });
+  }, []);
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
   const completeOnboarding = useCallback(
     (prefs: { theme: Theme; modeId: PresetModeId }) => {
@@ -404,8 +434,16 @@ export default function App() {
       setShowOnboarding(false);
       setPulseHelp(true);
       setTimeout(() => setPulseHelp(false), 2500);
-      setPulseBurger(true);
-      setTimeout(() => setPulseBurger(false), 3000);
+      // Delayed burger pulse — fires after hint bar is visible
+      setTimeout(() => {
+        setPulseBurger(true);
+        setTimeout(() => setPulseBurger(false), 6000);
+      }, 2000);
+      // Post-onboarding hint + upload pulse
+      setShowPostOnboardingHint(true);
+      setPulseUpload(true);
+      setTimeout(() => setPulseUpload(false), 4000);
+      setTimeout(() => setShowPostOnboardingHint(false), 6000);
     },
     [setTheme, applyMode, setActiveMode],
   );
@@ -467,6 +505,13 @@ export default function App() {
           <ThemeToggle />
         </div>
       </header>
+
+      {/* Post-onboarding hint bar */}
+      {showPostOnboardingHint && words.length === 0 && (
+        <div className="postOnboardingHint" aria-live="polite">
+          Upload a file or paste text to begin
+        </div>
+      )}
 
       {/* ── 2. Reading main ─────────────────────────────────────── */}
       <main className="readingMain">
@@ -532,6 +577,10 @@ export default function App() {
               {wpm} <span className="focusWpmUnit">WPM</span>
             </div>
           )}
+          {/* Focus mode exit hint — fades after 3s */}
+          {isFocused && showFocusHint && (
+            <div className="focusExitHint" aria-hidden="true">Esc or F to exit</div>
+          )}
         </div>
         </main>
 
@@ -560,6 +609,7 @@ export default function App() {
           onPasteToggle={togglePaste}
           pasteOpen={showPaste}
           focused={isFocused}
+          pulseUpload={pulseUpload}
         />
       </div>
 
@@ -576,11 +626,32 @@ export default function App() {
         sessionCompleted={sessionCompleted}
         onDismiss={() => setSessionCompleted(false)}
       />
-      <Toaster position="bottom-center" />
+      <Toaster position="bottom-center" toastOptions={{ ariaProps: { role: 'status', 'aria-live': 'polite' } }} />
 
       {showResetConfirm && (
         <ResetConfirmModal
-          onConfirm={() => { reset(); setShowResetConfirm(false); }}
+          onConfirm={() => {
+            preResetIndexRef.current = currentWordIndex;
+            reset();
+            setShowResetConfirm(false);
+            toast(
+              (t) => (
+                <span>
+                  Reset to beginning{' '}
+                  <button
+                    style={{ marginLeft: 8, fontWeight: 700, cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline', padding: 0 }}
+                    onClick={() => {
+                      setCurrentWordIndex(preResetIndexRef.current);
+                      toast.dismiss(t.id);
+                    }}
+                  >
+                    Undo
+                  </button>
+                </span>
+              ),
+              { duration: 5000 },
+            );
+          }}
           onCancel={() => setShowResetConfirm(false)}
         />
       )}

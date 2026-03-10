@@ -140,6 +140,16 @@
   color: var(--color-accent);
 }
 
+/* Upload button pulse — post-onboarding attention cue */
+@keyframes uploadPulse {
+  0%   { box-shadow: 0 0 0 0 var(--color-accent-30); }
+  50%  { box-shadow: 0 0 0 8px var(--color-accent-8); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.controlBtnPulse {
+  animation: uploadPulse 0.9s ease-in-out 3;
+}
+
 /* ── PLAY / PAUSE — primary action ── */
 .playBtn {
   display: flex;
@@ -308,6 +318,16 @@
   padding: 0 0.5rem;
 }
 .wpmPillValue:hover { background: var(--state-hover); }
+
+/* WPM flash on speed change */
+@keyframes wpmFlash {
+  0%   { transform: scale(1);    background: transparent; }
+  40%  { transform: scale(1.08); background: var(--color-accent-12); }
+  100% { transform: scale(1);    background: transparent; }
+}
+.wpmPillFlash {
+  animation: wpmFlash 0.2s ease-out;
+}
 
 .wpmUnit {
   font-size: 0.65rem;

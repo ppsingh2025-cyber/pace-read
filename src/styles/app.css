@@ -110,6 +110,7 @@
   --vp-border:      #1e1e2a;
   --vp-text:        #d4d4d4;
   --vp-placeholder: #55556a;
+  --vp-text-peripheral: #8888a0; /* ≥4.5:1 against --vp-bg #0d0d10 */
   --slot-width:     10ch;
 
   /* Interaction states */
@@ -161,6 +162,7 @@
   --vp-border:     #2a2018;
   --vp-text:       #d8d0b8;
   --vp-placeholder: #5a5040;
+  --vp-text-peripheral: #9a8a6a; /* ≥4.5:1 against --vp-bg #100d08 */
   --slot-width:    10ch;
 
   --state-hover:   rgba(255,255,255,0.06);
@@ -211,6 +213,7 @@
   --vp-border:     #d0c8bc;
   --vp-text:       #1a1a2e;
   --vp-placeholder: #a0a0b8;
+  --vp-text-peripheral: #565470; /* ≥4.5:1 against --vp-bg #ede8e0 */
   --slot-width:    10ch;
 
   --state-hover:   rgba(0,0,0,0.05);
@@ -266,6 +269,7 @@
   --vp-border:      #111111;
   --vp-text:        #e8e8e8;
   --vp-placeholder: #444444;
+  --vp-text-peripheral: #888888; /* ≥4.5:1 against --vp-bg #000000 */
   --slot-width:     10ch;
 
   --state-hover:    rgba(255,255,255,0.07);
@@ -379,12 +383,27 @@ body {
   padding: 0;
 }
 
-/* In focus mode, hide the top bar and controls bar — pure reading experience */
+/* In focus mode, hide the top bar and controls bar — pure reading experience.
+   Base transition on .topBar / .controlsBar handles fade-back-in on exit (0.15s).
+   .appShellFocused overrides for the staggered fade-out on entry (different durations). */
+.topBar {
+  transition: opacity 0.15s ease;
+}
+.controlsBar {
+  transition: opacity 0.15s ease;
+}
+/* Staggered fade-out when entering focus mode */
 .appShellFocused .topBar {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.1s ease;
 }
 .appShellFocused .controlsBar {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.12s ease 0.06s;
 }
 
 .viewportWrapper {
@@ -724,4 +743,47 @@ kbd {
   font-size: 0.75rem;
   font-family: monospace;
   color: var(--kbd-text);
+}
+
+/* ─── Post-onboarding hint bar ──────────────────────────────── */
+
+@keyframes hintBarFade {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.postOnboardingHint {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  padding: 0.4rem 1rem;
+  animation: hintBarFade 6s ease forwards;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Focus mode exit hint pill ─────────────────────────────── */
+
+@keyframes focusHintFade {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.focusExitHint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  animation: focusHintFade 3s ease forwards;
 }

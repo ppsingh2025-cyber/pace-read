@@ -94,7 +94,7 @@
 | **5 — Context strip** | `<div class="contextStrip">` — `ContextPreview` | Hidden in focus mode |
 | **6 — Footer (sticky)** | `<AppFooter>` | `position:sticky; bottom:0` — hidden in focus mode |
 
-**Focus mode** (`isFocused` state): sets `appShellFocused` on the shell → `position:fixed; inset:0`. Reading viewport fills all available height. Toggled by the ⊞/⊡ button on the viewport.
+**Focus mode** (`isFocused` state): sets `appShellFocused` on the shell → `position:fixed; inset:0`. Reading viewport fills all available height. Toggled by the ⊞/⊡ button on the viewport, or the **F** key. On entry, `showFocusHint` state shows an "Esc or F to exit" pill that fades after 3s.
 
 **Landscape mobile** (≤480 px height, landscape): CSS Grid kicks in — viewport 75% left, Controls sidebar 25% right. Nav/paste/footer hidden.
 
@@ -111,7 +111,7 @@
 | `PageNavigator` | `components/PageNavigator.tsx` | Page/chapter jump (prev/next/direct input). |
 | `WordNavigator` | `components/WordNavigator.tsx` | Word-level step controls + jump to specific word. |
 | `ContextPreview` | `components/ContextPreview.tsx` | Page Preview panel below controls. Uses fixed `PAGE_SIZE=80` word chunks (not `pageBreaks`). Header has compact `‹ N/total ›` cluster + chevron collapse toggle. When detached, shows `↩ current` button. Threshold-based instant scroll (no smooth). |
-| `InputPanel` | `components/InputPanel.tsx` | Paste-text textarea + URL fetch field. |
+| `InputPanel` | `components/InputPanel.tsx` | Paste-text textarea + URL fetch (via `parseUrl`). Async loading state when URL detected. Optional session title auto-populates from first sentence. |
 | `ReadingHistory` | `components/ReadingHistory.tsx` | Per-file history list with progress %; deletes individual records. |
 | `SessionStats` | `components/SessionStats.tsx` | Words read, active time, effective WPM for current session. |
 | `HelpModal` | `components/HelpModal.tsx` | Keyboard shortcuts + usage guide modal. |
@@ -139,8 +139,7 @@
 ```
 - When the user navigates away from the current reading page (`isDetached = true`), a
   `↩ current` button appears. Clicking it calls `snapToCurrent`: sets `viewPage = readingPage`
-  and clears `isDetached`. The button is `className={styles.returnBtn}` — styled with an
-  accent border and hover state.
+  and clears `isDetached`. The button is `className={styles.returnBtn}` — filled accent background (`var(--color-accent)`), white text, with a mount appear animation (scale + fade in 0.25s).
 - `‹` / `›` buttons inside the page cluster call `e.stopPropagation()` — they do NOT
   collapse the panel
 - The `▼` chevron is the **only** collapse/expand toggle

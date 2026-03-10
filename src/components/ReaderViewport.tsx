@@ -122,6 +122,8 @@ function getSlotOpacity(
   return peripheralFade ? 0.45 : 0.65;
 }
 
+/** Pixels from left edge to exclude from swipe detection (iOS back-navigation zone) */
+const IOS_SWIPE_EXCLUSION_ZONE = 20;
 /** Minimum horizontal pixel delta to trigger a swipe-faster or swipe-slower gesture */
 const SWIPE_THRESHOLD_H = 50;
 /** Minimum vertical pixel delta (upward) to trigger a swipe-play/pause gesture */
@@ -157,12 +159,14 @@ const ReaderViewport = memo(function ReaderViewport({
   onFaster,
   onSlower,
 }: ReaderViewportProps) {
-  const { isPlaying } = useReaderContext();
+  const { isPlaying, wpm } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Outermost viewport div — receives --pre-orp-col and --focal-tick-x CSS variables */
   const viewportRef  = useRef<HTMLDivElement>(null);
   /** Hidden 'n' span — always rendered for font metric measurement */
   const measureRef   = useRef<HTMLSpanElement>(null);
+  /** Visually hidden live region for screen readers (polite, ≤300 WPM only) */
+  const srLiveRef    = useRef<HTMLSpanElement>(null);
   /** Touch start coordinates for swipe detection */
   const touchStartX  = useRef<number>(0);
   const touchStartY  = useRef<number>(0);
@@ -174,6 +178,8 @@ const ReaderViewport = memo(function ReaderViewport({
   };
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    // Exclude iOS Safari left-edge back-navigation gesture zone
+    if (e.touches[0].clientX < IOS_SWIPE_EXCLUSION_ZONE) return;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   }, []);
@@ -332,17 +338,42 @@ const ReaderViewport = memo(function ReaderViewport({
   }, [measureAndSetVars]);
   // ⚠️ currentWordIndex DELIBERATELY EXCLUDED.
 
+  // Screen reader live region: announce word at ≤300 WPM, silence above
+  useEffect(() => {
+    if (!srLiveRef.current) return;
+    if (wpm <= 300 && currentWord) {
+      srLiveRef.current.textContent = currentWord;
+    } else {
+      srLiveRef.current.textContent = '';
+    }
+  }, [currentWord, wpm]);
+
   const scaledFont = computeMainWordFontSize(fullHeight ?? false, userScale);
 
   return (
     <div
       ref={viewportRef}
       className={`${styles.viewport}${fullHeight ? ` ${styles.viewportFull}` : ''}`}
-      aria-live="assertive"
-      aria-atomic="true"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Screen reader live region — polite announcements at ≤300 WPM */}
+      <span
+        ref={srLiveRef}
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      />
       {/* Hidden measuring span — always rendered for layout metrics.
           Must use same CSS class as reading words for accurate char width. */}
       <span
@@ -434,14 +465,14 @@ const ReaderViewport = memo(function ReaderViewport({
         >
           {wordWindow.map((word, i) => {
             const isCenter   = i === highlightIndex;
-            const opacity    = getSlotOpacity(i, wordWindow.length, peripheralFade);
+            const isPeripheral = !isCenter && getSlotOpacity(i, wordWindow.length, peripheralFade) < 1;
             return (
               <span
                 key={i}
                 className={`${styles.wordSlot}${isCenter ? ` ${styles.wordSlotCenter}` : ''}`}
                 style={{
                   ...(isCenter && !focalLine ? { color: highlightColor } : undefined),
-                  ...(opacity < 1 ? { opacity } : undefined),
+                  ...(isPeripheral ? { color: 'var(--vp-text-peripheral)', opacity: 1 } : undefined),
                   ...(isCenter && scaledFont ? { fontSize: scaledFont } : undefined),
                 }}
                 aria-hidden={!word ? true : undefined}
@@ -520,11 +551,10 @@ const ReaderViewport = memo(function ReaderViewport({
                       : styles.contextWord
                   }
                   style={{
-                    opacity: getSlotOpacity(
-                      actualSlot,
-                      wordWindow.length,
-                      peripheralFade,
-                    ),
+                    color: getSlotOpacity(actualSlot, wordWindow.length, peripheralFade) < 1
+                      ? 'var(--vp-text-peripheral)'
+                      : undefined,
+                    opacity: 1,
                   }}
                 >
                   {word}

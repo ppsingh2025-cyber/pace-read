@@ -101,27 +101,31 @@
 }
 
 /* ── Return-to-current button (shown when browsing away) ── */
+@keyframes returnBtnAppear {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 .returnBtn {
   display: inline-flex;
   align-items: center;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-accent);
-  background: transparent;
-  border: 1px solid var(--color-accent);
+  color: #fff;
+  background: var(--color-accent);
+  border: none;
   border-radius: var(--radius-full);
-  padding: 1px 7px;
+  padding: 3px 10px;
   white-space: nowrap;
   cursor: pointer;
-  opacity: 0.85;
-  transition: opacity 0.15s, background 0.15s;
+  transition: opacity 0.15s;
   touch-action: manipulation;
+  animation: returnBtnAppear 0.25s ease;
 }
 .returnBtn:hover {
-  opacity: 1;
-  background: var(--color-accent-10, rgba(91,141,238,0.12));
+  opacity: 0.88;
 }
 
 /* ── Content area ── */
