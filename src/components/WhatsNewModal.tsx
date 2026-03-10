@@ -1,8 +1,9 @@
 /**
- * WhatsNewModal — shown once per app version.
+ * WhatsNewModal — non-blocking bottom banner, shown once per app version.
  * Appears before onboarding on version bumps.
  */
 
+import { useState } from 'react';
 import { APP_VERSION } from '../version';
 import styles from '../styles/WhatsNewModal.module.css';
 
@@ -23,16 +24,32 @@ interface WhatsNewModalProps {
 }
 
 export default function WhatsNewModal({ onDismiss }: WhatsNewModalProps) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="What's new in PaceRead">
-      <div className={styles.card}>
+    <div className={styles.banner} role="region" aria-label="What's new in PaceRead">
+      <div className={styles.row}>
+        <span className={styles.sparkle} aria-hidden="true">✨</span>
+        <span className={styles.label}>What's new in {APP_VERSION}</span>
+        <button
+          type="button"
+          className={styles.expandBtn}
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+        >
+          {expanded ? 'Hide' : 'See what\'s new'}
+        </button>
+        <button
+          type="button"
+          className={styles.dismissBtn}
+          onClick={onDismiss}
+          aria-label="Dismiss what's new banner"
+        >
+          ✕
+        </button>
+      </div>
 
-        <div className={styles.header}>
-          <span className={styles.badge}>{APP_VERSION}</span>
-          <h2 className={styles.title}>What's New</h2>
-          <p className={styles.subtitle}>PaceRead just got better</p>
-        </div>
-
+      {expanded && (
         <ul className={styles.list} role="list">
           {WHATS_NEW.map((entry) => (
             <li key={entry.title} className={styles.item}>
@@ -44,12 +61,7 @@ export default function WhatsNewModal({ onDismiss }: WhatsNewModalProps) {
             </li>
           ))}
         </ul>
-
-        <button type="button" className={styles.cta} onClick={onDismiss} autoFocus>
-          Got it — let's read
-        </button>
-
-      </div>
+      )}
     </div>
   );
 }

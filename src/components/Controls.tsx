@@ -9,7 +9,7 @@
  * All interactive elements meet the 44 px minimum touch-target size.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/Controls.module.css';
 
@@ -28,7 +28,12 @@ interface ControlsProps {
   pasteOpen: boolean;
   /** When true (maximize/focus mode) upload and paste buttons are hidden */
   focused?: boolean;
+  /** When true, pulse-animate the upload button to draw attention post-onboarding */
+  pulseUpload?: boolean;
 }
+
+/** Duration in ms for the WPM flash animation — matches the CSS @keyframes wpmFlash */
+const WPM_FLASH_DURATION = 200;
 
 export default function Controls({
   onFileSelect,
@@ -42,6 +47,7 @@ export default function Controls({
   onPasteToggle,
   pasteOpen,
   focused,
+  pulseUpload,
 }: ControlsProps) {
   const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex } =
     useReaderContext();
@@ -51,6 +57,14 @@ export default function Controls({
   const [wpmEditing, setWpmEditing] = useState(false);
   const [wpmDraft,   setWpmDraft]   = useState('');
   const wpmInputRef = useRef<HTMLInputElement>(null);
+
+  /* ── WPM flash on speed change ───────────────────────────────── */
+  const [wpmFlash, setWpmFlash] = useState(false);
+  useEffect(() => {
+    const t1 = setTimeout(() => setWpmFlash(true), 0);
+    const t2 = setTimeout(() => setWpmFlash(false), WPM_FLASH_DURATION);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [wpm]);
 
   /* ── File upload ─────────────────────────────────────────────── */
   const handleFileClick = useCallback(() => {
@@ -88,7 +102,7 @@ export default function Controls({
         {!focused && (
           <button
             type="button"
-            className={styles.controlBtn}
+            className={`${styles.controlBtn}${pulseUpload ? ` ${styles.controlBtnPulse}` : ''}`}
             onClick={handleFileClick}
             disabled={isLoading}
             title="Upload file (PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX)"
@@ -216,7 +230,7 @@ export default function Controls({
         ) : (
           <button
             type="button"
-            className={styles.wpmPillValue}
+            className={`${styles.wpmPillValue}${wpmFlash ? ` ${styles.wpmPillFlash}` : ''}`}
             onClick={() => { setWpmDraft(String(wpm)); setWpmEditing(true); }}
             aria-label={`${wpm} words per minute, tap to edit`}
             title="Tap to set exact WPM"

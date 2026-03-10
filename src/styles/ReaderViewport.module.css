@@ -178,7 +178,8 @@
 
 /* Non-pivot prefix/suffix letters — slightly muted to draw attention to pivot */
 .orpContext {
-  opacity: 0.78;
+  color: var(--vp-text-peripheral, #8888a0);
+  opacity: 1;
 }
 
 .placeholder {
