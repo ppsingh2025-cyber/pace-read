@@ -141,9 +141,6 @@ export default function App() {
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
 
-  // Suppresses the eviction toast for exactly one file load after a bulk clear
-  const skipEvictionToastRef = useRef(false);
-
   // What's New: shown when stored version ≠ current version (skip for brand-new users)
   const [showWhatsNew, setShowWhatsNew] = useState<boolean>(
     () => {
@@ -318,13 +315,9 @@ export default function App() {
             // Caching is best-effort; ignore errors
           }
         }
-        // Block 2 — prune + eviction toast (always runs, sibling of block 1)
+        // Block 2 — prune (always runs, sibling of block 1)
         try {
-          const evicted = await IndexedDBService.pruneFileCacheToLimit();
-          if (evicted && !skipEvictionToastRef.current) {
-            toast('Saved session removed to make room for your new one', { duration: 4000 });
-          }
-          skipEvictionToastRef.current = false; // always reset after prune
+          await IndexedDBService.pruneFileCacheToLimit();
         } catch {
           // Prune is best-effort; ignore errors
         }
@@ -359,7 +352,6 @@ export default function App() {
 
   /** Clear all history, position records, and IDB caches in one operation */
   const handleClearAll = useCallback(() => {
-    skipEvictionToastRef.current = true;
     clearSessionHistory();
     setRecords(clearAllRecords());
     IndexedDBService.clearFileCache().catch(() => {});

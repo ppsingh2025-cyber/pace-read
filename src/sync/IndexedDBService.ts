@@ -187,22 +187,16 @@ export const IndexedDBService = {
   async getCachedSessionNames(names: string[]): Promise<{ fileCached: Set<string>; textCached: Set<string> }> {
     try {
       const db = await getDB();
-      const results = await Promise.all(
-        names.map(async (name) => {
-          const [fileKey, textKey] = await Promise.all([
-            db.getKey('cachedFiles', name),
-            db.getKey('savedTexts', name),
-          ]);
-          return { name, fileKey, textKey };
-        }),
-      );
-      const fileCached = new Set<string>();
-      const textCached = new Set<string>();
-      for (const { name, fileKey, textKey } of results) {
-        if (fileKey != null) fileCached.add(name);
-        if (textKey != null) textCached.add(name);
-      }
-      return { fileCached, textCached };
+      const [fileKeys, textKeys] = await Promise.all([
+        db.getAllKeys('cachedFiles'),
+        db.getAllKeys('savedTexts'),
+      ]);
+      const fileKeySet = new Set(fileKeys as string[]);
+      const textKeySet = new Set(textKeys as string[]);
+      return {
+        fileCached: new Set(names.filter(n => fileKeySet.has(n))),
+        textCached: new Set(names.filter(n => textKeySet.has(n))),
+      };
     } catch {
       return { fileCached: new Set(), textCached: new Set() };
     }

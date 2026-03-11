@@ -149,7 +149,16 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   const [sessionHistory, setSessionHistoryState] = useState<StoredSession[]>(() => {
     try {
       const saved = localStorage.getItem(LS_KEY_SESSION_HISTORY);
-      if (saved) return JSON.parse(saved) as StoredSession[];
+      if (saved) {
+        const parsed = JSON.parse(saved) as StoredSession[];
+        // Deduplicate by bookName on load, keeping the first (most recent) occurrence
+        const seen = new Set<string>();
+        return parsed.filter((s: StoredSession) => {
+          if (seen.has(s.bookName)) return false;
+          seen.add(s.bookName);
+          return true;
+        });
+      }
     } catch { /* ignore parse errors */ }
     return [];
   });
