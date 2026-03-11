@@ -425,6 +425,34 @@
   letter-spacing: 0.01em;
 }
 
+/* ── Title strip — top-left filename pill ── */
+.titlePill {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  padding: 2px 6px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+[data-theme='day'] .titlePill {
+  background: rgba(255,255,255,0.55);
+  border-color: rgba(0,0,0,0.1);
+  color: var(--text-muted);
+}
+
 /* ── Viewport bottom overlay bar ── */
 .overlayBar {
   position: absolute; bottom: 0; left: 0; right: 0;

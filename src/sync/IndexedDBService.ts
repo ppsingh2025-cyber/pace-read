@@ -8,7 +8,7 @@ import { openDB, type IDBPDatabase } from 'idb';
 import type { FileMetadata, UserPreferences, ReadingSession } from '../types/metadata';
 
 const DB_NAME = 'readswift_metadata';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 interface ReadSwiftDB {
   files: FileMetadata & { id: string };
@@ -16,6 +16,7 @@ interface ReadSwiftDB {
   sessions: ReadingSession & { id: string };
   syncState: { key: string; value: string | number };
   cachedFiles: { name: string; buffer: ArrayBuffer; type: string };
+  savedTexts: { name: string; rawText: string; savedAt: string };
 }
 
 let dbInstance: IDBPDatabase<ReadSwiftDB> | null = null;
@@ -50,6 +51,10 @@ async function getDB(): Promise<IDBPDatabase<ReadSwiftDB>> {
       // v2: cached file blobs for auto-resume
       if (oldVersion < 2) {
         db.createObjectStore('cachedFiles', { keyPath: 'name' });
+      }
+      // v3: saved pasted/URL text for auto-resume
+      if (oldVersion < 3) {
+        db.createObjectStore('savedTexts', { keyPath: 'name' });
       }
     },
   });
@@ -125,5 +130,39 @@ export const IndexedDBService = {
   async clearFileCache(): Promise<void> {
     const db = await getDB();
     await db.clear('cachedFiles');
+  },
+
+  /** Remove file cache entries whose names are not in the provided list. */
+  async pruneFileCacheToRecords(names: string[]): Promise<void> {
+    const db = await getDB();
+    const nameSet = new Set(names);
+    const allKeys = await db.getAllKeys('cachedFiles');
+    for (const key of allKeys) {
+      if (!nameSet.has(key as string)) {
+        await db.delete('cachedFiles', key);
+      }
+    }
+  },
+
+  async saveTextCache(name: string, rawText: string): Promise<void> {
+    const db = await getDB();
+    await db.put('savedTexts', { name, rawText, savedAt: new Date().toISOString() });
+  },
+
+  async getTextCache(name: string): Promise<{ name: string; rawText: string; savedAt: string } | undefined> {
+    const db = await getDB();
+    return db.get('savedTexts', name);
+  },
+
+  /** Remove text cache entries whose names are not in the provided list. */
+  async pruneTextCacheToRecords(names: string[]): Promise<void> {
+    const db = await getDB();
+    const nameSet = new Set(names);
+    const allKeys = await db.getAllKeys('savedTexts');
+    for (const key of allKeys) {
+      if (!nameSet.has(key as string)) {
+        await db.delete('savedTexts', key);
+      }
+    }
   },
 };

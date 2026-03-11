@@ -11,6 +11,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
+import type { WindowSize } from '../context/readerContextDef';
 import styles from '../styles/Controls.module.css';
 
 interface ControlsProps {
@@ -49,7 +50,7 @@ export default function Controls({
   focused,
   pulseUpload,
 }: ControlsProps) {
-  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex } =
+  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, windowSize, setWindowSize } =
     useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,7 +89,7 @@ export default function Controls({
     <div className={styles.controls}>
       <div className={styles.inner}>
 
-      {/* ── Row 1: Action buttons ───────────────────────────────── */}
+      {/* ── Row 1: Playback buttons ─────────────────────────────── */}
       <div className={styles.actionRow}>
         <input
           ref={fileInputRef}
@@ -98,44 +99,6 @@ export default function Controls({
           onChange={handleFileChange}
           aria-label="Upload file"
         />
-
-        {!focused && (
-          <button
-            type="button"
-            className={`${styles.controlBtn}${pulseUpload ? ` ${styles.controlBtnPulse}` : ''}`}
-            onClick={handleFileClick}
-            disabled={isLoading}
-            title="Upload file (PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX)"
-            aria-label="Upload file"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 15V3m0 0l-4 4m4-4l4 4"/>
-              <path d="M2 17v2a2 2 0 002 2h16a2 2 0 002-2v-2"/>
-            </svg>
-            <span className={styles.controlBtnLabel}>Upload</span>
-          </button>
-        )}
-
-        {!focused && (
-          <button
-            type="button"
-            className={`${styles.controlBtn}${pasteOpen ? ` ${styles.controlBtnActive}` : ''}`}
-            onClick={onPasteToggle}
-            title="Paste text"
-            aria-label="Toggle paste panel"
-            aria-pressed={pasteOpen}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="9" y="2" width="6" height="4" rx="1"/>
-              <path d="M9 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2h-2"/>
-              <line x1="9" y1="12" x2="15" y2="12"/>
-              <line x1="9" y1="16" x2="13" y2="16"/>
-            </svg>
-            <span className={styles.controlBtnLabel}>Paste</span>
-          </button>
-        )}
 
         <button
           type="button"
@@ -190,70 +153,129 @@ export default function Controls({
 
       </div>
 
-      {/* ── WPM pill stepper ── */}
-      <div className={styles.wpmPill}>
-        <button
-          type="button"
-          className={styles.wpmPillBtn}
-          onClick={onSlower}
-          disabled={isLoading}
-          aria-label="Decrease speed"
-          title="Slower (↓)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-               strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
+      {/* ── Row 2: Upload · compound pill · Paste (hidden in focus mode) ── */}
+      {!focused && (
+        <div className={styles.loadRow}>
 
-        {wpmEditing ? (
-          <input
-            ref={wpmInputRef}
-            type="number"
-            className={styles.wpmPillInput}
-            value={wpmDraft}
-            min={60}
-            max={1500}
-            onChange={(e) => setWpmDraft(e.target.value)}
-            onBlur={() => {
-              const v = parseInt(wpmDraft, 10);
-              if (!isNaN(v)) setWpm(Math.min(1500, Math.max(60, v)));
-              setWpmEditing(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-              if (e.key === 'Escape') setWpmEditing(false);
-            }}
-            autoFocus
-            aria-label="Words per minute"
-          />
-        ) : (
+          {/* Upload icon-only button */}
           <button
             type="button"
-            className={`${styles.wpmPillValue}${wpmFlash ? ` ${styles.wpmPillFlash}` : ''}`}
-            onClick={() => { setWpmDraft(String(wpm)); setWpmEditing(true); }}
-            aria-label={`${wpm} words per minute, tap to edit`}
-            title="Tap to set exact WPM"
+            className={`${styles.loadRowBtn}${pulseUpload ? ` ${styles.controlBtnPulse}` : ''}`}
+            onClick={handleFileClick}
+            disabled={isLoading}
+            title="Upload file (PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX)"
+            aria-label="Upload file"
           >
-            {wpm} <span className={styles.wpmUnit}>WPM</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 15V3m0 0l-4 4m4-4l4 4"/>
+              <path d="M2 17v2a2 2 0 002 2h16a2 2 0 002-2v-2"/>
+            </svg>
           </button>
-        )}
 
-        <button
-          type="button"
-          className={styles.wpmPillBtn}
-          onClick={onFaster}
-          disabled={isLoading}
-          aria-label="Increase speed"
-          title="Faster (↑)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-               strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5"  y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
-      </div>
+          {/* Compound pill: WPM stepper + divider + window-size buttons 1/2/3 */}
+          <div className={styles.wpmPill}>
+            <button
+              type="button"
+              className={styles.wpmPillBtn}
+              onClick={onSlower}
+              disabled={isLoading}
+              aria-label="Decrease speed"
+              title="Slower (↓)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                   strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+
+            {wpmEditing ? (
+              <input
+                ref={wpmInputRef}
+                type="number"
+                className={styles.wpmPillInput}
+                value={wpmDraft}
+                min={60}
+                max={1500}
+                onChange={(e) => setWpmDraft(e.target.value)}
+                onBlur={() => {
+                  const v = parseInt(wpmDraft, 10);
+                  if (!isNaN(v)) setWpm(Math.min(1500, Math.max(60, v)));
+                  setWpmEditing(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                  if (e.key === 'Escape') setWpmEditing(false);
+                }}
+                autoFocus
+                aria-label="Words per minute"
+              />
+            ) : (
+              <button
+                type="button"
+                className={`${styles.wpmPillValue}${wpmFlash ? ` ${styles.wpmPillFlash}` : ''}`}
+                onClick={() => { setWpmDraft(String(wpm)); setWpmEditing(true); }}
+                aria-label={`${wpm} words per minute, tap to edit`}
+                title="Tap to set exact WPM"
+              >
+                {wpm} <span className={styles.wpmUnit}>WPM</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              className={styles.wpmPillBtn}
+              onClick={onFaster}
+              disabled={isLoading}
+              aria-label="Increase speed"
+              title="Faster (↑)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                   strokeLinecap="round" strokeLinejoin="round" width="14" height="14" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5"  y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+
+            {/* Thin divider */}
+            <span className={styles.pillDivider} aria-hidden="true" />
+
+            {/* Window-size buttons 1 / 2 / 3 */}
+            {([1, 2, 3] as WindowSize[]).map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`${styles.windowSizeBtn}${windowSize === n ? ` ${styles.windowSizeBtnActive}` : ''}`}
+                onClick={() => setWindowSize(n)}
+                aria-label={`${n} word${n > 1 ? 's' : ''} at a time`}
+                aria-pressed={windowSize === n}
+                title={`Show ${n} word${n > 1 ? 's' : ''} at once`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+
+          {/* Paste icon-only button */}
+          <button
+            type="button"
+            className={`${styles.loadRowBtn}${pasteOpen ? ` ${styles.controlBtnActive}` : ''}`}
+            onClick={onPasteToggle}
+            title="Paste text"
+            aria-label="Toggle paste panel"
+            aria-pressed={pasteOpen}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="4" rx="1"/>
+              <path d="M9 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2h-2"/>
+              <line x1="9" y1="12" x2="15" y2="12"/>
+              <line x1="9" y1="16" x2="13" y2="16"/>
+            </svg>
+          </button>
+
+        </div>
+      )}
 
       {/* ── Row 3: Reset ── */}
       <div className={styles.resetRow}>

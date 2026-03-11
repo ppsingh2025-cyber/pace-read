@@ -159,7 +159,7 @@ const ReaderViewport = memo(function ReaderViewport({
   onFaster,
   onSlower,
 }: ReaderViewportProps) {
-  const { isPlaying, wpm } = useReaderContext();
+  const { isPlaying, wpm, fileMetadata } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Outermost viewport div — receives --pre-orp-col and --focal-tick-x CSS variables */
   const viewportRef  = useRef<HTMLDivElement>(null);
@@ -392,6 +392,13 @@ const ReaderViewport = memo(function ReaderViewport({
       >
         n
       </span>
+
+      {/* Title strip — top-left pill showing filename sans extension */}
+      {fileMetadata && hasWords && !isLoading && (
+        <div className={styles.titlePill} aria-hidden="true">
+          {fileMetadata.name.replace(/\.[^/.]+$/, '')}
+        </div>
+      )}
 
       {/* Tick marks — only when focalLine ON, horizontal, document loaded */}
       {showFocalTicks && (

@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.2 (in progress)
+### Added
+- IndexedDB upgraded to v3: new `savedTexts` store persists pasted/URL text for auto-resume
+- `cachedFiles` now supports up to 20 entries (one per history record) — no more single-file limit
+- `pruneFileCacheToRecords` and `pruneTextCacheToRecords` keep both caches in sync with localStorage records
+- On first mount, auto-resume falls back to `savedTexts` when no file buffer is cached
+- Controls Row 1 is now playback-only (Back · Play/Pause · Next); Upload and Paste moved to Row 2
+- Row 2 (loadRow): icon-only Upload (left) · compound WPM+window-size pill (center) · icon-only Paste (right); hidden in focus mode
+- Compound pill extends WPM stepper rightward with a thin divider and word-count buttons 1 | 2 | 3
+- Viewport title strip: translucent pill in top-left of reading area shows filename (extension stripped)
+
 ## v1.3.1 (in progress)
 ### Added
 - InputPanel now wires urlParser.ts for URL inputs (CORS-aware, honest error on blocked sites)

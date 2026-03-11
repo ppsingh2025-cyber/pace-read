@@ -304,11 +304,15 @@ export default function App() {
           setLoadingProgress(100);
         }
         finaliseWords(allWords, file.name, breaks, allRawLines.length > 0 ? allRawLines : undefined);
-        // Cache the file buffer for auto-resume on next app boot (GROUP 1B/D)
+        // Cache the file buffer for auto-resume on next app boot.
+        // Save first, then prune any entries not in the current record list.
         try {
           const buffer = await file.arrayBuffer();
-          await IndexedDBService.clearFileCache();
           await IndexedDBService.saveFileCache(file.name, buffer, file.type);
+          const recordNames = records.some((r) => r.name === file.name)
+            ? records.map((r) => r.name)
+            : [file.name, ...records.map((r) => r.name)];
+          await IndexedDBService.pruneFileCacheToRecords(recordNames);
         } catch {
           // Caching is best-effort; ignore errors
         }
@@ -324,7 +328,7 @@ export default function App() {
         setLoadingProgress(100);
       }
     },
-    [setIsPlaying, saveCurrentSession, setIsLoading, setLoadingProgress, setFileMetadata, finaliseWords],
+    [setIsPlaying, saveCurrentSession, setIsLoading, setLoadingProgress, setFileMetadata, finaliseWords, records],
   );
 
   const handleTextReady = useCallback(
@@ -332,8 +336,19 @@ export default function App() {
       setFileMetadata({ name: sourceName, size: 0, type: 'text' });
       finaliseWords(words, sourceName, [], rawLines);
       setShowPaste(false); // collapse paste panel after loading
+      // Cache the raw text for auto-resume on next app boot.
+      const rawText = words.join(' ');
+      const recordNames = [sourceName, ...records.filter((r) => r.name !== sourceName).map((r) => r.name)];
+      (async () => {
+        try {
+          await IndexedDBService.saveTextCache(sourceName, rawText);
+          await IndexedDBService.pruneTextCacheToRecords(recordNames);
+        } catch {
+          // Caching is best-effort; ignore errors
+        }
+      })();
     },
-    [setFileMetadata, finaliseWords],
+    [setFileMetadata, finaliseWords, records],
   );
 
   /** Auto-pause when the user switches away from the tab */
@@ -404,9 +419,19 @@ export default function App() {
       try {
         if (!records[0]) return;
         const cached = await IndexedDBService.getFileCache(records[0].name);
-        if (!cached) return;
-        const file = new File([cached.buffer], cached.name, { type: cached.type });
-        await handleFileSelect(file);
+        if (cached) {
+          const file = new File([cached.buffer], cached.name, { type: cached.type });
+          await handleFileSelect(file);
+          return;
+        }
+        // Fall back to saved text cache (pasted/URL content)
+        const textCached = await IndexedDBService.getTextCache(records[0].name);
+        if (textCached) {
+          const words = tokenize(normalizeText(textCached.rawText));
+          if (words.length > 0) {
+            handleTextReady(words, textCached.name);
+          }
+        }
       } catch {
         // Cache miss or read error — not fatal, ignore silently
       }

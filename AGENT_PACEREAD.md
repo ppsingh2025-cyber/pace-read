@@ -1,7 +1,7 @@
 # AGENT_PACEREAD.md — Architecture Brain
 
 > **Purpose:** Authoritative reference for AI coding agents working in this repository. Read this before writing any code. Cross-reference `/READING_ENGINE.md` for engine details and `/DESIGN_SYSTEM.md` for UI rules.
-> **Current version:** v1.3.0
+> **Current version:** v1.3.2
 
 ---
 

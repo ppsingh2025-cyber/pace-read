@@ -1,4 +1,4 @@
-/* Controls.module.css — v2: two-row layout, WPM pill stepper */
+/* Controls.module.css — v3: three-row layout, compound WPM+window-size pill */
 
 /* ─── Wrapper ───────────────────────────────────────────────────── */
 
@@ -263,6 +263,101 @@
   .playBtnLabel {
     display: none;
   }
+}
+
+/* ── Row 2: Load row — Upload · compound pill · Paste ───────────── */
+
+.loadRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2, 8px);
+}
+
+/* Icon-only Upload / Paste buttons in the load row */
+.loadRowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.loadRowBtn:hover:not(:disabled) {
+  background: var(--state-hover);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.loadRowBtn:active:not(:disabled) {
+  background: var(--state-active);
+}
+
+.loadRowBtn:disabled {
+  opacity: var(--state-disabled, 0.35);
+  cursor: not-allowed;
+}
+
+.loadRowBtn svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+/* Thin vertical divider between WPM stepper and window-size buttons */
+.pillDivider {
+  display: block;
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* Window-size buttons 1 / 2 / 3 within the compound pill */
+.windowSizeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-width: 30px;
+  min-height: 44px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.windowSizeBtn:hover:not(:disabled) {
+  background: var(--state-hover);
+  color: var(--text);
+}
+
+.windowSizeBtnActive {
+  color: var(--color-accent);
+  background: var(--color-accent-dim, rgba(34,211,238,0.1));
+}
+
+@media (max-width: 520px) {
+  .loadRowBtn { width: 40px; height: 40px; }
+  .windowSizeBtn { width: 26px; min-width: 26px; font-size: 0.73rem; }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .loadRow { display: none; }
 }
 
 /* ── WPM pill stepper ── */
