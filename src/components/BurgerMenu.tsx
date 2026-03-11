@@ -55,11 +55,12 @@ const RESETTABLE_KEYS = [
 
 interface BurgerMenuProps {
   onFileSelect: (file: File) => void;
+  onResumeFromCache: (name: string) => Promise<boolean>;
   onReplayIntro?: () => void;
   pulseBurger?: boolean;
 }
 
-export default function BurgerMenu({ onFileSelect, onReplayIntro, pulseBurger }: BurgerMenuProps) {
+export default function BurgerMenu({ onFileSelect, onResumeFromCache, onReplayIntro, pulseBurger }: BurgerMenuProps) {
   const [open, setOpen] = useState(false);
 
   const {
@@ -120,6 +121,16 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, pulseBurger }:
       onFileSelect(file);
     },
     [close, onFileSelect],
+  );
+
+  // Wrap cache resume so the menu closes on success
+  const handleResumeFromCache = useCallback(
+    async (name: string) => {
+      const success = await onResumeFromCache(name);
+      if (success) close();
+      return success;
+    },
+    [onResumeFromCache, close],
   );
 
   // Reset all user preferences to new-user defaults
@@ -250,7 +261,7 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, pulseBurger }:
               {/* ── Session Analytics (unified: current session + history + resume) ── */}
               <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Session Analytics</h3>
-                <SessionStats onFileSelect={handleHistoryFileSelect} />
+                <SessionStats onFileSelect={handleHistoryFileSelect} onResumeFromCache={handleResumeFromCache} />
               </section>
 
               {/* ── Reset to Defaults ───────────────────────────────── */}

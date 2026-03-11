@@ -15,7 +15,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { APP_VERSION } from './version';
-import { IndexedDBService } from './sync/IndexedDBService';
+import { IndexedDBService, FILE_CACHE_SIZE_LIMIT_BYTES } from './sync/IndexedDBService';
 import WhatsNewModal from './components/WhatsNewModal';
 import OnboardingOverlay from './components/OnboardingOverlay';
 import { useReaderContext } from './context/useReaderContext';
@@ -32,10 +32,10 @@ import AppFooter from './components/AppFooter';
 import HelpModal from './components/HelpModal';
 import { parsePDF } from './parsers/pdfParser';
 import { parseEPUB } from './parsers/epubParser';
-import { parseFile } from './parsers/textParser';
+import { parseFile, parseRawText } from './parsers/textParser';
 import { normalizeText, tokenize } from './utils/textUtils';
 import { normalizePages } from './utils/contentNormalizer';
-import { saveRecord } from './utils/recordsUtils';
+import { saveRecord, loadRecords } from './utils/recordsUtils';
 import { buildStructureMap, buildStructureMapFromWords } from './utils/structureUtils';
 import { AuthProvider } from './auth/AuthContext';
 import SignInPrompt from './auth/SignInPrompt';
@@ -191,7 +191,7 @@ export default function App() {
   }, [isPlaying]);
 
   const finaliseWords = useCallback(
-    (allWords: string[], sourceName: string, breaks: number[] = [], rawLines?: string[]) => {
+    (allWords: string[], sourceName: string, breaks: number[] = [], rawLines?: string[], sourceType: 'file' | 'text' = 'file') => {
       if (allWords.length === 0) {
         alert('No readable text found.');
         return;
@@ -219,6 +219,7 @@ export default function App() {
         lastWordIndex: restoredIndex,
         lastReadAt: new Date().toISOString(),
         wpm,
+        sourceType,
       });
       setRecords(updated);
     },
@@ -303,14 +304,24 @@ export default function App() {
           if (rawLines) allRawLines.push(...rawLines);
           setLoadingProgress(100);
         }
-        finaliseWords(allWords, file.name, breaks, allRawLines.length > 0 ? allRawLines : undefined);
-        // Cache the file buffer for auto-resume on next app boot (GROUP 1B/D)
+        finaliseWords(allWords, file.name, breaks, allRawLines.length > 0 ? allRawLines : undefined, 'file');
+        // Block 1 — save (size-guarded): only if file is within the 10 MB iOS quota-safe cap
         try {
-          const buffer = await file.arrayBuffer();
-          await IndexedDBService.clearFileCache();
-          await IndexedDBService.saveFileCache(file.name, buffer, file.type);
+          if (file.size <= FILE_CACHE_SIZE_LIMIT_BYTES) {
+            const buffer = await file.arrayBuffer();
+            await IndexedDBService.saveFileCache(file.name, buffer, file.type);
+          }
         } catch {
-          // Caching is best-effort; ignore errors
+          // Caching is best-effort; ignore errors (including QuotaExceededError on iOS)
+        }
+        // Block 2 — prune + eviction toast: always runs, independent of block 1
+        try {
+          const evicted = await IndexedDBService.pruneFileCacheToLimit();
+          if (evicted) {
+            toast('Auto-resume updated — oldest cached session removed', { duration: 4000 });
+          }
+        } catch {
+          // Prune is best-effort; ignore errors
         }
       } catch (err) {
         console.error('Error parsing file:', err);
@@ -330,11 +341,41 @@ export default function App() {
   const handleTextReady = useCallback(
     (words: string[], sourceName: string, rawLines?: string[]) => {
       setFileMetadata({ name: sourceName, size: 0, type: 'text' });
-      finaliseWords(words, sourceName, [], rawLines);
+      finaliseWords(words, sourceName, [], rawLines, 'text');
       setShowPaste(false); // collapse paste panel after loading
+      // Cache raw text for instant resume (fire-and-forget)
+      if (rawLines && rawLines.length > 0) {
+        IndexedDBService.saveTextCache(sourceName, rawLines.join('\n')).catch(() => {});
+        IndexedDBService.pruneTextCacheToRecords(loadRecords().map(r => r.name)).catch(() => {});
+      }
     },
     [setFileMetadata, finaliseWords],
   );
+
+  /** Resume a session from IDB cache by name. Returns true on success, false on cache miss. */
+  const handleResumeFromCache = useCallback(async (name: string): Promise<boolean> => {
+    try {
+      // Try file cache first
+      const fileCached = await IndexedDBService.getFileCache(name);
+      if (fileCached) {
+        const file = new File([fileCached.buffer], fileCached.name, { type: fileCached.type });
+        await handleFileSelect(file);
+        return true;
+      }
+      // Try text cache
+      const textCached = await IndexedDBService.getTextCache(name);
+      if (textCached && textCached.rawText.length > 0) {
+        const { words: parsedWords, rawLines } = parseRawText(textCached.rawText, 'resume');
+        setFileMetadata({ name, size: 0, type: 'text' });
+        finaliseWords(parsedWords, name, [], rawLines, 'text');
+        return true;
+      }
+      // Both missed
+      return false;
+    } catch {
+      return false;
+    }
+  }, [handleFileSelect, setFileMetadata, finaliseWords]);
 
   /** Auto-pause when the user switches away from the tab */
   useEffect(() => {
@@ -398,15 +439,26 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPlaying, play, pause, faster, slower, prevWord, nextWord, showResetConfirm, setShowResetConfirm]);
 
-  /** Auto-load the most recently cached file on first mount */
+  /** Auto-load the most recently cached session on first mount */
   useEffect(() => {
     (async () => {
       try {
         if (!records[0]) return;
-        const cached = await IndexedDBService.getFileCache(records[0].name);
-        if (!cached) return;
-        const file = new File([cached.buffer], cached.name, { type: cached.type });
-        await handleFileSelect(file);
+        const name = records[0].name;
+        // Try file cache first
+        const fileCached = await IndexedDBService.getFileCache(name);
+        if (fileCached) {
+          const file = new File([fileCached.buffer], fileCached.name, { type: fileCached.type });
+          await handleFileSelect(file);
+          return;
+        }
+        // Fall back to text cache
+        const textCached = await IndexedDBService.getTextCache(name);
+        if (textCached && textCached.rawText.length > 0) {
+          const { words: parsedWords, rawLines } = parseRawText(textCached.rawText, 'resume');
+          setFileMetadata({ name, size: 0, type: 'text' });
+          finaliseWords(parsedWords, name, [], rawLines, 'text');
+        }
       } catch {
         // Cache miss or read error — not fatal, ignore silently
       }
@@ -479,7 +531,7 @@ export default function App() {
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
       <header className="topBar">
         <div className="topBarLeft">
-          <BurgerMenu onFileSelect={handleFileSelect} onReplayIntro={resetOnboarding} pulseBurger={pulseBurger} />
+          <BurgerMenu onFileSelect={handleFileSelect} onResumeFromCache={handleResumeFromCache} onReplayIntro={resetOnboarding} pulseBurger={pulseBurger} />
         </div>
         <div className="topBarBrand">
           <img

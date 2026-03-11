@@ -250,3 +250,27 @@
   margin-bottom: 0;
   line-height: 1.4;
 }
+
+/* Tier 1 — Instant Resume button (solid accent) */
+.resumeBtnCached {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-accent);
+  color: var(--bg);
+  background: var(--color-accent);
+  cursor: pointer;
+  transition: opacity 0.12s;
+  touch-action: manipulation;
+}
+.resumeBtnCached:hover { opacity: 0.85; }
+
+/* Tier C — Session unavailable label */
+.resumeUnavailable {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
