@@ -1,4 +1,4 @@
-/* Controls.module.css — v2: two-row layout, WPM pill stepper */
+/* Controls.module.css — v3: two-row layout — Row 1: playback + speed, Row 2: load + utility */
 
 /* ─── Wrapper ───────────────────────────────────────────────────── */
 
@@ -67,7 +67,7 @@
   }
 }
 
-/* ─── Row 1: Action buttons ──────────────────────────────────────── */
+/* ─── Row 1: Playback + speed ────────────────────────────────────── */
 
 .actionRow {
   display: flex;
@@ -80,7 +80,7 @@
   display: none;
 }
 
-/* ── Base: Upload / Paste / Back / Next ── */
+/* ── Base: Back / Next / Upload / Paste / Reset ── */
 .controlBtn {
   display: flex;
   flex-direction: column;
@@ -203,7 +203,21 @@
 
 /* ── RESET — muted / secondary ── */
 
-/* ─── Mobile tweaks ──────────────────────────────────────────────── */
+/* ─── Row 2: Load + utility ─────────────────────────────────────── */
+
+.loadRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+/* Reset danger hover modifier */
+.resetBtn:hover:not(:disabled) {
+  color: var(--color-danger, #e05252);
+  border-color: var(--color-danger, #e05252);
+  background: rgba(224, 82, 82, 0.08);
+}
 
 @media (min-width: 321px) and (max-width: 400px) {
   .controlBtn {
@@ -214,6 +228,15 @@
   .playBtn {
     width: 50px;
     height: 52px;
+  }
+
+  .wpmPillBtn {
+    width: 36px;
+    min-width: 36px;
+  }
+
+  .wpmPillValue {
+    min-width: 80px;
   }
 }
 
@@ -360,37 +383,5 @@
   .wpmPill { height: 32px; min-height: 32px; }
   .wpmPillBtn { width: 32px; min-height: 32px; }
   .wpmPillValue { min-width: 78px; font-size: 0.8rem; }
-}
-
-/* ── Row 3: Reset to beginning ────────────────────────────────── */
-
-.resetRow {
-  display: flex;
-  justify-content: center;
-  padding-top: 2px;
-}
-
-.resetRowBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
-  color: var(--text-faint);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
-}
-.resetRowBtn:hover:not(:disabled) {
-  color: var(--color-danger, #e05252);
-  background: rgba(224, 82, 82, 0.08);
-}
-.resetRowBtn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }
 

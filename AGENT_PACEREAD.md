@@ -105,7 +105,7 @@
 | Component | File | Purpose |
 |-----------|------|---------|
 | `ReaderViewport` | `components/ReaderViewport.tsx` | Word display with ORP split, peripheral fade, focus mode. `React.memo` wrapped. |
-| `Controls` | `components/Controls.tsx` | Progress bar, playback buttons, logarithmic WPM slider. |
+| `Controls` | `components/Controls.tsx` | Two-row panel. Row 1 (actionRow): Back · Play/Pause · Next · WPM pill stepper. Always visible (including focus mode per appShellFocused rule). Row 2 (loadRow): Upload · Paste · Reset. Hidden in focus mode ({!focused}). space-evenly distribution. Reset uses controlBtn + resetBtn modifier. Row 3: removed. |
 | `BurgerMenu` | `components/BurgerMenu.tsx` | Slide-in settings drawer: Reading Mode (presets + fine-tune), Display (theme only), Session Analytics, Reset. Layout/font size/key letter color moved to Fine-tune in ReadingModes. |
 | `Settings` | `components/Settings.tsx` | Legacy collapsible settings (used inside BurgerMenu). |
 | `PageNavigator` | `components/PageNavigator.tsx` | Page/chapter jump (prev/next/direct input). |

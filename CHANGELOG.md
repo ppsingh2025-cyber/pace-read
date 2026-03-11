@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.2 (in progress)
+### Changed
+- Controls condensed from 3 rows to 2: Row 1 is now playback + speed (Back · Play · Next · WPM pill); Row 2 is load + utility (Upload · Paste · Reset)
+- WPM pill moved to right end of Row 1 for always-visible speed control during playback
+- Upload, Paste, and Reset consolidated into Row 2; Row 2 hides in focus mode
+- Reset elevated from ghost text link to a full peer button (icon + label) with danger hover styling
+
 ## v1.3.1 (in progress)
 ### Added
 - InputPanel now wires urlParser.ts for URL inputs (CORS-aware, honest error on blocked sites)
