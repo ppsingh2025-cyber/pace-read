@@ -76,6 +76,12 @@ interface ReaderViewportProps {
   onFaster?: () => void;
   /** Called when user swipes right (slower) */
   onSlower?: () => void;
+  /** The filename or source name to display at the top of the viewport */
+  fileName?: string;
+  /** Whether focus mode (full-screen word-only view) is currently active */
+  isFocused?: boolean;
+  /** Called when the user taps the eye icon to toggle focus mode */
+  onToggleFocus?: () => void;
 }
 
 /**
@@ -158,6 +164,9 @@ const ReaderViewport = memo(function ReaderViewport({
   onPlayPause,
   onFaster,
   onSlower,
+  fileName,
+  isFocused,
+  onToggleFocus,
 }: ReaderViewportProps) {
   const { isPlaying, wpm } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -393,6 +402,13 @@ const ReaderViewport = memo(function ReaderViewport({
         n
       </span>
 
+      {/* Filename strip — absolute top, hidden in focus mode */}
+      {fileName && hasWords && !isLoading && !fullHeight && (
+        <div className={styles.fileNameStrip} aria-label={`Reading: ${fileName}`}>
+          {fileName}
+        </div>
+      )}
+
       {/* Tick marks — only when focalLine ON, horizontal, document loaded */}
       {showFocalTicks && (
         <>
@@ -624,6 +640,31 @@ const ReaderViewport = memo(function ReaderViewport({
             </div>
           )}
 
+          {/* Eye button — absolute center of overlay bar */}
+          {onToggleFocus && (
+            <button
+              className={`${styles.eyeBtn}${isFocused ? ` ${styles.eyeBtnActive}` : ''}`}
+              onClick={onToggleFocus}
+              aria-label={isFocused ? 'Exit focus mode' : 'Focus on word only'}
+              title={isFocused ? 'Exit focus mode' : 'Focus on word only'}
+            >
+              {isFocused ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                     strokeLinecap="round" strokeLinejoin="round" width="13" height="13" aria-hidden="true">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                     strokeLinecap="round" strokeLinejoin="round" width="13" height="13" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+          )}
+
           {currentWordIndex !== undefined && totalWordCount !== undefined && goToWord && (
             <div className={styles.wordNavOverlay} ref={wordJumpRef}>
               <button
@@ -640,12 +681,13 @@ const ReaderViewport = memo(function ReaderViewport({
               <button
                 className={styles.pagePillOverlay}
                 onClick={() => { setShowWordJump(p => !p); }}
-                aria-label={`Word ${currentWordIndex + 1} of ${totalWordCount}, ${Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}% complete`}
+                aria-label={`${Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}% through — word ${currentWordIndex + 1} of ${totalWordCount}`}
               >
-                Word {(currentWordIndex + 1).toLocaleString()}
+                <span className={styles.wcPct}>{Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}%</span>
+                <span className={styles.wcSep}>·</span>
+                w{(currentWordIndex + 1).toLocaleString()}
                 <span className={styles.wcSep}>/</span>
                 {totalWordCount.toLocaleString()}
-                <span className={styles.wcPct}>· {Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}%</span>
               </button>
               <button
                 className={styles.pageNavBtn}
@@ -660,10 +702,33 @@ const ReaderViewport = memo(function ReaderViewport({
               </button>
               {showWordJump && (
                 <div className={styles.wordJumpPopover}>
+                  {/* Custom word number input */}
+                  <div className={styles.wordJumpInputRow}>
+                    <input
+                      type="number"
+                      min={1}
+                      max={totalWordCount}
+                      placeholder={`Word 1–${totalWordCount.toLocaleString()}`}
+                      className={styles.wordJumpInput}
+                      aria-label="Jump to specific word number"
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          const v = parseInt((e.target as HTMLInputElement).value, 10);
+                          if (!isNaN(v) && v >= 1 && v <= totalWordCount) {
+                            goToWord(v - 1);
+                            setShowWordJump(false);
+                          }
+                        }
+                        if (e.key === 'Escape') setShowWordJump(false);
+                      }}
+                      autoFocus
+                    />
+                    <span className={styles.wordJumpHint}>Enter to jump</span>
+                  </div>
+                  <div className={styles.wordJumpDivider} aria-hidden="true" />
                   <select
                     className={styles.wordJumpSelect}
                     defaultValue=""
-                    autoFocus
                     aria-label="Jump to position"
                     onChange={e => {
                       const idx = parseInt(e.target.value, 10);
@@ -671,7 +736,7 @@ const ReaderViewport = memo(function ReaderViewport({
                     }}
                     onKeyDown={e => { if (e.key === 'Escape') setShowWordJump(false); }}
                   >
-                    <option value="" disabled>Jump to…</option>
+                    <option value="" disabled>or jump to…</option>
                     {jumpOptions.map((opt, i) => (
                       <option key={i} value={opt.wordIndex}>{opt.label}</option>
                     ))}

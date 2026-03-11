@@ -291,14 +291,18 @@ export default function OnboardingOverlay({ onComplete, initialTheme, initialMod
         </div>
 
         <div className={styles.actions}>
-          {step > 0 && (
-            <button type="button" className={styles.btnBack} onClick={goBack}>← Back</button>
-          )}
-          {step === 0 && <button type="button" className={styles.btnSecondary} onClick={launchDemo}>Replay</button>}
+          <div className={styles.actionsLeft}>
+            {step > 0 && (
+              <button type="button" className={styles.btnBack} onClick={goBack}>← Back</button>
+            )}
+            {step === 0 && <button type="button" className={styles.btnSecondary} onClick={launchDemo}>Replay</button>}
+          </div>
           <button type="button" className={styles.btnPrimary} onClick={advance}>
             {step < 4 ? 'Next →' : 'Start Reading →'}
           </button>
-          <button type="button" className={styles.btnSkip} onClick={skip}>Skip</button>
+          <div className={styles.actionsRight}>
+            <button type="button" className={styles.btnSkip} onClick={skip}>Skip</button>
+          </div>
         </div>
 
       </div>

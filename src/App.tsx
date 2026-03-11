@@ -596,6 +596,9 @@ export default function App() {
             onPlayPause={() => isPlaying ? pause() : play()}
             onFaster={() => { manualWpmRef.current = true; faster(); }}
             onSlower={() => { manualWpmRef.current = true; slower(); }}
+            fileName={fileMetadata?.name}
+            isFocused={isFocused}
+            onToggleFocus={() => setIsFocused(v => !v)}
           />
           {/* Maximize / minimize button */}
           <button
