@@ -597,7 +597,6 @@ export default function App() {
             onFaster={() => { manualWpmRef.current = true; faster(); }}
             onSlower={() => { manualWpmRef.current = true; slower(); }}
             fileName={fileMetadata?.name}
-            isFocused={isFocused}
             onToggleFocus={() => setIsFocused(v => !v)}
           />
           {/* Maximize / minimize button */}
