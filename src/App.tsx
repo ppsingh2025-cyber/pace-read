@@ -341,11 +341,15 @@ export default function App() {
       setFileMetadata({ name: sourceName, size: 0, type: 'text' });
       finaliseWords(words, sourceName, [], rawLines, 'text');
       setShowPaste(false); // collapse paste panel after loading
-      if (rawLines && rawLines.length > 0) {
-        IndexedDBService.saveTextCache(sourceName, rawLines.join('\n')).catch(() => {});
-        // Fire-and-forget: prune savedTexts entries not in current records
-        IndexedDBService.pruneTextCacheToNames(records.map(r => r.name)).catch(() => {});
-      }
+      // Always persist text so paste sessions can be resumed.
+      // Use rawLines when available; fall back to words array.
+      const textToCache = rawLines && rawLines.length > 0 ? rawLines.join('\n') : words.join(' ');
+      IndexedDBService.saveTextCache(sourceName, textToCache)
+        // Sequence the prune after the save so the new entry is never deleted;
+        // include sourceName in the keep list because `records` is still the
+        // pre-setState snapshot and does not yet contain this session.
+        .then(() => IndexedDBService.pruneTextCacheToNames([...records.map(r => r.name), sourceName]))
+        .catch(() => {});
     },
     [setFileMetadata, finaliseWords, records],
   );

@@ -533,3 +533,125 @@
 }
 [data-theme='day'] .pageNavBtn:hover:not(:disabled),
 [data-theme='day'] .pagePillOverlay:hover { background: rgba(255,255,255,0.8); }
+
+/* ── Feature 1: Percentage prefix in word-count pill ─────────── */
+
+/* Percentage shown BEFORE the "W" label — muted color to visually separate */
+.wcPctPre {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  opacity: 0.85;
+  margin-right: 3px;
+}
+
+/* ── Feature 2: Source label — top-left viewport overlay ───────── */
+
+.sourceLabel {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  z-index: 2;
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.75;
+}
+
+[data-theme='day'] .sourceLabel {
+  color: var(--text-muted);
+}
+
+/* ── Feature 3: Eye icon — focus mode toggle ────────────────────── */
+
+.eyeBtn {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--vp-text, #d4d4d4);
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.eyeBtn:hover {
+  opacity: 0.7;
+}
+
+/* Active = focus mode ON: drop opacity further to stay out of reading view */
+.eyeBtnActive {
+  opacity: 0.2;
+}
+
+.eyeBtnActive:hover {
+  opacity: 0.5;
+}
+
+[data-theme='day'] .eyeBtn {
+  color: var(--text, #1a1a1a);
+}
+
+/* ── Feature 3: Focus mode — word enlargement + element hiding ──── */
+
+/* Hide non-essential overlays in focus mode */
+.focusModeActive .overlayBar {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.focusModeActive .focalTickTop,
+.focusModeActive .focalTickBottom {
+  visibility: hidden;
+}
+
+.focusModeActive .sourceLabel {
+  visibility: hidden;
+}
+
+/* Hide the normal word row in focus mode (replaced by the enlarged overlay) */
+.focusModeActive .wordRow,
+.focusModeActive .windowVertical {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Focused-word overlay: always in DOM, shown/enlarged only in focus mode */
+.focusModeWordOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Georgia', serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+  /* Start at the normal word font size so the transition animates from rest */
+  font-size: clamp(1.1rem, 8vw, 3.2rem);
+  opacity: 0;
+  transition: font-size 0.25s ease, opacity 0.2s ease;
+}
+
+/* Focus mode ON: enlarge to ~2.5× and make visible */
+.focusModeActive .focusModeWordOverlay {
+  font-size: clamp(2.75rem, 20vw, 8rem);
+  opacity: 1;
+}

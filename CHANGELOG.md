@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.3.2 (in progress)
+### Added
+- **Progress % in word panel** — percentage now prepended before the "W" label
+  (`[XX%] W [current] / [total]`). Calculated as
+  `Math.round((currentWordIndex / totalWords) * 100)` with a 0% guard when
+  no document is loaded. Uses muted `--text-faint` token so it recedes behind
+  the word count without a badge or border.
+- **Source label** — small, non-interactive overlay at the top-left of the reading
+  viewport showing the loaded filename (files) or session title / first line
+  (pasted text), truncated to 28 characters with a trailing ellipsis. Renders
+  `null` when no source is loaded. Hides in focus mode.
+- **Eye icon focus mode** — unobtrusive eye button (opacity 0.4 at rest) centered
+  at the boundary between the reading area and the word-count bar. Clicking it
+  enters focus mode: all overlay UI becomes `visibility:hidden`, the RSVP word
+  enlarges to ~2.5× its resting size with a smooth `font-size 0.25s ease`
+  transition and is re-centered absolutely within the viewport. Eye drops to
+  `opacity: 0.2` while active. Clicking again fully restores the normal UI.
+  State is local to `ReaderViewport` and is not persisted.
+- **Paste text resume** — pasted and URL-fetched content now reliably creates an
+  IndexedDB entry so sessions resume from the correct word position on next visit.
+  Fixed a pruning-race bug where the `pruneTextCacheToNames` call ran with a
+  stale `records` snapshot that did not yet include the newly created session,
+  causing the just-saved entry to be immediately deleted.
+
 ## v1.3.1 (in progress)
 ### Added
 - InputPanel now wires urlParser.ts for URL inputs (CORS-aware, honest error on blocked sites)

@@ -26,6 +26,11 @@ import type { Orientation, StructuralMarker } from '../context/readerContextDef'
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/ReaderViewport.module.css';
 
+/** Truncate a source label to at most `max` characters, appending an ellipsis. */
+function truncateLabel(text: string, max = 28): string {
+  return text.length > max ? `${text.slice(0, max)}\u2026` : text;
+}
+
 interface ReaderViewportProps {
   /** Ordered list of words in the current window (length = windowSize) */
   wordWindow: string[];
@@ -159,7 +164,7 @@ const ReaderViewport = memo(function ReaderViewport({
   onFaster,
   onSlower,
 }: ReaderViewportProps) {
-  const { isPlaying, wpm } = useReaderContext();
+  const { isPlaying, wpm, fileMetadata } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Outermost viewport div — receives --pre-orp-col and --focal-tick-x CSS variables */
   const viewportRef  = useRef<HTMLDivElement>(null);
@@ -201,6 +206,14 @@ const ReaderViewport = memo(function ReaderViewport({
       onPlayPause?.();
     }
   }, [onFaster, onSlower, onPlayPause]);
+
+  /* ── Focus mode (eye icon) — local UI state, never persisted ── */
+  const [isFocusMode, setIsFocusMode] = useState(false);
+
+  // Reset focus mode whenever a new document is loaded
+  useEffect(() => {
+    setIsFocusMode(false);
+  }, [words]);
 
   /* ── Page-jump popover ──────────────────────────────────────── */
   const [showPageJump, setShowPageJump] = useState(false);
@@ -353,7 +366,7 @@ const ReaderViewport = memo(function ReaderViewport({
   return (
     <div
       ref={viewportRef}
-      className={`${styles.viewport}${fullHeight ? ` ${styles.viewportFull}` : ''}`}
+      className={`${styles.viewport}${fullHeight ? ` ${styles.viewportFull}` : ''}${isFocusMode ? ` ${styles.focusModeActive}` : ''}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -640,12 +653,13 @@ const ReaderViewport = memo(function ReaderViewport({
               <button
                 className={styles.pagePillOverlay}
                 onClick={() => { setShowWordJump(p => !p); }}
-                aria-label={`Word ${currentWordIndex + 1} of ${totalWordCount}, ${Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}% complete`}
+                aria-label={`Word ${currentWordIndex + 1} of ${totalWordCount}, ${totalWordCount > 0 ? Math.round((currentWordIndex / totalWordCount) * 100) : 0}% complete`}
               >
-                Word {(currentWordIndex + 1).toLocaleString()}
+                <span className={styles.wcPctPre}>{totalWordCount > 0 ? Math.round((currentWordIndex / totalWordCount) * 100) : 0}%</span>
+                {' '}<span className={styles.wcLabel}>W</span>{' '}
+                {(currentWordIndex + 1).toLocaleString()}
                 <span className={styles.wcSep}>/</span>
                 {totalWordCount.toLocaleString()}
-                <span className={styles.wcPct}>· {Math.round(((currentWordIndex + 1) / totalWordCount) * 100)}%</span>
               </button>
               <button
                 className={styles.pageNavBtn}
@@ -682,6 +696,41 @@ const ReaderViewport = memo(function ReaderViewport({
           )}
 
         </div>
+      )}
+
+      {/* ── Source label — top-left overlay (Feature 2) ── */}
+      {hasWords && !isLoading && fileMetadata && (
+        <div className={styles.sourceLabel} aria-label={`Source: ${fileMetadata.name}`}>
+          {truncateLabel(fileMetadata.name)}
+        </div>
+      )}
+
+      {/* ── Focus-mode enlarged word (Feature 3) — always in DOM when words loaded,
+           opacity controlled by CSS so the font-size transition fires cleanly ── */}
+      {hasWords && !isLoading && (
+        <div
+          className={styles.focusModeWordOverlay}
+          aria-hidden="true"
+          style={{ color: highlightColor }}
+        >
+          {wordWindow[highlightIndex] ?? '\u00A0'}
+        </div>
+      )}
+
+      {/* ── Eye icon — focus mode toggle (Feature 3) ── */}
+      {hasWords && !isLoading && (
+        <button
+          className={`${styles.eyeBtn}${isFocusMode ? ` ${styles.eyeBtnActive}` : ''}`}
+          onClick={() => setIsFocusMode(f => !f)}
+          aria-label={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
+          title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+               strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
       )}
     </div>
   );
