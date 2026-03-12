@@ -6,7 +6,7 @@
  * Records can be individually deleted or resumed by re-uploading the file.
  */
 
-import { useCallback, useRef } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import { deleteRecord } from '../utils/recordsUtils';
 import styles from '../styles/ReadingHistory.module.css';
@@ -27,7 +27,7 @@ interface ReadingHistoryProps {
   onFileSelect: (file: File) => void;
 }
 
-export default function ReadingHistory({ onFileSelect }: ReadingHistoryProps) {
+export default memo(function ReadingHistory({ onFileSelect }: ReadingHistoryProps) {
   const { records, setRecords } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -117,4 +117,4 @@ export default function ReadingHistory({ onFileSelect }: ReadingHistoryProps) {
       </ul>
     </>
   );
-}
+})

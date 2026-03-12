@@ -13,6 +13,7 @@ import React, {
   useState,
 } from 'react';
 import { ReaderContext, type FileMetadata, type ReadingRecord, type WindowSize, type Orientation, type Theme, type ChunkMode, type SessionStats, type StructuralMarker, type ModeId, type CustomMode } from './readerContextDef';
+import { ReaderEngineContext } from './ReaderEngineContext';
 import { loadRecords } from '../utils/recordsUtils';
 import { PRESET_MODES } from '../config/readingModePresets';
 import type { PresetModeId, ModeSettings } from '../types/readingModes';
@@ -220,6 +221,11 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   /** True while applyMode is executing — suppresses auto-switch to Custom */
   const applyingModeRef = useRef(false);
 
+  /** Debounce timer for persisting word index to localStorage */
+  const indexSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Always holds the latest word index so the unmount flush reads the correct value */
+  const pendingWordIndexRef = useRef(currentWordIndex);
+
   // Derive 1-indexed current page via binary search over pageBreaks
   const currentPage = useMemo(() => {
     if (pageBreaks.length === 0) return 1;
@@ -235,10 +241,36 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
 
   const totalPages = pageBreaks.length;
 
-  // Persist word index to localStorage whenever it changes
+  // Persist word index to localStorage (debounced to 500 ms to avoid
+  // thrashing at high WPM — e.g. 1500 WPM fires 25 updates/sec without this)
   useEffect(() => {
-    localStorage.setItem(LS_KEY_INDEX, String(currentWordIndex));
+    pendingWordIndexRef.current = currentWordIndex;
+    if (indexSaveTimerRef.current !== null) {
+      clearTimeout(indexSaveTimerRef.current);
+    }
+    indexSaveTimerRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(LS_KEY_INDEX, String(pendingWordIndexRef.current));
+      } catch { /* quota — silently discard; position will be saved on next tick */ }
+      indexSaveTimerRef.current = null;
+    }, 500);
+    return () => {
+      if (indexSaveTimerRef.current !== null) {
+        clearTimeout(indexSaveTimerRef.current);
+        indexSaveTimerRef.current = null;
+      }
+    };
   }, [currentWordIndex]);
+
+  // Flush the latest word index to localStorage on unmount so the final
+  // position is never lost if the provider is torn down before the debounce fires
+  useEffect(() => {
+    return () => {
+      try {
+        localStorage.setItem(LS_KEY_INDEX, String(pendingWordIndexRef.current));
+      } catch { /* quota — silently discard */ }
+    };
+  }, []);
 
   // Persist WPM
   useEffect(() => {
@@ -538,6 +570,15 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
+        // Flush any pending debounced index write immediately so the position
+        // is not lost if the browser discards the page while hidden.
+        if (indexSaveTimerRef.current !== null) {
+          clearTimeout(indexSaveTimerRef.current);
+          indexSaveTimerRef.current = null;
+          try {
+            localStorage.setItem(LS_KEY_INDEX, String(pendingWordIndexRef.current));
+          } catch { /* quota — silently discard */ }
+        }
         saveCurrentSession();
       }
     };
@@ -605,84 +646,168 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     setActiveCustomModeIdState(mode.id);
   }, [applyMode, setWpm]);
 
+  // ── Tick-frequency context: only currentWordIndex + isPlaying ────────────
+  // This object re-creates 25×/sec at 1500 WPM. Keeping it separate from
+  // contextValue means the large settings/callbacks object stays stable and
+  // all non-engine consumers skip reconciliation entirely.
+  const engineValue = useMemo(
+    () => ({ currentWordIndex, isPlaying }),
+    [currentWordIndex, isPlaying],
+  );
+
+  // ── Stable context: all settings + setters (never changes during playback) ─
+  const contextValue = useMemo(
+    () => ({
+      words,
+      wpm,
+      fileMetadata,
+      fileId,
+      isLoading,
+      loadingProgress,
+      pageBreaks,
+      currentPage,
+      totalPages,
+      structureMap,
+      records,
+      windowSize,
+      highlightColor,
+      orientation,
+      theme,
+      orpEnabled,
+      orpColored,
+      punctuationPause,
+      peripheralFade,
+      longWordCompensation,
+      mainWordFontSize,
+      chunkMode,
+      contextWordFontSize,
+      contextWordOpacity,
+      sessionStats,
+      sessionHistory,
+      focusMarkerEnabled,
+      focalLine,
+      activeMode,
+      savedCustomModes,
+      activeCustomModeId,
+      setWords,
+      setCurrentWordIndex,
+      setIsPlaying,
+      setWpm,
+      setFileMetadata,
+      setFileId,
+      setIsLoading,
+      setLoadingProgress,
+      resetReader,
+      setPageBreaks,
+      setStructureMap,
+      goToPage,
+      goToWord,
+      setRecords,
+      setWindowSize,
+      setHighlightColor,
+      setOrientation,
+      setTheme,
+      setOrpEnabled,
+      setOrpColored,
+      setPunctuationPause,
+      setPeripheralFade,
+      setLongWordCompensation,
+      setMainWordFontSize,
+      setChunkMode,
+      setContextWordFontSize,
+      setContextWordOpacity,
+      updateSessionStats,
+      resetSessionStats,
+      saveCurrentSession,
+      clearSessionHistory,
+      setFocusMarkerEnabled,
+      setFocalLine,
+      setActiveMode,
+      setSavedCustomModes,
+      setActiveCustomModeId,
+      applyMode,
+      selectPresetMode,
+      selectCustomMode,
+    }),
+    [
+      words,
+      wpm,
+      fileMetadata,
+      fileId,
+      isLoading,
+      loadingProgress,
+      pageBreaks,
+      currentPage,
+      totalPages,
+      structureMap,
+      records,
+      windowSize,
+      highlightColor,
+      orientation,
+      theme,
+      orpEnabled,
+      orpColored,
+      punctuationPause,
+      peripheralFade,
+      longWordCompensation,
+      mainWordFontSize,
+      chunkMode,
+      contextWordFontSize,
+      contextWordOpacity,
+      sessionStats,
+      sessionHistory,
+      focusMarkerEnabled,
+      focalLine,
+      activeMode,
+      savedCustomModes,
+      activeCustomModeId,
+      setWords,
+      setCurrentWordIndex,
+      setIsPlaying,
+      setWpm,
+      setFileMetadata,
+      setFileId,
+      setIsLoading,
+      setLoadingProgress,
+      resetReader,
+      setPageBreaks,
+      setStructureMap,
+      goToPage,
+      goToWord,
+      setRecords,
+      setWindowSize,
+      setHighlightColor,
+      setOrientation,
+      setTheme,
+      setOrpEnabled,
+      setOrpColored,
+      setPunctuationPause,
+      setPeripheralFade,
+      setLongWordCompensation,
+      setMainWordFontSize,
+      setChunkMode,
+      setContextWordFontSize,
+      setContextWordOpacity,
+      updateSessionStats,
+      resetSessionStats,
+      saveCurrentSession,
+      clearSessionHistory,
+      setFocusMarkerEnabled,
+      setFocalLine,
+      setActiveMode,
+      setSavedCustomModes,
+      setActiveCustomModeId,
+      applyMode,
+      selectPresetMode,
+      selectCustomMode,
+    ],
+  );
+
   return (
-    <ReaderContext.Provider
-      value={{
-        words,
-        currentWordIndex,
-        isPlaying,
-        wpm,
-        fileMetadata,
-        fileId,
-        isLoading,
-        loadingProgress,
-        pageBreaks,
-        currentPage,
-        totalPages,
-        structureMap,
-        records,
-        windowSize,
-        highlightColor,
-        orientation,
-        theme,
-        orpEnabled,
-        orpColored,
-        punctuationPause,
-        peripheralFade,
-        longWordCompensation,
-        mainWordFontSize,
-        chunkMode,
-        contextWordFontSize,
-        contextWordOpacity,
-        sessionStats,
-        sessionHistory,
-        focusMarkerEnabled,
-        focalLine,
-        activeMode,
-        savedCustomModes,
-        activeCustomModeId,
-        setWords,
-        setCurrentWordIndex,
-        setIsPlaying,
-        setWpm,
-        setFileMetadata,
-        setFileId,
-        setIsLoading,
-        setLoadingProgress,
-        resetReader,
-        setPageBreaks,
-        setStructureMap,
-        goToPage,
-        goToWord,
-        setRecords,
-        setWindowSize,
-        setHighlightColor,
-        setOrientation,
-        setTheme,
-        setOrpEnabled,
-        setOrpColored,
-        setPunctuationPause,
-        setPeripheralFade,
-        setLongWordCompensation,
-        setMainWordFontSize,
-        setChunkMode,
-        setContextWordFontSize,
-        setContextWordOpacity,
-        updateSessionStats,
-        resetSessionStats,
-        saveCurrentSession,
-        clearSessionHistory,
-        setFocusMarkerEnabled,
-        setFocalLine,
-        setActiveMode,
-        setSavedCustomModes,
-        setActiveCustomModeId,
-        applyMode,
-        selectPresetMode,
-        selectCustomMode,
-      }}
-    >
-      {children}
+    <ReaderContext.Provider value={contextValue}>
+      <ReaderEngineContext.Provider value={engineValue}>
+        {children}
+      </ReaderEngineContext.Provider>
     </ReaderContext.Provider>
   );
 }
