@@ -28,3 +28,4 @@ android/
 ios/
 !release-package/icons/ios/
 .env
+.env.local
