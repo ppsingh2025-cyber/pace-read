@@ -27,8 +27,20 @@ export function loadRecords(): ReadingRecord[] {
  */
 export function saveRecord(record: ReadingRecord): ReadingRecord[] {
   const existing = loadRecords().filter((r) => r.name !== record.name);
-  const updated = [record, ...existing].slice(0, MAX_RECORDS);
-  localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
+  let updated = [record, ...existing].slice(0, MAX_RECORDS);
+  try {
+    localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'QuotaExceededError') {
+      // Evict the 3 oldest records and retry once
+      updated = updated.slice(0, Math.max(1, updated.length - 3));
+      try {
+        localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
+      } catch {
+        // Storage is still full — silently discard to avoid crashing
+      }
+    }
+  }
   return updated;
 }
 
@@ -38,7 +50,19 @@ export function saveRecord(record: ReadingRecord): ReadingRecord[] {
  */
 export function deleteRecord(name: string): ReadingRecord[] {
   const updated = loadRecords().filter((r) => r.name !== name);
-  localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
+  try {
+    localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(updated));
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'QuotaExceededError') {
+      // Quota hit even while deleting (rare) — retry with further trimming
+      const trimmed = updated.slice(0, Math.max(1, updated.length - 3));
+      try {
+        localStorage.setItem(LS_KEY_RECORDS, JSON.stringify(trimmed));
+      } catch {
+        // Silently discard
+      }
+    }
+  }
   return updated;
 }
 

@@ -8,7 +8,7 @@
  * Rendered only when words are loaded.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/WordNavigator.module.css';
 
@@ -17,7 +17,7 @@ interface WordNavigatorProps {
   onNextWord: () => void;
 }
 
-export default function WordNavigator({ onPrevWord, onNextWord }: WordNavigatorProps) {
+export default memo(function WordNavigator({ onPrevWord, onNextWord }: WordNavigatorProps) {
   const { words, currentWordIndex, goToWord, isLoading } = useReaderContext();
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -105,4 +105,4 @@ export default function WordNavigator({ onPrevWord, onNextWord }: WordNavigatorP
       </button>
     </div>
   );
-}
+})

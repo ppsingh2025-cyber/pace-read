@@ -85,6 +85,10 @@ export default function InputPanel({ onTextReady, onClose, wpm = 250 }: InputPan
       return;
     }
     if (isUrl) {
+      if (!navigator.onLine) {
+        setError('You are offline. Please check your internet connection and try again.');
+        return;
+      }
       setIsFetching(true);
       try {
         const parsed = await parseUrl(trimmed);

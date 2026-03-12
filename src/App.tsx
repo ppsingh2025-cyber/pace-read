@@ -48,7 +48,23 @@ import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import './styles/app.css';
 
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+/** Per-format file size limits (bytes). */
+const FORMAT_LIMITS: Record<string, number> = {
+  pdf:  50  * 1024 * 1024, // 50 MB
+  epub: 100 * 1024 * 1024, // 100 MB
+  docx: 20  * 1024 * 1024, // 20 MB
+  txt:  10  * 1024 * 1024, // 10 MB
+  md:   10  * 1024 * 1024,
+  html: 10  * 1024 * 1024,
+  htm:  10  * 1024 * 1024,
+  rtf:  10  * 1024 * 1024,
+  srt:  10  * 1024 * 1024,
+};
+
+function getFormatLimit(ext: string): number {
+  return FORMAT_LIMITS[ext] ?? 10 * 1024 * 1024; // default 10 MB for unknown types
+}
+
 const STREAMING_EXTS = new Set(['pdf', 'epub']);
 const TEXT_EXTS = new Set(['txt', 'md', 'html', 'htm', 'rtf', 'srt', 'docx']);
 
@@ -230,13 +246,15 @@ export default function App() {
 
   const handleFileSelect = useCallback(
     async (file: File) => {
-      if (file.size > MAX_FILE_SIZE) {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+      const limitBytes = getFormatLimit(ext);
+      if (file.size > limitBytes) {
         alert(
-          `File is too large (max 100 MB). Selected file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
+          `File is too large for ${ext.toUpperCase()} (max ${(limitBytes / 1024 / 1024).toFixed(0)} MB). ` +
+          `Selected file is ${(file.size / 1024 / 1024).toFixed(1)} MB.`,
         );
         return;
       }
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
       if (!STREAMING_EXTS.has(ext) && !TEXT_EXTS.has(ext)) {
         alert(
           'Unsupported file type. Supported formats: PDF, EPUB, TXT, MD, HTML, RTF, SRT, DOCX.',
@@ -493,6 +511,25 @@ export default function App() {
     });
   }, []);
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
+
+  // Stable callbacks for memo'd children — wrapping in useCallback prevents
+  // prop-identity changes from defeating React.memo on Controls / ReaderViewport.
+  const handleFaster = useCallback(() => {
+    manualWpmRef.current = true;
+    faster();
+  }, [faster]);
+
+  const handleSlower = useCallback(() => {
+    manualWpmRef.current = true;
+    slower();
+  }, [slower]);
+
+  const handleResetRequest = useCallback(() => setShowResetConfirm(true), []);
+
+  const handlePlayPause = useCallback(() => {
+    if (isPlayingRef.current) pause(); else play();
+  }, [play, pause]);
+
   const completeOnboarding = useCallback(
     (prefs: { theme: Theme; modeId: PresetModeId }) => {
       setTheme(prefs.theme);
@@ -618,9 +655,9 @@ export default function App() {
             goToPage={goToPage}
             goToWord={goToWord}
             structureMap={structureMap}
-            onPlayPause={() => isPlaying ? pause() : play()}
-            onFaster={() => { manualWpmRef.current = true; faster(); }}
-            onSlower={() => { manualWpmRef.current = true; slower(); }}
+            onPlayPause={handlePlayPause}
+            onFaster={handleFaster}
+            onSlower={handleSlower}
             isEyeFocus={isEyeFocus}
             onEyeToggle={toggleEyeFocus}
             contextWordFontSize={contextWordFontSize}
@@ -677,13 +714,15 @@ export default function App() {
           onFileSelect={handleFileSelect}
           onPlay={play}
           onPause={pause}
-          onResetRequest={() => setShowResetConfirm(true)}
-          onFaster={() => { manualWpmRef.current = true; faster(); }}
-          onSlower={() => { manualWpmRef.current = true; slower(); }}
+          onResetRequest={handleResetRequest}
+          onFaster={handleFaster}
+          onSlower={handleSlower}
           onPrevWord={prevWord}
           onNextWord={nextWord}
           onPasteToggle={togglePaste}
           pasteOpen={showPaste}
+          prevDisabled={!words.length || currentWordIndex <= 0}
+          nextDisabled={!words.length || currentWordIndex >= words.length - 1}
           focused={isFocused}
         />
       </div>

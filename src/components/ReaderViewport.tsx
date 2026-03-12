@@ -376,7 +376,7 @@ const ReaderViewport = memo(function ReaderViewport({
   // Screen reader live region: announce word at ≤300 WPM, silence above
   useEffect(() => {
     if (!srLiveRef.current) return;
-    if (wpm <= 300 && currentWord) {
+    if (wpm <= 400 && currentWord) {
       srLiveRef.current.textContent = currentWord;
     } else {
       srLiveRef.current.textContent = '';

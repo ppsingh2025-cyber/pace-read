@@ -62,8 +62,6 @@ export interface SessionStats {
 
 interface ReaderState {
   words: string[];
-  currentWordIndex: number;
-  isPlaying: boolean;
   wpm: number;
   fileMetadata: FileMetadata | null;
   /** Stable identifier for the currently loaded file (filename) */
