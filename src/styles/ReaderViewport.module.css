@@ -568,91 +568,62 @@
   color: var(--text-muted);
 }
 
-/* ── Feature 3: Eye icon — focus mode toggle ────────────────────── */
+/* ── Eye icon — focus mode toggle ──────────────────────────────── */
 
 .eyeBtn {
-  position: absolute;
-  /* Sits just above the overlayBar (22px button + 6px padding-bottom = 28px) */
-  bottom: calc(var(--space-7, 28px) + 4px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--vp-text, #d4d4d4);
+  padding: var(--space-1, 4px);
+  color: var(--text-muted);
   opacity: 0.4;
   transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .eyeBtn:hover {
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-/* Active = focus mode ON: drop opacity further to stay out of reading view */
+/* Active = eye focus ON */
 .eyeBtnActive {
   opacity: 0.2;
 }
 
 .eyeBtnActive:hover {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
-[data-theme='day'] .eyeBtn {
-  color: var(--text, #1a1a1a);
+/* ── Eye focus mode — hide viewport nav children, keep word display as-is ── */
+
+/* Keep overlayBar present so eye button stays clickable */
+.viewportEyeFocus .overlayBar {
+  pointer-events: none;
 }
 
-/* ── Feature 3: Focus mode — word enlargement + element hiding ──── */
+.viewportEyeFocus .eyeBtn {
+  pointer-events: all;
+}
 
-/* Hide non-essential overlays in focus mode */
-.focusModeActive .overlayBar {
+/* Hide page/word nav clusters */
+.viewportEyeFocus .pageNavOverlay,
+.viewportEyeFocus .wordNavOverlay {
   visibility: hidden;
   pointer-events: none;
 }
 
-.focusModeActive .focalTickTop,
-.focusModeActive .focalTickBottom {
-  visibility: hidden;
-}
-
-.focusModeActive .sourceLabel {
-  visibility: hidden;
-}
-
-/* Hide the normal word row in focus mode (replaced by the enlarged overlay) */
-.focusModeActive .wordRow,
-.focusModeActive .windowVertical {
+/* Hide source label */
+.viewportEyeFocus .sourceLabel {
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Focused-word overlay: always in DOM, shown/enlarged only in focus mode */
-.focusModeWordOverlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Georgia', serif;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: visible;
-  pointer-events: none;
-  user-select: none;
-  /* Start at the normal word font size so the transition animates from rest */
-  font-size: clamp(1.1rem, 8vw, 3.2rem);
-  opacity: 0;
-  transition: font-size 0.25s ease, opacity 0.2s ease;
-}
-
-/* Focus mode ON: enlarge to ~2.5× and make visible */
-.focusModeActive .focusModeWordOverlay {
-  font-size: clamp(2.75rem, 20vw, 8rem);
-  opacity: 1;
+/* Focal tick marks are distracting in eye focus — hide them */
+.viewportEyeFocus .focalTickTop,
+.viewportEyeFocus .focalTickBottom {
+  visibility: hidden;
 }

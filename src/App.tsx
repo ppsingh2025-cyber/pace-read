@@ -88,7 +88,6 @@ export default function App() {
     resetSessionStats,
     saveCurrentSession,
     clearSessionHistory,
-    setWpm,
     goToPage,
     goToWord,
     setTheme,
@@ -124,6 +123,7 @@ export default function App() {
 
   const [showHelp, setShowHelp] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [isEyeFocus, setIsEyeFocus] = useState(false);
   const [showPaste, setShowPaste] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
@@ -166,10 +166,11 @@ export default function App() {
       // Compute adaptive adjustment and persist new baseline for future sessions.
       // Only apply to current session WPM if user didn't manually change speed.
       const newBaseline = finalizeSession(wpm);
+      // Store adaptive baseline in fastread_adaptive_wpm only (via finalizeSession).
+      // Never overwrite fastread_wpm — that is the user's saved preference.
       if (!manualWpmRef.current && newBaseline !== wpm) {
-        setWpm(newBaseline);
         const direction = newBaseline > wpm ? '⚡' : '🐢';
-        toast(`${direction} Speed adjusted to ${newBaseline} WPM`, { duration: 4000 });
+        toast(`${direction} Suggested speed for next session: ${newBaseline} WPM`, { duration: 4000 });
       }
       manualWpmRef.current = false; // reset manual flag after each session
 
@@ -380,6 +381,7 @@ export default function App() {
         if (showResetConfirm) { setShowResetConfirm(false); return; }
         setShowHelp(false);
         setIsFocused(false);
+        setIsEyeFocus(false);
         setShowPaste(false);
         return;
       }
@@ -479,6 +481,15 @@ export default function App() {
         setTimeout(() => setShowFocusHint(false), 3000);
       }
       return !f;
+    });
+  }, []);
+
+  const toggleEyeFocus = useCallback(() => {
+    setIsEyeFocus((prev) => {
+      const entering = !prev;
+      // Eye focus borrows the shell's focus mode to hide topBar + controlsBar
+      setIsFocused(entering);
+      return entering;
     });
   }, []);
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
@@ -600,6 +611,8 @@ export default function App() {
             onPlayPause={() => isPlaying ? pause() : play()}
             onFaster={() => { manualWpmRef.current = true; faster(); }}
             onSlower={() => { manualWpmRef.current = true; slower(); }}
+            isEyeFocus={isEyeFocus}
+            onEyeToggle={toggleEyeFocus}
           />
           {/* Maximize / minimize button */}
           <button
@@ -628,12 +641,6 @@ export default function App() {
               </svg>
             )}
           </button>
-          {/* WPM badge — visible only in focus mode, mirrored at top-left */}
-          {isFocused && (
-            <div className="focusWpmBadge" role="status" aria-label={`${wpm} words per minute`}>
-              {wpm} <span className="focusWpmUnit">WPM</span>
-            </div>
-          )}
           {/* Focus mode exit hint — fades after 3s */}
           {isFocused && showFocusHint && (
             <div className="focusExitHint" aria-hidden="true">Esc or F to exit</div>

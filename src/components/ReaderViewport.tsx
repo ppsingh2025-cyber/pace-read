@@ -81,6 +81,10 @@ interface ReaderViewportProps {
   onFaster?: () => void;
   /** Called when user swipes right (slower) */
   onSlower?: () => void;
+  /** When true, applies eye focus mode (hides nav overlays, keeps word display unchanged) */
+  isEyeFocus?: boolean;
+  /** Called when the user clicks the eye focus button */
+  onEyeToggle?: () => void;
 }
 
 /**
@@ -163,6 +167,8 @@ const ReaderViewport = memo(function ReaderViewport({
   onPlayPause,
   onFaster,
   onSlower,
+  isEyeFocus = false,
+  onEyeToggle,
 }: ReaderViewportProps) {
   const { isPlaying, wpm, fileMetadata } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -206,14 +212,6 @@ const ReaderViewport = memo(function ReaderViewport({
       onPlayPause?.();
     }
   }, [onFaster, onSlower, onPlayPause]);
-
-  /* ── Focus mode (eye icon) — local UI state, never persisted ── */
-  const [isFocusMode, setIsFocusMode] = useState(false);
-
-  // Reset focus mode whenever a new document is loaded
-  useEffect(() => {
-    setIsFocusMode(false);
-  }, [words]);
 
   /* ── Page-jump popover ──────────────────────────────────────── */
   const [showPageJump, setShowPageJump] = useState(false);
@@ -371,7 +369,11 @@ const ReaderViewport = memo(function ReaderViewport({
   return (
     <div
       ref={viewportRef}
-      className={`${styles.viewport}${fullHeight ? ` ${styles.viewportFull}` : ''}${isFocusMode ? ` ${styles.focusModeActive}` : ''}`}
+      className={[
+        styles.viewport,
+        fullHeight ? styles.viewportFull : '',
+        isEyeFocus ? styles.viewportEyeFocus : '',
+      ].filter(Boolean).join(' ')}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -642,6 +644,23 @@ const ReaderViewport = memo(function ReaderViewport({
             </div>
           )}
 
+          {/* Eye focus button — centered between nav clusters */}
+          {onEyeToggle && (
+            <button
+              className={`${styles.eyeBtn}${isEyeFocus ? ` ${styles.eyeBtnActive}` : ''}`}
+              onClick={(e) => { e.stopPropagation(); onEyeToggle(); }}
+              aria-label={isEyeFocus ? 'Exit eye focus mode' : 'Eye focus mode'}
+              title={isEyeFocus ? 'Exit eye focus mode' : 'Eye focus mode'}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                   strokeLinecap="round" strokeLinejoin="round"
+                   width="14" height="14" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          )}
+
           {currentWordIndex !== undefined && totalWordCount !== undefined && goToWord && (
             <div className={styles.wordNavOverlay} ref={wordJumpRef}>
               <button
@@ -703,39 +722,11 @@ const ReaderViewport = memo(function ReaderViewport({
         </div>
       )}
 
-      {/* ── Source label — top-left overlay (Feature 2) ── */}
+      {/* ── Source label — top-left overlay ── */}
       {hasWords && !isLoading && fileMetadata && (
         <div className={styles.sourceLabel} aria-label={`Source: ${fileMetadata.name}`}>
           {truncateLabel(fileMetadata.name)}
         </div>
-      )}
-
-      {/* ── Focus-mode enlarged word (Feature 3) — always in DOM when words loaded,
-           opacity controlled by CSS so the font-size transition fires cleanly ── */}
-      {hasWords && !isLoading && (
-        <div
-          className={styles.focusModeWordOverlay}
-          aria-hidden="true"
-          style={{ color: highlightColor }}
-        >
-          {wordWindow[highlightIndex] ?? '\u00A0'}
-        </div>
-      )}
-
-      {/* ── Eye icon — focus mode toggle (Feature 3) ── */}
-      {hasWords && !isLoading && (
-        <button
-          className={`${styles.eyeBtn}${isFocusMode ? ` ${styles.eyeBtnActive}` : ''}`}
-          onClick={() => setIsFocusMode(f => !f)}
-          aria-label={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
-          title={isFocusMode ? 'Exit focus mode' : 'Enter focus mode'}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-               strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
       )}
     </div>
   );
