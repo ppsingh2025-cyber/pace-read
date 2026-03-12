@@ -43,6 +43,8 @@ const LS_KEY_CUSTOM_MODES = 'fastread_custom_modes';
 const LS_KEY_ACTIVE_CUSTOM_MODE = 'fastread_active_custom_mode_id';
 const LS_KEY_ORP_COLORED = 'fastread_orp_colored';
 const LS_KEY_SESSION_HISTORY = 'fastread_session_history';
+const LS_KEY_CONTEXT_SAME_SIZE = 'fastread_context_same_size';
+const LS_KEY_CONTEXT_OPACITY   = 'fastread_context_opacity';
 const DEFAULT_WPM = 250;
 const DEFAULT_WINDOW_SIZE: WindowSize = 1;
 const DEFAULT_ORIENTATION: Orientation = 'horizontal';
@@ -183,6 +185,15 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   });
   const [activeCustomModeId, setActiveCustomModeIdState] = useState<string | null>(() => {
     return localStorage.getItem(LS_KEY_ACTIVE_CUSTOM_MODE);
+  });
+  const [contextWordSameSize, setContextWordSameSizeState] = useState<boolean>(() => {
+    const saved = localStorage.getItem(LS_KEY_CONTEXT_SAME_SIZE);
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [contextWordOpacity, setContextWordOpacityState] = useState<number>(() => {
+    const saved = localStorage.getItem(LS_KEY_CONTEXT_OPACITY);
+    const parsed = saved ? parseFloat(saved) : NaN;
+    return !isNaN(parsed) && parsed >= 0.2 && parsed <= 1.0 ? parsed : 0.65;
   });
 
   /** True while applyMode is executing — suppresses auto-switch to Custom */
@@ -440,6 +451,17 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LS_KEY_MAIN_FONT_SIZE, String(clamped));
   }, []);
 
+  const setContextWordSameSize = useCallback((v: boolean) => {
+    setContextWordSameSizeState(v);
+    localStorage.setItem(LS_KEY_CONTEXT_SAME_SIZE, String(v));
+  }, []);
+
+  const setContextWordOpacity = useCallback((v: number) => {
+    const clamped = Math.max(0.2, Math.min(1.0, Math.round(v * 20) / 20));
+    setContextWordOpacityState(clamped);
+    localStorage.setItem(LS_KEY_CONTEXT_OPACITY, String(clamped));
+  }, []);
+
   const updateSessionStats = useCallback((delta: Partial<SessionStats>) => {
     setSessionStatsState((prev) => {
       const next: SessionStats = { ...prev, ...delta };
@@ -526,6 +548,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     setPunctuationPauseRaw(settings.punctuationPause);
     setLongWordCompensationRaw(settings.longWordCompensation);
     setChunkModeRaw(settings.chunkMode);
+    setContextWordSameSizeState(settings.contextWordSameSize);
+    setContextWordOpacityState(settings.contextWordOpacity);
     // Reset the flag after React has batched all state updates
     queueMicrotask(() => { applyingModeRef.current = false; });
   }, [setWindowSizeRaw, setOrpEnabledRaw, setFocalLineRaw, setPeripheralFadeRaw, setPunctuationPauseRaw, setLongWordCompensationRaw, setChunkModeRaw]);
@@ -587,6 +611,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         longWordCompensation,
         mainWordFontSize,
         chunkMode,
+        contextWordSameSize,
+        contextWordOpacity,
         sessionStats,
         sessionHistory,
         focusMarkerEnabled,
@@ -619,6 +645,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
         setLongWordCompensation,
         setMainWordFontSize,
         setChunkMode,
+        setContextWordSameSize,
+        setContextWordOpacity,
         updateSessionStats,
         resetSessionStats,
         saveCurrentSession,

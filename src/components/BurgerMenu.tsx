@@ -124,6 +124,15 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, pulseBurger, o
     [close, onFileSelect],
   );
 
+  // Wrap resume so the menu closes when a cached session is resumed
+  const handleResumeFromCache = useCallback(
+    (name: string) => {
+      close();
+      onResumeFromCache(name);
+    },
+    [close, onResumeFromCache],
+  );
+
   // Reset all user preferences to new-user defaults
   const handleResetDefaults = useCallback(() => {
     RESETTABLE_KEYS.forEach(key => { try { localStorage.removeItem(key); } catch { /* ignore */ } });
@@ -252,7 +261,7 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, pulseBurger, o
               {/* ── Session Analytics (unified: current session + history + resume) ── */}
               <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Session Analytics</h3>
-                <SessionStats onFileSelect={handleHistoryFileSelect} onResumeFromCache={onResumeFromCache} onClearAll={onClearAll} />
+                <SessionStats onFileSelect={handleHistoryFileSelect} onResumeFromCache={handleResumeFromCache} onClearAll={onClearAll} />
               </section>
 
               {/* ── Reset to Defaults ───────────────────────────────── */}

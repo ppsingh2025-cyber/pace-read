@@ -75,6 +75,8 @@ export default function App() {
     currentPage,
     totalPages,
     structureMap,
+    contextWordSameSize,
+    contextWordOpacity,
     setWords,
     setCurrentWordIndex,
     setFileMetadata,
@@ -613,6 +615,8 @@ export default function App() {
             onSlower={() => { manualWpmRef.current = true; slower(); }}
             isEyeFocus={isEyeFocus}
             onEyeToggle={toggleEyeFocus}
+            contextWordSameSize={contextWordSameSize}
+            contextWordOpacity={contextWordOpacity}
           />
           {/* Maximize / minimize button */}
           <button
