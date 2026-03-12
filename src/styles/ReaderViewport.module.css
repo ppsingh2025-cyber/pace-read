@@ -14,6 +14,7 @@
   user-select: none;
   border: 1px solid var(--vp-border, #151515);
   touch-action: pan-y;
+  contain: layout style paint;
 }
 
 @media (max-width: 640px) {
@@ -131,7 +132,7 @@
   text-align: center;
   color: var(--vp-text, #d4d4d4);
   white-space: nowrap;
-  will-change: contents;
+  will-change: transform;
 }
 
 .windowVertical .wordSlot {

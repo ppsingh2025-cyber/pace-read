@@ -73,7 +73,7 @@ export function useAdaptiveSpeed(
     (currentWpm: number): number => {
       if (totalWords === 0) return currentWpm;
 
-      const wordsConsumed = Math.max(0, currentWordIndex - sessionStartIndexRef.current);
+      const wordsConsumed = Math.max(0, prevIndexRef.current - sessionStartIndexRef.current);
       const completionPct = totalWords > 0 ? wordsConsumed / totalWords : 0;
       const rewinds = rewindCountRef.current;
 
@@ -101,7 +101,7 @@ export function useAdaptiveSpeed(
       localStorage.setItem(LS_ADAPTIVE_BASELINE, String(adjusted));
       return adjusted;
     },
-    [currentWordIndex, totalWords],
+    [totalWords],
   );
 
   /** Load the stored adaptive baseline (null if never set) */

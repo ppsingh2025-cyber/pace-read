@@ -90,17 +90,27 @@ export async function parseUrl(url: string): Promise<ParsedText> {
   }
 
   let html: string;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15_000); // 15 s timeout
   try {
     const response = await fetch(url, {
       // no-cors mode would only give an opaque response; we need the text body
       mode: 'cors',
       headers: { Accept: 'text/html' },
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
     if (!response.ok) {
       throw new Error(`Server returned ${response.status} ${response.statusText}`);
     }
     html = await response.text();
   } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error(
+        'Request timed out after 15 seconds. The site may be slow or blocking requests.',
+      );
+    }
     // CORS errors are reported as generic TypeError in the browser
     if (err instanceof TypeError) {
       throw new Error(

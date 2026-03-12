@@ -10,11 +10,11 @@
  * un-paged content.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import styles from '../styles/PageNavigator.module.css';
 
-export default function PageNavigator() {
+export default memo(function PageNavigator() {
   const { currentPage, totalPages, goToPage, fileMetadata } =
     useReaderContext();
 
@@ -99,4 +99,4 @@ export default function PageNavigator() {
       </button>
     </div>
   );
-}
+})
