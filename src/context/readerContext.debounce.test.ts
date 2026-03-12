@@ -48,11 +48,11 @@ function createDebouncedIndexWriter(ls: { setItem: (key: string, value: string) 
 }
 
 // ── localStorage mock (reset in beforeEach) ──────────────────────────────────
-let setItemMock: ReturnType<typeof vi.fn>;
+let setItemMock: ReturnType<typeof vi.fn<(key: string, value: string) => void>>;
 
 beforeEach(() => {
   vi.useFakeTimers();
-  setItemMock = vi.fn();
+  setItemMock = vi.fn<(key: string, value: string) => void>();
   vi.stubGlobal('localStorage', { setItem: setItemMock });
 });
 
