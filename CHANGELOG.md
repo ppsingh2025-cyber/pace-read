@@ -1,5 +1,10 @@
 # Changelog
 
+### v1.3.2
+- fix(pdf): Approach C diagram detection false positive rate reduced from 83% to 3.5%
+  - isDiagramSymbol() excludes prose typography (smart quotes, dashes, footnote markers)
+  - ZONE_EXPAND_GAP 30→40pt: captures labels adjacent to diagram anchor rows
+  - X_SPREAD_MIN 60→75pt: eliminates marginal prose band overlap
 ## [1.5.0]
 ### Changed
 - **Onboarding redesigned** — 4 steps (was 5): Demo → Pick mode → Pick theme → Load content.
