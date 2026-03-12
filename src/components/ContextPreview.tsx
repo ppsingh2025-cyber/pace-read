@@ -14,8 +14,6 @@ import styles from '../styles/ContextPreview.module.css';
 
 const LS_KEY = 'contextPreview_collapsed';
 const LS_AUTOSCROLL_KEY = 'contextPreview_autoScroll';
-/** Approximate rendered height per word span (px) — used for virtual scroll padding */
-const WORD_ROW_HEIGHT = 22;
 
 interface ContextPreviewProps {
   onExpandChange?: (expanded: boolean) => void;
@@ -217,42 +215,30 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
       {/* ── Content ── */}
       {isExpanded && (
         <div id="page-preview-content" className={styles.content} ref={contentRef}>
-          {(() => {
-            const activeInPage  = currentWordIndex - pageStart;
-            const renderStart   = Math.max(0, activeInPage - 40);
-            const renderEnd     = Math.min(pageWords.length, activeInPage + 40);
-            const visibleWords  = pageWords.slice(renderStart, renderEnd);
-            const preHeight     = renderStart * WORD_ROW_HEIGHT;
-            const postHeight    = (pageWords.length - renderEnd) * WORD_ROW_HEIGHT;
+          {pageWords.map((word, i) => {
+            const globalIndex = pageStart + i;
+            const isActive    = globalIndex === currentWordIndex;
             return (
-              <div style={{ paddingTop: preHeight, paddingBottom: postHeight }}>
-                {visibleWords.map((word, i) => {
-                  const globalIndex = pageStart + renderStart + i;
-                  const isActive    = globalIndex === currentWordIndex;
-                  return (
-                    <span
-                      key={globalIndex}
-                      ref={isActive ? activeWordRef : undefined}
-                      className={isActive ? styles.activeWord : styles.word}
-                      onClick={() => goToWord(globalIndex)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          goToWord(globalIndex);
-                        }
-                      }}
-                      aria-label={`${word}${isActive ? ' (current)' : ''}`}
-                      aria-pressed={isActive}
-                    >
-                      {word}{' '}
-                    </span>
-                  );
-                })}
-              </div>
+              <span
+                key={globalIndex}
+                ref={isActive ? activeWordRef : undefined}
+                className={isActive ? styles.activeWord : styles.word}
+                onClick={() => goToWord(globalIndex)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    goToWord(globalIndex);
+                  }
+                }}
+                aria-label={`${word}${isActive ? ' (current)' : ''}`}
+                aria-pressed={isActive}
+              >
+                {word}{' '}
+              </span>
             );
-          })()}
+          })}
         </div>
       )}
     </div>
