@@ -28,7 +28,7 @@ const localStorageMock = {
 
 vi.stubGlobal('localStorage', localStorageMock);
 
-const { saveRecord, loadRecords, deleteRecord, clearAllRecords } =
+const { saveRecord, loadRecords, clearAllRecords } =
   await import('./recordsUtils');
 
 // ── helpers ──────────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@
  * vi.useFakeTimers() is used only for the timeout test.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Mock fetch before importing the module ────────────────────────────────────
 const mockFetch = vi.fn();
