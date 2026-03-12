@@ -548,8 +548,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     setPunctuationPauseRaw(settings.punctuationPause);
     setLongWordCompensationRaw(settings.longWordCompensation);
     setChunkModeRaw(settings.chunkMode);
-    if (settings.contextWordSameSize !== undefined) setContextWordSameSizeState(settings.contextWordSameSize);
-    if (settings.contextWordOpacity  !== undefined) setContextWordOpacityState(settings.contextWordOpacity);
+    setContextWordSameSizeState(settings.contextWordSameSize);
+    setContextWordOpacityState(settings.contextWordOpacity);
     // Reset the flag after React has batched all state updates
     queueMicrotask(() => { applyingModeRef.current = false; });
   }, [setWindowSizeRaw, setOrpEnabledRaw, setFocalLineRaw, setPeripheralFadeRaw, setPunctuationPauseRaw, setLongWordCompensationRaw, setChunkModeRaw]);

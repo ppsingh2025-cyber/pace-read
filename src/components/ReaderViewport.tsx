@@ -130,6 +130,18 @@ function getSlotOpacity(
   return peripheralFade ? contextWordOpacity : 1.0;
 }
 
+/**
+ * Return the inline fontSize for a context word based on the contextWordSameSize
+ * setting and whether a user-scaled font size is active.
+ */
+function getContextWordFontSize(
+  contextWordSameSize: boolean,
+  scaledFont: string | undefined,
+): string | undefined {
+  if (!contextWordSameSize) return undefined;
+  return scaledFont ?? 'clamp(1.1rem, 8vw, 3.2rem)';
+}
+
 /** Pixels from left edge to exclude from swipe detection (iOS back-navigation zone) */
 const IOS_SWIPE_EXCLUSION_ZONE = 20;
 /** Minimum horizontal pixel delta to trigger a swipe-faster or swipe-slower gesture */
@@ -495,11 +507,7 @@ const ReaderViewport = memo(function ReaderViewport({
                   ...(isCenter && !focalLine ? { color: highlightColor } : undefined),
                   ...(isPeripheral ? { color: 'var(--vp-text-peripheral)', opacity: 1 } : undefined),
                   ...(isCenter && scaledFont ? { fontSize: scaledFont } : undefined),
-                  ...(!isCenter && contextWordSameSize && scaledFont
-                    ? { fontSize: scaledFont }
-                    : !isCenter && contextWordSameSize
-                    ? { fontSize: 'clamp(1.1rem, 8vw, 3.2rem)' }
-                    : undefined),
+                  ...(!isCenter ? { fontSize: getContextWordFontSize(contextWordSameSize, scaledFont) } : undefined),
                 }}
                 aria-hidden={!word ? true : undefined}
               >
@@ -581,11 +589,7 @@ const ReaderViewport = memo(function ReaderViewport({
                       ? 'var(--vp-text-peripheral)'
                       : undefined,
                     opacity: 1,
-                    ...(contextWordSameSize && scaledFont
-                      ? { fontSize: scaledFont }
-                      : contextWordSameSize
-                      ? { fontSize: 'clamp(1.1rem, 8vw, 3.2rem)' }
-                      : undefined),
+                    fontSize: getContextWordFontSize(contextWordSameSize, scaledFont),
                   }}
                 >
                   {word}

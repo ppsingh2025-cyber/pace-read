@@ -42,6 +42,8 @@ type WizardSettings = {
 };
 
 const TOTAL_STEPS = 13; // 0–12
+/** Wizard steps that present a Yes/No choice (for Y/N keyboard shortcut) */
+const YES_NO_STEPS = [2, 3, 4, 5, 6, 8, 9, 12];
 
 export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizardProps) {
   const {
@@ -144,7 +146,7 @@ export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizar
           }
           break;
         case 'y': case 'Y':
-          if ([2,3,4,5,6,8,9,12].includes(step)) {
+          if (YES_NO_STEPS.includes(step)) {
             e.preventDefault();
             if (step === 2)  setSettings(s => ({ ...s, orpEnabled: true }));
             if (step === 3)  setSettings(s => ({ ...s, orpColored: true }));
@@ -157,7 +159,7 @@ export default function SaveModeWizard({ onClose, existingModes }: SaveModeWizar
           }
           break;
         case 'n': case 'N':
-          if ([2,3,4,5,6,8,9,12].includes(step)) {
+          if (YES_NO_STEPS.includes(step)) {
             e.preventDefault();
             if (step === 2)  setSettings(s => ({ ...s, orpEnabled: false }));
             if (step === 3)  setSettings(s => ({ ...s, orpColored: false }));
