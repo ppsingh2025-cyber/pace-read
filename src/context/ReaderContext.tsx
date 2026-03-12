@@ -220,6 +220,11 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   /** True while applyMode is executing — suppresses auto-switch to Custom */
   const applyingModeRef = useRef(false);
 
+  /** Debounce timer for persisting word index to localStorage */
+  const indexSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Always holds the latest word index so the unmount flush reads the correct value */
+  const pendingWordIndexRef = useRef(currentWordIndex);
+
   // Derive 1-indexed current page via binary search over pageBreaks
   const currentPage = useMemo(() => {
     if (pageBreaks.length === 0) return 1;
@@ -235,10 +240,32 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
 
   const totalPages = pageBreaks.length;
 
-  // Persist word index to localStorage whenever it changes
+  // Persist word index to localStorage (debounced to 500 ms to avoid
+  // thrashing at high WPM — e.g. 1500 WPM fires 25 updates/sec without this)
   useEffect(() => {
-    localStorage.setItem(LS_KEY_INDEX, String(currentWordIndex));
+    pendingWordIndexRef.current = currentWordIndex;
+    if (indexSaveTimerRef.current !== null) {
+      clearTimeout(indexSaveTimerRef.current);
+    }
+    indexSaveTimerRef.current = setTimeout(() => {
+      localStorage.setItem(LS_KEY_INDEX, String(pendingWordIndexRef.current));
+      indexSaveTimerRef.current = null;
+    }, 500);
+    return () => {
+      if (indexSaveTimerRef.current !== null) {
+        clearTimeout(indexSaveTimerRef.current);
+        indexSaveTimerRef.current = null;
+      }
+    };
   }, [currentWordIndex]);
+
+  // Flush the latest word index to localStorage on unmount so the final
+  // position is never lost if the provider is torn down before the debounce fires
+  useEffect(() => {
+    return () => {
+      localStorage.setItem(LS_KEY_INDEX, String(pendingWordIndexRef.current));
+    };
+  }, []);
 
   // Persist WPM
   useEffect(() => {
