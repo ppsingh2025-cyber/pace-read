@@ -845,6 +845,22 @@ kbd {
   animation: focusHintFade 3s ease forwards;
 }
 
+.eyeFocusExitHint {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  animation: focusHintFade 3s ease forwards;
+}
+
 /* ─── Post-onboarding burger coach mark ─────────────────────── */
 
 .burgerCoach {
@@ -860,7 +876,7 @@ kbd {
   white-space: nowrap;
   pointer-events: none;
   z-index: 600;
-  animation: coachFade 5s ease forwards;
+  animation: coachFadeIn 0.25s ease forwards;
 }
 
 .burgerCoachArrow {
@@ -879,6 +895,11 @@ kbd {
   15%  { opacity: 1; transform: translateY(0); }
   75%  { opacity: 1; }
   100% { opacity: 0; }
+}
+
+@keyframes coachFadeIn {
+  0%   { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Global reading progress bar ────────────────────────────── */

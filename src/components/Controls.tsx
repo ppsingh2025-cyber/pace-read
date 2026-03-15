@@ -161,6 +161,7 @@ export default memo(function Controls({
                   ? `Word ${(currentWordIndex + 1).toLocaleString()} of ${words.length >= 10000 ? `${(words.length / 1000).toFixed(1)}k` : words.length.toLocaleString()}`
                   : 'No content loaded'}
               </span>
+              {hasWords && <span className={styles.sessionJumpHint} aria-hidden="true">↕ jump</span>}
             </button>
           )}
 
@@ -298,6 +299,7 @@ export default memo(function Controls({
                 aria-label={`${wpm} words per minute, tap to edit`}
                 title="Tap to set exact WPM">
                 {wpm} <span className={styles.wpmUnit}>WPM</span>
+                <span className={styles.wpmTapHint}>tap to set</span>
               </button>
             )}
 

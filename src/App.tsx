@@ -149,6 +149,7 @@ export default function App() {
   const [showPostOnboardingCoach, setShowPostOnboardingCoach] = useState(false);
   const [showBurgerCoach, setShowBurgerCoach] = useState(false);
   const [showFocusHint, setShowFocusHint] = useState(false);
+  const [showEyeFocusHint, setShowEyeFocusHint] = useState(false);
 
   // Ref to store word index before reset (for undo)
   const preResetIndexRef = useRef(0);
@@ -156,6 +157,9 @@ export default function App() {
   // Ref to mirror isPlaying without stale closure issues (used by visibilitychange handler)
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+  // Tracks whether WE auto-paused due to tab switch (to show resume toast only in that case)
+  const tabAutoPausedRef = useRef(false);
 
   // What's New: shown when stored version ≠ current version (skip for brand-new users)
   const [showWhatsNew, setShowWhatsNew] = useState<boolean>(
@@ -395,6 +399,11 @@ export default function App() {
     const handleVisibilityChange = () => {
       if (document.hidden && isPlayingRef.current) {
         pause();
+        tabAutoPausedRef.current = true;
+        toast('⏸ Paused — you switched tabs', { duration: 3000 });
+      } else if (!document.hidden && tabAutoPausedRef.current) {
+        tabAutoPausedRef.current = false;
+        toast('▶ Tap Play to resume', { duration: 2500 });
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -519,6 +528,12 @@ export default function App() {
       const entering = !prev;
       // Eye focus borrows the shell's focus mode to hide topBar + controlsBar
       setIsFocused(entering);
+      if (entering) {
+        setShowEyeFocusHint(true);
+        setTimeout(() => setShowEyeFocusHint(false), 3000);
+      } else {
+        setShowEyeFocusHint(false);
+      }
       return entering;
     });
   }, []);
@@ -568,27 +583,20 @@ export default function App() {
     setShowOnboarding(true);
   }, []);
 
-  // Coach mark: show 3s after onboarding completes, auto-dismiss after 5s
+  // Coach mark: show 3s after onboarding completes, stays until content is loaded
   useEffect(() => {
     if (!showPostOnboardingCoach) return;
     const show = setTimeout(() => setShowBurgerCoach(true), 3000);
-    const hide = setTimeout(() => {
-      setShowBurgerCoach(false);
-      setShowPostOnboardingCoach(false);
-    }, 8000);
-    return () => { clearTimeout(show); clearTimeout(hide); };
+    return () => { clearTimeout(show); };
   }, [showPostOnboardingCoach]);
 
-  // Dismiss coach mark on any click
+  // Dismiss coach mark once user loads any content
   useEffect(() => {
-    if (!showBurgerCoach) return;
-    const dismiss = () => {
+    if (showBurgerCoach && words.length > 0) {
       setShowBurgerCoach(false);
       setShowPostOnboardingCoach(false);
-    };
-    window.addEventListener('click', dismiss, { once: true });
-    return () => window.removeEventListener('click', dismiss);
-  }, [showBurgerCoach]);
+    }
+  }, [showBurgerCoach, words.length]); // trigger only when coach is shown or word count changes
 
   return (
     <AuthProvider>
@@ -713,6 +721,9 @@ export default function App() {
           {/* Focus mode exit hint — fades after 3s */}
           {isFocused && showFocusHint && (
             <div className="focusExitHint" aria-hidden="true">Esc or F to exit</div>
+          )}
+          {isEyeFocus && showEyeFocusHint && (
+            <div className="eyeFocusExitHint" aria-hidden="true">Tap 👁 or Esc to exit</div>
           )}
         </div>
         </main>
