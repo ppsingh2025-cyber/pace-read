@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0] — Fix: burger portal (iOS backdrop-filter trap), obsidian topBar visible, contextStrip gap removed
+### Fixed
+- **Burger overlay (iOS portal fix)** — wrapped `{open && (...)}` block in `createPortal(…, document.body)` in `BurgerMenu.tsx`; iOS Safari WebKit bug #224093 traps `position:fixed` descendants inside an ancestor with `backdrop-filter` — portaling to `document.body` escapes all ancestor compositing layers so the full-screen overlay now covers the entire viewport on iOS
+- **Obsidian topBar** — added `[data-theme='obsidian'] .topBar` override with `rgba(28,28,28,0.95)` background; the previous value `rgba(10,10,10,0.80)` was visually indistinguishable from the `#000` page background; also added explicit midnight and warm overrides for completeness
+- **contextStrip gap** — removed `padding-bottom: calc(0.5rem + 2.75rem)` from `.contextStrip`; the 2.75rem was intended to prevent footer overlap but instead created a visible black gap below the collapsed preview panel
+
 ## [2.1.0] — UX polish: burger fix, tagline contrast, sign-in button, duplicate word count removed, preview label
 ### Fixed
 - **Burger menu overlay** — removed `backdrop-filter` from `.inner` in `Controls.module.css`; iOS WebKit compositing bug caused the controls panel to paint above the burger menu fixed overlay regardless of z-index; replaced glass blur with solid `--bg-panel` background

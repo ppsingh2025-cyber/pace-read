@@ -377,6 +377,20 @@ body {
   border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 
+[data-theme='obsidian'] .topBar {
+  background: rgba(28, 28, 28, 0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+[data-theme='midnight'] .topBar {
+  background: rgba(26, 26, 34, 0.92);
+}
+
+[data-theme='warm'] .topBar {
+  background: rgba(38, 30, 20, 0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
 @supports not (backdrop-filter: blur(1px)) {
   .topBar { background: var(--bg-panel); }
 }
@@ -540,13 +554,11 @@ body {
 
 .contextStrip {
   padding: 0.5rem 1rem;
-  padding-bottom: calc(0.5rem + 2.75rem); /* 2.75rem ≈ footer height */
   flex-shrink: 0;
 }
 @media (max-width: 640px) {
   .contextStrip {
     padding: 0.4rem 0.75rem;
-    padding-bottom: calc(0.4rem + 2.75rem);
   }
 }
 

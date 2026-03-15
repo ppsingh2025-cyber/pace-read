@@ -18,6 +18,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useReaderContext } from '../context/useReaderContext';
 import SessionStats from './SessionStats';
 import ReadingModes from './ReadingModes';
@@ -180,7 +181,10 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, onResumeFromCa
         <span className={styles.bar} />
       </button>
 
-      {open && (
+      {/* Portal escapes .topBar's backdrop-filter compositing layer (WebKit bug #224093):
+          position:fixed descendants are trapped inside their backdrop-filter ancestor on iOS Safari.
+          Rendering to document.body breaks out of that layer so the overlay covers the full screen. */}
+      {open && createPortal(
         /* Backdrop */
         <div className={styles.backdrop} onClick={close} aria-hidden="true">
           {/* Drawer — stop propagation so clicks inside don't close */}
@@ -334,7 +338,8 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, onResumeFromCa
 
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
