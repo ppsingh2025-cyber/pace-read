@@ -79,6 +79,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     return saved ? parseInt(saved, 10) : 0;
   });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [pendingSpeedSuggestion, setPendingSpeedSuggestionState] = useState<number | null>(null);
   const [wpm, setWpmState] = useState<number>(() => {
     const saved = localStorage.getItem(LS_KEY_WPM);
     return saved ? parseInt(saved, 10) : DEFAULT_WPM;
@@ -317,6 +318,10 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
 
   const setWpm = useCallback((newWpm: number) => {
     setWpmState(newWpm);
+  }, []);
+
+  const setPendingSpeedSuggestion = useCallback((wpm: number | null) => {
+    setPendingSpeedSuggestionState(wpm);
   }, []);
 
   const resetReader = useCallback(() => {
@@ -689,6 +694,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       activeMode,
       savedCustomModes,
       activeCustomModeId,
+      pendingSpeedSuggestion,
       setWords,
       setCurrentWordIndex,
       setIsPlaying,
@@ -728,6 +734,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       applyMode,
       selectPresetMode,
       selectCustomMode,
+      setPendingSpeedSuggestion,
     }),
     [
       words,
@@ -800,6 +807,8 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       applyMode,
       selectPresetMode,
       selectCustomMode,
+      pendingSpeedSuggestion,
+      setPendingSpeedSuggestion,
     ],
   );
 

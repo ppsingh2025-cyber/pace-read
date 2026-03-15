@@ -28,6 +28,17 @@ const DEMO_WORDS = (
 const DEMO_WPM = 250;
 const DEMO_INTERVAL_MS = Math.round(60_000 / DEMO_WPM);
 
+const DEMO_WPM_START = 150;
+const DEMO_RAMP_WORDS = 10; // ramp from start speed to full speed over first 10 words
+
+/** Returns the ms delay before showing word at index `wordIdx`, ramping from slow to full speed. */
+function getDemoInterval(wordIdx: number): number {
+  if (wordIdx >= DEMO_RAMP_WORDS) return DEMO_INTERVAL_MS;
+  const t = wordIdx / DEMO_RAMP_WORDS; // 0.0 at word 0 → 1.0 at word 10
+  const startMs = Math.round(60_000 / DEMO_WPM_START);
+  return Math.round(startMs + (DEMO_INTERVAL_MS - startMs) * t);
+}
+
 /**
  * Returns the Optimal Recognition Point (ORP) character index for a word.
  * ORP is the character position where the eye naturally fixates for fastest
@@ -58,7 +69,7 @@ export default function OnboardingOverlay({ onComplete, initialTheme, initialMod
   const [step, setStep]       = useState(0);
   const [visible, setVisible] = useState(false);
   const [demoIndex, setDemoIndex] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pickedTheme, setPickedTheme] = useState<Theme>(initialTheme ?? DEFAULT_ONBOARDING_THEME);
   const [pickedMode,  setPickedMode]  = useState<PresetModeId>(initialModeId ?? DEFAULT_ONBOARDING_MODE);
 
@@ -68,19 +79,22 @@ export default function OnboardingOverlay({ onComplete, initialTheme, initialMod
   }, []);
 
   const clearDemo = useCallback(() => {
-    if (intervalRef.current !== null) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (intervalRef.current !== null) {
+      clearTimeout(intervalRef.current);
+      intervalRef.current = null;
+    }
   }, []);
 
   const launchDemo = useCallback(() => {
     clearDemo();
     setDemoIndex(0);
-    intervalRef.current = setInterval(() => {
-      setDemoIndex(prev => {
-        const next = prev + 1;
-        if (next >= DEMO_WORDS.length) { clearInterval(intervalRef.current!); intervalRef.current = null; return prev; }
-        return next;
-      });
-    }, DEMO_INTERVAL_MS);
+    const tick = (currentIdx: number) => {
+      const nextIdx = currentIdx + 1;
+      if (nextIdx >= DEMO_WORDS.length) return;
+      setDemoIndex(nextIdx);
+      intervalRef.current = setTimeout(() => tick(nextIdx), getDemoInterval(nextIdx));
+    };
+    intervalRef.current = setTimeout(() => tick(0), getDemoInterval(0));
   }, [clearDemo]);
 
   // Auto-play demo immediately on open — step 0 IS the demo.
