@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0] — Full UI/UX Facelift Part 2: viewport active glow, progress bar wired, top bar tagline TSX, controls 3-layer dock TSX, word-jump, help keyboard shortcut
+### Changed
+- **Reading viewport** — simplified `box-shadow` (explicit `border: 1px solid` + `inset 0 0 60px` vignette + `0 4px 24px` depth); new `.viewportActive` glow state: `border-color: --color-accent-30`, `0 0 0 1px --color-accent-22` outer ring applied when `isPlaying === true`
+- **Top bar** — TSX restructure: `<span className="topBarTitle">` replaced with `<div className="topBarBrandText">` containing title + tagline "Read faster, Understand Better"; `SyncStatusIndicator`, `ThemeToggle`, and help `?` button removed from `topBarActions` (theme accessible via BurgerMenu drawer; help opens via `?` keyboard shortcut)
+- **Controls dock** — full 3-layer TSX restructure: Layer 1 = session strip (`pct%`, word position, reset icon); Layer 2 = action row (Upload+Paste cluster | circular play | Back+Next cluster); Layer 3 = WPM stepper pill; `resetRow` removed, merged into session strip
+- **Controls context** — `currentWordIndex` and `goToWord` added to context destructure
+### Added
+- **Word jump** — session strip `pct%` label is now a tappable button that opens an inline input; supports both word number (`234`) and percentage (`47%`) formats; focus auto-set on open
+- **Reading progress bar** — `<div className="readingProgressBar">` wired in App.tsx with `currentWordIndex / words.length` width calculation
+- **`?` keyboard shortcut** — pressing `?` toggles the HelpModal (replaces the removed top-bar `?` button)
+
 ## [1.9.0] — Full UI/UX Facelift Part 1: reading progress bar, glass top bar with tagline, controls v3 dock, burger menu z-index fix, ContextPreview glass card
 ### Changed
 - **Top bar** — `will-change: backdrop-filter` for stable composite layer; opacity raised to 0.80; `transition: opacity 0.15s ease`; day-theme and `@supports` fallbacks updated

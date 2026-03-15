@@ -27,7 +27,6 @@ import Controls from './components/Controls';
 import InputPanel from './components/InputPanel';
 import ContextPreview from './components/ContextPreview';
 import BurgerMenu from './components/BurgerMenu';
-import ThemeToggle from './components/ThemeToggle';
 import AppFooter from './components/AppFooter';
 import HelpModal from './components/HelpModal';
 import { parsePDF } from './parsers/pdfParser';
@@ -40,7 +39,6 @@ import { buildStructureMap, buildStructureMapFromWords } from './utils/structure
 import { AuthProvider } from './auth/AuthContext';
 import SignInPrompt from './auth/SignInPrompt';
 import UserAvatar from './components/UserAvatar';
-import SyncStatusIndicator from './components/SyncStatusIndicator';
 import ResetConfirmModal from './components/ResetConfirmModal';
 import { Toaster, toast } from 'react-hot-toast';
 import { PRESET_MODES } from './config/readingModePresets';
@@ -438,11 +436,14 @@ export default function App() {
             return !f;
           });
           break;
+        case '?':
+          setShowHelp((h) => !h);
+          break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, play, pause, faster, slower, prevWord, nextWord, showResetConfirm, setShowResetConfirm]);
+  }, [isPlaying, play, pause, faster, slower, prevWord, nextWord, showResetConfirm, setShowResetConfirm, setShowHelp]);
 
   /** Auto-load the most recently cached file on first mount */
   useEffect(() => {
@@ -580,6 +581,13 @@ export default function App() {
 
   return (
     <AuthProvider>
+    {/* ── Global reading progress bar ── */}
+    <div className="readingProgressBar">
+      <div
+        className="readingProgressFill"
+        style={{ width: words.length > 0 ? `${Math.round((currentWordIndex / Math.max(words.length - 1, 1)) * 100)}%` : '0%' }}
+      />
+    </div>
     {showWhatsNew && (
       <WhatsNewModal onDismiss={handleWhatsNewDismiss} />
     )}
@@ -610,21 +618,13 @@ export default function App() {
             alt=""
             aria-hidden="true"
           />
-          <span className="topBarTitle">PaceRead</span>
+          <div className="topBarBrandText">
+            <span className="topBarTitle">PaceRead</span>
+            <span className="topBarTagline">Read faster, Understand Better</span>
+          </div>
         </div>
         <div className="topBarActions">
-          <SyncStatusIndicator />
-
           <UserAvatar />
-          <button
-            className="helpBtn"
-            onClick={() => setShowHelp(true)}
-            title="How to Use PaceRead"
-            aria-label="How to Use PaceRead"
-          >
-            ?
-          </button>
-          <ThemeToggle />
         </div>
       </header>
 

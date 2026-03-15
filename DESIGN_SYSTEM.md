@@ -8,6 +8,8 @@
 
 PaceRead is a **reading instrument**, not a typical web app. Every design decision must answer: *Does this help the user read?*
 
+**Tagline: "Read faster, Understand Better"** — appears in the top bar below the PaceRead wordmark via `.topBarTagline`. Represents the app's dual promise: speed (RSVP) and comprehension (context preview, adaptive speed).
+
 1. **Reading flow is sacred.** No layout shifts, reflows, or visual noise during active reading.
 2. **Zero visual jitter.** The ORP word must appear stable at a fixed focal point between word changes.
 3. **Minimal UI.** Controls exist to serve reading, not to demonstrate features.
@@ -57,14 +59,14 @@ Use these tokens for all padding, margin, and gap values. Do **not** use magic p
 
 ### Shadow / Elevation Scale
 
-```css
---shadow-sm   /* subtle grounding shadow — buttons, panels, inputs */
---shadow-md   /* moderate elevation — cards, popovers */
---shadow-lg   /* high elevation — drawers, sidebars (e.g. BurgerMenu panel) */
---shadow-xl   /* maximum elevation — full-screen overlays, modals */
-```
+| Token | Value (dark themes) | Usage |
+|-------|---------------------|-------|
+| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20)` | Subtle grounding — buttons, input fields, small cards |
+| `--shadow-md` | `0 4px 16px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.25)` | Moderate elevation — glass cards, popovers |
+| `--shadow-lg` | `0 8px 28px rgba(0,0,0,0.55), 0 3px 8px rgba(0,0,0,0.30)` | High elevation — drawers, sidebars (BurgerMenu panel) |
+| `--shadow-xl` | `0 16px 48px rgba(0,0,0,0.60), 0 6px 16px rgba(0,0,0,0.35)` | Maximum elevation — full-screen overlays, modals |
 
-Dark themes use heavier opacity values; the `[data-theme="day"]` block overrides all four with lighter equivalents.
+Dark themes use heavier opacity values; the `[data-theme="day"]` block overrides all four with lighter equivalents (`0.08/0.05`, `0.10/0.06`, `0.13/0.07`, `0.16/0.09`).
 
 ### Transition Timing Tokens
 

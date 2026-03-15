@@ -17,21 +17,28 @@
   touch-action: pan-y;
   contain: layout style paint;
 
-  /* Upgrade: gradient border via box-shadow instead of flat 1px line.
-     The outer glow creates depth. The inner shadow creates a slight vignette
-     that pulls the eye toward the center where the ORP word appears. */
-  border: 1px solid transparent;
+  /* Simplified: explicit border + box-shadow so the viewport can transition
+     cleanly to .viewportActive (which overrides border-color only). */
+  border: 1px solid var(--vp-border, #1e1e2a);
   box-shadow:
-    0 0 0 1px var(--vp-border, #1e1e2a),          /* border replacement */
-    inset 0 0 80px rgba(0,0,0,0.6),                /* inner vignette — focus the eye */
-    0 4px 32px rgba(0,0,0,0.5);                    /* outer depth shadow */
+    inset 0 0 60px rgba(0,0,0,0.5),
+    0 4px 24px rgba(0,0,0,0.4);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 [data-theme='day'] .viewport {
   box-shadow:
-    0 0 0 1px var(--vp-border, #d0c8bc),
-    inset 0 0 60px rgba(0,0,0,0.04),
-    0 4px 24px rgba(0,0,0,0.08);
+    inset 0 0 40px rgba(0,0,0,0.04),
+    0 4px 24px rgba(0,0,0,0.07);
+}
+
+/* Applied via className when isPlaying === true */
+.viewportActive {
+  border-color: var(--color-accent-30, rgba(91,141,238,0.30));
+  box-shadow:
+    inset 0 0 60px rgba(0,0,0,0.5),
+    0 4px 24px rgba(0,0,0,0.4),
+    0 0 0 1px var(--color-accent-22, rgba(91,141,238,0.22));
 }
 
 @media (max-width: 640px) {
