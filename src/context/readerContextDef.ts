@@ -116,6 +116,8 @@ interface ReaderState {
   savedCustomModes: CustomMode[];
   /** ID of the currently active custom mode, or null if unsaved custom */
   activeCustomModeId: string | null;
+  /** Suggested WPM from the adaptive speed system — shown until user acts on it */
+  pendingSpeedSuggestion: number | null;
 }
 
 interface ReaderActions {
@@ -167,6 +169,8 @@ interface ReaderActions {
   selectPresetMode: (modeId: PresetModeId) => void;
   /** Apply a saved custom mode */
   selectCustomMode: (mode: CustomMode) => void;
+  /** Set or clear the adaptive speed suggestion */
+  setPendingSpeedSuggestion: (wpm: number | null) => void;
 }
 
 export type ReaderContextValue = ReaderState & ReaderActions;

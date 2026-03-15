@@ -89,6 +89,8 @@ interface ReaderViewportProps {
   contextWordFontSize?: number;
   /** Opacity of context words when peripheralFade is true (0.20–1.00) */
   contextWordOpacity?: number;
+  /** When true, highlights the empty-state action buttons to guide first-time users */
+  isFirstAction?: boolean;
 }
 
 /**
@@ -188,6 +190,7 @@ const ReaderViewport = memo(function ReaderViewport({
   onEyeToggle,
   contextWordFontSize = 0,
   contextWordOpacity = 0.65,
+  isFirstAction = false,
 }: ReaderViewportProps) {
   const { isPlaying, wpm, fileMetadata } = useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -459,7 +462,7 @@ const ReaderViewport = memo(function ReaderViewport({
           </div>
         </div>
       ) : !hasWords ? (
-        <div className={styles.emptyState}>
+        <div className={`${styles.emptyState}${isFirstAction ? ` ${styles.emptyStateFirstAction}` : ''}`}>
           <input
             ref={fileInputRef}
             type="file"

@@ -206,6 +206,7 @@ contextWordOpacity: number           // 0.20–1.00, default 0.65
 // History & analytics
 records: ReadingRecord[]          // up to 20, from localStorage
 sessionStats: SessionStats        // { wordsRead, startTime, activeTimeMs, effectiveWpm }
+pendingSpeedSuggestion: number | null  // Adaptive speed badge — set when session ends with suggestion, cleared on manual WPM change
 ```
 
 ### localStorage Keys

@@ -54,7 +54,8 @@ export default memo(function Controls({
   prevDisabled,
   nextDisabled,
 }: ControlsProps) {
-  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, goToWord } =
+  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, goToWord,
+    pendingSpeedSuggestion, setPendingSpeedSuggestion } =
     useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,6 +115,13 @@ export default memo(function Controls({
     setJumpOpen(false);
   }, [jumpDraft, words.length, goToWord]);
 
+  const handleApplySuggestion = useCallback(() => {
+    if (pendingSpeedSuggestion !== null) {
+      setWpm(pendingSpeedSuggestion);
+      setPendingSpeedSuggestion(null);
+    }
+  }, [pendingSpeedSuggestion, setWpm, setPendingSpeedSuggestion]);
+
   useEffect(() => {
     if (jumpOpen) {
       setJumpDraft('');
@@ -162,6 +170,18 @@ export default memo(function Controls({
                   : 'No content loaded'}
               </span>
               {hasWords && <span className={styles.sessionJumpHint} aria-hidden="true">↕ jump</span>}
+            </button>
+          )}
+
+          {pendingSpeedSuggestion !== null && !jumpOpen && (
+            <button
+              type="button"
+              className={styles.speedSuggestionBadge}
+              onClick={handleApplySuggestion}
+              title={`Apply suggested speed: ${pendingSpeedSuggestion} WPM`}
+              aria-label={`Suggested speed ${pendingSpeedSuggestion} words per minute — tap to apply`}
+            >
+              ⚡ {pendingSpeedSuggestion} WPM
             </button>
           )}
 
@@ -284,6 +304,7 @@ export default memo(function Controls({
                 onBlur={() => {
                   const v = parseInt(wpmDraft, 10);
                   if (!isNaN(v)) setWpm(Math.min(1500, Math.max(60, v)));
+                  setPendingSpeedSuggestion(null);
                   setWpmEditing(false);
                 }}
                 onKeyDown={e => {

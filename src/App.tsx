@@ -112,6 +112,7 @@ export default function App() {
     applyMode,
     setActiveMode,
     activeMode,
+    setPendingSpeedSuggestion,
   } = useReaderContext();
 
   const { wordWindow, play, pause, reset, faster, slower, prevWord, nextWord } = useRSVPEngine();
@@ -150,6 +151,7 @@ export default function App() {
   const [showBurgerCoach, setShowBurgerCoach] = useState(false);
   const [showFocusHint, setShowFocusHint] = useState(false);
   const [showEyeFocusHint, setShowEyeFocusHint] = useState(false);
+  const [showFirstActionCTA, setShowFirstActionCTA] = useState(false);
 
   // Ref to store word index before reset (for undo)
   const preResetIndexRef = useRef(0);
@@ -200,6 +202,7 @@ export default function App() {
       if (!manualWpmRef.current && newBaseline !== wpm) {
         const direction = newBaseline > wpm ? '⚡' : '🐢';
         toast(`${direction} Suggested speed for next session: ${newBaseline} WPM`, { duration: 4000 });
+        setPendingSpeedSuggestion(newBaseline);
       }
       manualWpmRef.current = false; // reset manual flag after each session
 
@@ -227,6 +230,7 @@ export default function App() {
         alert('No readable text found.');
         return;
       }
+      setShowFirstActionCTA(false);
       setWords(allWords);
       setPageBreaks(breaks);
       setFileId(sourceName);
@@ -543,13 +547,15 @@ export default function App() {
   // prop-identity changes from defeating React.memo on Controls / ReaderViewport.
   const handleFaster = useCallback(() => {
     manualWpmRef.current = true;
+    setPendingSpeedSuggestion(null);
     faster();
-  }, [faster]);
+  }, [faster, setPendingSpeedSuggestion]);
 
   const handleSlower = useCallback(() => {
     manualWpmRef.current = true;
+    setPendingSpeedSuggestion(null);
     slower();
-  }, [slower]);
+  }, [slower, setPendingSpeedSuggestion]);
 
   const handleResetRequest = useCallback(() => setShowResetConfirm(true), []);
 
@@ -564,6 +570,7 @@ export default function App() {
       setActiveMode(prefs.modeId);
       localStorage.setItem('fastread_onboarding_complete', 'true');
       setShowOnboarding(false);
+      setShowFirstActionCTA(true);
       setShowPostOnboardingCoach(true);
     },
     [setTheme, applyMode, setActiveMode],
@@ -690,6 +697,7 @@ export default function App() {
             onEyeToggle={toggleEyeFocus}
             contextWordFontSize={contextWordFontSize}
             contextWordOpacity={contextWordOpacity}
+            isFirstAction={showFirstActionCTA && words.length === 0}
           />
           {/* Maximize / minimize button */}
           <button

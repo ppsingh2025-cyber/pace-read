@@ -105,6 +105,25 @@
 }
 .sessionInfo:hover .sessionJumpHint { opacity: 0.7; }
 
+.speedSuggestionBadge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.4;
+}
+.speedSuggestionBadge:hover {
+  background: var(--color-accent);
+  color: var(--bg);
+}
+
 .wordJumpStrip {
   display: flex;
   align-items: center;
