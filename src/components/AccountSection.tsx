@@ -18,12 +18,7 @@ export default function AccountSection() {
     return (
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Account</h3>
-        <button
-          className={styles.linkBtn}
-          onClick={() => console.log('Sign in - auth not configured')}
-        >
-          Sign In with Google
-        </button>
+        <p className={styles.aboutText}>Sign-in unavailable — app is running without cloud configuration.</p>
       </section>
     );
   }
