@@ -37,21 +37,49 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2, 8px);
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
+
+  /* Glass panel */
+  background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.85);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: var(--radius-lg, 14px);
-  padding: var(--space-2, 8px) var(--space-3, 12px) var(--space-3, 12px);
-  box-shadow: var(--shadow-sm);
+  padding: var(--space-3, 12px) var(--space-3, 12px) var(--space-4, 16px);
+
+  /* Elevation — panel floats above the page */
+  box-shadow:
+    0 -4px 24px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.04);
+
+  /* Glass blur */
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .inner {
+    background: var(--bg-panel);
+    backdrop-filter: none;
+  }
+}
+
+[data-theme='day'] .inner {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(0,0,0,0.07);
+  box-shadow:
+    0 -4px 24px rgba(0,0,0,0.08),
+    0 0 0 1px rgba(0,0,0,0.04);
 }
 
 @media (max-width: 520px) {
   .inner {
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255,255,255,0.07);
     border-radius: var(--radius-lg, 14px);
-    padding: var(--space-2, 8px) var(--space-3, 12px) var(--space-3, 12px);
+    padding: var(--space-3, 12px) var(--space-3, 12px) var(--space-4, 16px);
     max-width: 100%;
-    box-shadow: var(--shadow-sm);
-    background: var(--bg-panel);
+    box-shadow:
+      0 -4px 24px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(255,255,255,0.04);
+    background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.85);
   }
 }
 
@@ -88,7 +116,7 @@
 
   width: 52px;
   height: 52px;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-md, 10px);
   border: 1px solid var(--border);
   background: var(--bg-input);
   color: var(--text-muted);
@@ -108,14 +136,15 @@
     background: var(--bg-panel);
     color: var(--text);
     border-color: var(--border-input);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
 }
 
 .controlBtn:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: scale(0.94);
   box-shadow: none;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background: var(--state-active);
+  transition: transform var(--transition-fast);
 }
 
 .controlBtn:focus-visible {
@@ -137,7 +166,7 @@
 
 .controlBtnLabel {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -171,37 +200,49 @@
   justify-content: center;
   gap: 3px;
 
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-sm, 8px);
+  /* Shape: circular — not square */
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   border: none;
+
+  /* Color */
   background: var(--color-accent);
   color: var(--bg);
 
   cursor: pointer;
+  flex-shrink: 0;
+
+  /* Glow ring — subtle accent halo that gives it weight */
+  box-shadow:
+    0 0 0 6px var(--color-accent-12),
+    0 4px 16px rgba(0,0,0,0.4);
+
   transition:
     background var(--transition-base),
     box-shadow var(--transition-base),
     transform var(--transition-fast);
-  flex-shrink: 0;
 }
 
-@media (hover: hover) {
-  .playBtn:hover:not(:disabled) {
-    background: var(--color-accent-bright);
-    box-shadow: 0 0 0 4px var(--color-accent-15);
-  }
+.playBtn:hover:not(:disabled) {
+  background: var(--color-accent-bright);
+  box-shadow:
+    0 0 0 8px var(--color-accent-22),
+    0 6px 20px rgba(0,0,0,0.5);
 }
 
 .playBtn:active:not(:disabled) {
-  transform: scale(0.96);
-  box-shadow: none;
-  transition: transform var(--transition-fast);
+  transform: scale(0.93);
+  box-shadow:
+    0 0 0 4px var(--color-accent-15),
+    0 2px 8px rgba(0,0,0,0.3);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .playBtn:disabled {
-  opacity: var(--state-disabled, 0.35);
+  opacity: 0.35;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .playBtn:focus-visible {
@@ -210,21 +251,15 @@
 }
 
 .playBtn svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   fill: currentColor;
   flex-shrink: 0;
 }
 
+/* Hide the text label inside the circular play button — icon only */
 .playBtnLabel {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  color: inherit;
-  pointer-events: none;
-  user-select: none;
+  display: none;
 }
 
 /* ── RESET — muted / secondary ── */
@@ -238,8 +273,8 @@
   }
 
   .playBtn {
-    width: 50px;
-    height: 52px;
+    width: 58px;
+    height: 58px;
   }
 }
 
@@ -250,12 +285,16 @@
   }
 
   .playBtn {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
   }
 
-  .controlBtnLabel,
-  .playBtnLabel {
+  .playBtn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .controlBtnLabel {
     display: none;
   }
 }
@@ -297,19 +336,28 @@
   flex-direction: row;
   align-items: center;
   align-self: center;
-  height: 38px;
+  height: 44px;
   min-height: 44px;
+
+  /* Elevated pill with border */
   background: var(--bg-input);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-input);
   border-radius: var(--radius-full);
   overflow: hidden;
+
+  /* Subtle shadow to lift it off the panel */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+[data-theme='day'] .wpmPill {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .wpmPillBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
+  width: 44px;
   min-width: 44px;
   min-height: 44px;
   height: 100%;
@@ -317,31 +365,35 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-base), color var(--transition-base);
   flex-shrink: 0;
+  font-size: 1.1rem;
+  font-weight: 400;
 }
 .wpmPillBtn:hover:not(:disabled) { background: var(--state-hover); color: var(--text); }
+.wpmPillBtn:active:not(:disabled) { background: var(--state-active); }
 .wpmPillBtn:disabled { opacity: var(--state-disabled, 0.35); cursor: not-allowed; }
 
 .wpmPillValue {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25em;
-  min-width: 90px;
+  gap: 0.2em;
+  min-width: 96px;
   height: 100%;
   background: transparent;
   border: none;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
   color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   cursor: text;
-  transition: background var(--transition-fast);
+  transition: background var(--transition-base);
   white-space: nowrap;
-  padding: 0 0.5rem;
+  padding: 0 0.6rem;
+  letter-spacing: -0.01em;
 }
 .wpmPillValue:hover { background: var(--state-hover); }
 
@@ -352,15 +404,16 @@
   100% { transform: scale(1);    background: transparent; }
 }
 .wpmPillFlash {
-  animation: wpmFlash 250ms ease-out;
+  animation: wpmFlash var(--transition-slow) ease-out;
 }
 
 .wpmUnit {
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--color-accent);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
 }
 
 .wpmPillInput {

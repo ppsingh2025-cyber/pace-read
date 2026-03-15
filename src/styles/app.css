@@ -359,13 +359,28 @@ body {
   padding: 0.5rem 1rem;
   flex-shrink: 0;
   gap: 0.5rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   /* Sticky at the top — mirrors footer's sticky-bottom behaviour.
      Excluded from focus/fullscreen mode via appShellFocused rule below. */
   position: sticky;
   top: 0;
   z-index: 501;
-  background: var(--bg); /* covers content that scrolls beneath it */
+
+  /* Glass header */
+  background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.75);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+
+[data-theme='day'] .topBar {
+  background: rgba(245, 240, 232, 0.82);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .topBar {
+    background: var(--bg-panel);
+  }
 }
 
 .topBarBrand {

@@ -1,6 +1,16 @@
 # Changelog
 
-## [1.7.0] — UI Phase 1+2: Token foundation + micro-interaction layer
+## [1.8.0] — Visual redesign: circular play button, viewport vignette, glass controls panel, glass top bar, premium WPM pill
+### Changed
+- **Play button** — redesigned as circular hero element (64 px diameter). Glow ring via `box-shadow` (`--color-accent-12` halo + depth shadow). `:hover` expands glow; `:active` scales to 0.93. Label hidden — icon only.
+- **Reading viewport** — inner vignette (`inset 0 0 80px rgba(0,0,0,0.6)`) focuses the eye on the ORP word. Outer depth shadow grounds the canvas. Border replaced with `box-shadow 0 0 0 1px` technique for smoother appearance. Day-theme lighter overrides added.
+- **Controls panel** — glass treatment: `background: rgba(var(--bg-panel-rgb), 0.85)` + `backdrop-filter: blur(16px) saturate(1.1)`. Elevation via `box-shadow: 0 -4px 24px`. Day-theme and `@supports not (backdrop-filter)` fallbacks included.
+- **Top bar** — glass navigation header: `background: rgba(var(--bg-panel-rgb), 0.75)` + `backdrop-filter: blur(20px) saturate(1.2)`. `border-bottom` uses `rgba(255,255,255,0.06)` for subtlety. Day-theme and `@supports` fallbacks included.
+- **WPM pill** — height fixed to `44px` (was inconsistent 38/44 mix). `border-radius: var(--radius-full)` pill shape. `border-color: var(--border-input)`. Elevated `box-shadow`. `+/−` buttons widened to `44px`. Value display: `font-size: 1rem`, `font-weight: 600`, `min-width: 96px`, `letter-spacing: -0.01em`. Unit text now uses `var(--color-accent)` at `0.7` opacity.
+- **Control buttons** — corner radius upgraded from `--radius-sm (8px)` to `--radius-md (10px)`. Hover adds `box-shadow: 0 2px 8px`. Active scales to `0.94`.
+- **Focal tick marks** — changed from hardcoded `#666`/`#999` to `var(--color-accent)` at `0.35` opacity. Now theme-synchronized across all four themes.
+
+
 ### Added
 - Shadow/elevation token scale (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-xl`) in `:root`; lighter overrides in `[data-theme="day"]`
 - Transition timing tokens (`--transition-fast: 100ms ease`, `--transition-base: 150ms ease`, `--transition-slow: 250ms ease`, `--transition-spring`) in `:root`
