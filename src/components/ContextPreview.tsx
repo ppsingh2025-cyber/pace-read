@@ -130,7 +130,7 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
 
         {/* Label */}
         <span className={styles.headingLabel}>
-          Page Preview
+          Preview
           {isDetached && (
             <button
               type="button"

@@ -9,7 +9,7 @@ import { useAuth } from '../auth/useAuth';
 import styles from '../styles/UserAvatar.module.css';
 
 export default function UserAvatar() {
-  const { user, isAuthenticated, isSupabaseConfigured, signInWithGoogle, signOut } = useAuth();
+  const { user, isAuthenticated, isSupabaseConfigured, signOut } = useAuth();
   if (!isSupabaseConfigured) return null;
 
   const avatarUrl = user?.user_metadata?.['avatar_url'] as string | undefined;
@@ -19,20 +19,7 @@ export default function UserAvatar() {
   const handleSignOutKey = (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') handleSignOut(); };
 
   if (!isAuthenticated) {
-    return (
-      <div
-        className={styles.avatarPlaceholder}
-        title="Sign in to sync across devices"
-        aria-label="Account"
-        role="button"
-        tabIndex={0}
-        style={{ cursor: 'pointer' }}
-        onClick={signInWithGoogle}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') signInWithGoogle(); }}
-      >
-        👤
-      </div>
-    );
+    return null;
   }
 
   return avatarUrl ? (
