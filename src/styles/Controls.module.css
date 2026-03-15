@@ -41,6 +41,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg, 14px);
   padding: var(--space-2, 8px) var(--space-3, 12px) var(--space-3, 12px);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 520px) {
@@ -49,11 +50,8 @@
     border-radius: var(--radius-lg, 14px);
     padding: var(--space-2, 8px) var(--space-3, 12px) var(--space-3, 12px);
     max-width: 100%;
-    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-sm);
     background: var(--bg-panel);
-  }
-  [data-theme='day'] .inner {
-    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -96,18 +94,33 @@
   color: var(--text-muted);
 
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-fast);
   flex-shrink: 0;
 }
 
-.controlBtn:hover:not(:disabled) {
-  background: var(--state-hover);
-  color: var(--text);
-  border-color: var(--text-muted);
+@media (hover: hover) {
+  .controlBtn:hover:not(:disabled) {
+    background: var(--bg-panel);
+    color: var(--text);
+    border-color: var(--border-input);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .controlBtn:active:not(:disabled) {
-  background: var(--state-active);
+  transform: scale(0.96);
+  box-shadow: none;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.controlBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .controlBtn:disabled {
@@ -166,21 +179,34 @@
   color: var(--bg);
 
   cursor: pointer;
-  transition: background 0.15s;
+  transition:
+    background var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-fast);
   flex-shrink: 0;
 }
 
-.playBtn:hover:not(:disabled) {
-  background: var(--color-accent-bright);
+@media (hover: hover) {
+  .playBtn:hover:not(:disabled) {
+    background: var(--color-accent-bright);
+    box-shadow: 0 0 0 4px var(--color-accent-15);
+  }
 }
 
 .playBtn:active:not(:disabled) {
-  background: var(--color-accent-deep);
+  transform: scale(0.96);
+  box-shadow: none;
+  transition: transform var(--transition-fast);
 }
 
 .playBtn:disabled {
   opacity: var(--state-disabled, 0.35);
   cursor: not-allowed;
+}
+
+.playBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
 }
 
 .playBtn svg {
@@ -291,7 +317,7 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--transition-fast), color var(--transition-fast);
   flex-shrink: 0;
 }
 .wpmPillBtn:hover:not(:disabled) { background: var(--state-hover); color: var(--text); }
@@ -313,7 +339,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   cursor: text;
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
   white-space: nowrap;
   padding: 0 0.5rem;
 }
@@ -326,7 +352,7 @@
   100% { transform: scale(1);    background: transparent; }
 }
 .wpmPillFlash {
-  animation: wpmFlash 0.2s ease-out;
+  animation: wpmFlash 250ms ease-out;
 }
 
 .wpmUnit {
@@ -383,7 +409,7 @@
   cursor: pointer;
   padding: 4px 10px;
   border-radius: var(--radius-sm);
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--transition-base), background var(--transition-base);
 }
 .resetRowBtn:hover:not(:disabled) {
   color: var(--color-danger, #e05252);

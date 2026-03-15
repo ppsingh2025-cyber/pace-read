@@ -55,6 +55,28 @@ Use these tokens for all padding, margin, and gap values. Do **not** use magic p
 --radius-full: 9999px
 ```
 
+### Shadow / Elevation Scale
+
+```css
+--shadow-sm   /* subtle grounding shadow — buttons, panels, inputs */
+--shadow-md   /* moderate elevation — cards, popovers */
+--shadow-lg   /* high elevation — drawers, sidebars (e.g. BurgerMenu panel) */
+--shadow-xl   /* maximum elevation — full-screen overlays, modals */
+```
+
+Dark themes use heavier opacity values; the `[data-theme="day"]` block overrides all four with lighter equivalents.
+
+### Transition Timing Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--transition-fast` | `100ms ease` | Transform/scale responses (`:active` states) |
+| `--transition-base` | `150ms ease` | Standard hover/focus transitions (color, background, border, box-shadow) |
+| `--transition-slow` | `250ms ease` | Structural transitions (accordion chevrons, body theme switch) |
+| `--transition-spring` | `300ms cubic-bezier(0.34, 1.56, 0.64, 1)` | Springy entrance animations (reserved) |
+
+**Rule:** Never use raw time values (`0.15s`, `0.12s`, `0.2s`, etc.) in any component CSS. Always use one of the four tokens above.
+
 ### ORP Scale Steps
 
 Pre-computed scale factors for the reading viewport word size. Used when `mainWordFontSize` is non-default.

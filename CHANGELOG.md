@@ -1,6 +1,30 @@
 # Changelog
 
-## [1.6.0] — Fine-tune menu + wizard restructure
+## [1.7.0] — UI Phase 1+2: Token foundation + micro-interaction layer
+### Added
+- Shadow/elevation token scale (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-xl`) in `:root`; lighter overrides in `[data-theme="day"]`
+- Transition timing tokens (`--transition-fast: 100ms ease`, `--transition-base: 150ms ease`, `--transition-slow: 250ms ease`, `--transition-spring`) in `:root`
+- `--bg-panel-rgb` token in all four theme blocks (midnight, warm, day, obsidian) for future `rgba()` usage
+- Inter Variable font via `@fontsource-variable/inter`; imported as very first line of `main.tsx`
+- `font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif` set on `:root` and all theme blocks
+- `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale` on `body`
+- Micro-interaction layer across all interactive surfaces:
+  - `.controlBtn`, `.playBtn` — multi-property transitions, `@media (hover: hover)` hover with `box-shadow`, `:active` scale, `:focus-visible` ring
+  - `.topBarIconBtn`, `.helpBtn` — upgraded to `@media (hover: hover)`, `:active` scale, `:focus-visible` ring
+  - `.cta` in InputPanel — proper hover (background + glow ring), `:active` scale, `:focus-visible` ring
+  - `.burgerBtn`, `.linkBtn`, `.profileBtn`, `.themeBtn`, `.sectionActionBtn` in BurgerMenu — full interaction pattern
+  - `.presetTile`, `.customTile`, `.wizardTile` in ReadingModes — full interaction pattern
+  - `.wpmStepBtn` — `@media (hover: hover)` hover, `:active` scale
+- `.inner` in Controls — grounding `box-shadow: var(--shadow-sm)` (structural panel)
+- `.panel` in BurgerMenu — `box-shadow: var(--shadow-lg)`
+### Changed
+- All raw `0.15s`, `0.12s`, `0.2s` transition values in modified files replaced with design tokens (`var(--transition-base)`, `var(--transition-fast)`, `var(--transition-slow)`)
+- `.cta` `font-weight` changed from `700` → `600` (correct Inter weight for CTAs)
+- `.titleInput` transition now includes `box-shadow` for the focus ring
+### Known Issues
+- WPM stepper buttons (`.wpmStepBtn`) are 26×26 px — below the 44 px touch target minimum. To be addressed in a separate task.
+
+
 ### Changed
 - Fine-tune menu reordered into 5 logical groups with thin dividers
 - Labels renamed to plain language (Reading anchor, Focus guides,
