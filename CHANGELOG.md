@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.4.0] — Gap fix · tagline · viewport nav · empty state · default text · session strip · footer
+### Fixed
+- **Black gap below footer** — added `min-height: 100dvh` to `.appShell` so the shell always fills the screen
+- **Tagline breakpoint** — `.topBarTagline` now hides at `max-width: 340px` (was 380px) so it stays visible on more phones
+- **Word nav overlay hidden** — `.wordNavOverlay` is now `display: none`; word count lives in the session strip in the controls dock
+- **Page nav pill wider** — `.pagePillOverlay` resized to 26px height with better padding, `letter-spacing`, and `--text-muted` colour for readability
+- **Page nav buttons larger** — `.pageNavBtn` is now 26×26px (was 22×22px)
+- **Day-theme nav overrides** — slightly more opaque backgrounds and explicit `color: var(--text)` on hover for contrast
+- **Empty state spacious** — `.emptyState` now uses `gap: 1rem`, `padding: 2rem 1.5rem`, transparent background; heading is `1.4rem` with tracking and centred; `emptyActionBtn` uses `--radius-lg` and taller padding
+- **Viewport expands when empty** — `.viewportEmpty` modifier added; `.readingMain:has(.viewportEmpty)` stretches to fill available height
+- **Session strip minimum 1%** — `pct` now uses `Math.max(1, ...)` so a loaded document never shows "0%"
+- **Large word-count truncation** — documents ≥ 10 000 words show as e.g. "32.3k" in the session strip
+- **Welcome text on first visit** — `WELCOME_TEXT` loaded automatically when no history exists; returning users see their last state
+- **Footer visual weight** — `.footer` is `opacity: 0.5` at rest, full opacity on hover
+
 ## [2.3.0] — Top bar: tagline visible, ThemeToggle restored, help circle button, sign-in moved to burger Account section
 ### Fixed
 - **Tagline visibility** — removed `display: flex; flex-direction: column; align-items: flex-start` from `.topBarTitle`; these flex properties made the title a column container that consumed all height, leaving zero space for the sibling tagline span

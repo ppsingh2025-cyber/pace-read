@@ -95,7 +95,7 @@ export default memo(function Controls({
   const jumpInputRef = useRef<HTMLInputElement>(null);
 
   const pct = words.length > 0
-    ? Math.round((currentWordIndex / Math.max(words.length - 1, 1)) * 100)
+    ? Math.max(1, Math.round((currentWordIndex / Math.max(words.length - 1, 1)) * 100))
     : 0;
 
   const handleJumpCommit = useCallback(() => {
@@ -157,7 +157,9 @@ export default memo(function Controls({
             >
               <span className={styles.sessionPct}>{hasWords ? `${pct}%` : '—'}</span>
               <span className={styles.sessionPos}>
-                {hasWords ? `Word ${currentWordIndex + 1} of ${words.length.toLocaleString()}` : 'No content loaded'}
+                {hasWords
+                  ? `Word ${(currentWordIndex + 1).toLocaleString()} of ${words.length >= 10000 ? `${(words.length / 1000).toFixed(1)}k` : words.length.toLocaleString()}`
+                  : 'No content loaded'}
               </span>
             </button>
           )}

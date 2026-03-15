@@ -43,6 +43,7 @@ import ResetConfirmModal from './components/ResetConfirmModal';
 import ThemeToggle from './components/ThemeToggle';
 import { Toaster, toast } from 'react-hot-toast';
 import { PRESET_MODES } from './config/readingModePresets';
+import { WELCOME_TEXT } from './config/welcomeText';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import './styles/app.css';
@@ -174,6 +175,15 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Load welcome text on first visit — only if no words loaded and no history
+  useEffect(() => {
+    if (words.length === 0 && records.length === 0) {
+      const { words: parsed, rawLines } = parseRawText(WELCOME_TEXT, 'Welcome to PaceRead');
+      handleTextReady(parsed, 'Welcome to PaceRead', rawLines);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount only
 
   /** Persist reading progress; finalize adaptive speed when session ends */
   useEffect(() => {

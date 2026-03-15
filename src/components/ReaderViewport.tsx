@@ -393,6 +393,7 @@ const ReaderViewport = memo(function ReaderViewport({
         fullHeight ? styles.viewportFull : '',
         isEyeFocus ? styles.viewportEyeFocus : '',
         isPlaying ? styles.viewportActive : '',
+        (!hasWords && !isLoading) ? styles.viewportEmpty : '',
       ].filter(Boolean).join(' ')}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

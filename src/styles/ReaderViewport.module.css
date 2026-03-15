@@ -63,6 +63,12 @@
   border-radius: 0;
 }
 
+.viewportEmpty {
+  height: auto;
+  min-height: 280px;
+  flex: 1;
+}
+
 /* Scale words up in fullscreen so they use available space */
 .viewportFull .wordSlot {
   font-size: clamp(2rem, calc(10vw / var(--slot-count, 1)), 6rem);
@@ -212,10 +218,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
   width: 100%;
   height: 100%;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
+  background: transparent;
 }
 
 .hiddenFileInput {
@@ -224,15 +231,20 @@
 
 .emptyHeading {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--vp-text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .emptySubhead {
-  font-size: 0.82rem;
-  color: var(--vp-placeholder, #888);
+  font-size: 0.88rem;
+  color: var(--vp-placeholder);
   margin: 0;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .emptyActions {
@@ -248,11 +260,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  background: none;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--vp-border);
-  border-radius: var(--radius-md);
-  padding: 1rem 0.75rem;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 0.75rem;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   color: var(--vp-text);
@@ -488,23 +500,32 @@
 }
 .pageNavBtn {
   display: flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; padding: 0;
-  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
+  width: 26px; height: 26px; padding: 0;
+  background: rgba(0,0,0,0.40);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 4px; color: var(--text-faint); cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
-.pageNavBtn:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: var(--text-muted); }
+.pageNavBtn:hover:not(:disabled) { background: rgba(255,255,255,0.14); color: var(--text-muted); }
 .pageNavBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 .pagePillOverlay {
-  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: var(--radius-sm); color: var(--text-faint);
-  font-size: 0.62rem; font-variant-numeric: tabular-nums;
-  padding: 2px 6px; cursor: pointer; height: 22px;
-  display: flex; align-items: center; white-space: nowrap;
+  background: rgba(0,0,0,0.40);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  padding: 3px 10px;
+  cursor: pointer;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
   transition: background 0.12s, color 0.12s;
+  letter-spacing: 0.01em;
 }
-.pagePillOverlay:hover { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+.pagePillOverlay:hover { background: rgba(255,255,255,0.14); color: var(--text); }
 
 .pageJumpPopover {
   position: absolute; bottom: calc(100% + 6px); left: 0;
@@ -549,9 +570,7 @@
 
 /* ── Word nav overlay — mirrors pageNavOverlay but right-anchored ── */
 .wordNavOverlay {
-  display: flex; align-items: center; gap: 2px;
-  pointer-events: all; position: relative;
-  margin-left: auto; /* always push to the right edge */
+  display: none; /* word count moved to session strip in controls dock */
 }
 
 /* Word-jump popover opens above, right-anchored so it never overflows the edge */
@@ -579,13 +598,15 @@
 
 [data-theme='day'] .pageNavBtn,
 [data-theme='day'] .pagePillOverlay {
-  background: rgba(255,255,255,0.55); border-color: rgba(0,0,0,0.1); color: var(--text-muted);
+  background: rgba(255,255,255,0.60);
+  border-color: rgba(0,0,0,0.12);
+  color: var(--text-muted);
 }
 [data-theme='day'] .wordCountOverlay {
   display: none; /* duplicated by session strip in controls dock */
 }
 [data-theme='day'] .pageNavBtn:hover:not(:disabled),
-[data-theme='day'] .pagePillOverlay:hover { background: rgba(255,255,255,0.8); }
+[data-theme='day'] .pagePillOverlay:hover { background: rgba(255,255,255,0.85); color: var(--text); }
 
 /* ── Feature 1: Percentage prefix in word-count pill ─────────── */
 
