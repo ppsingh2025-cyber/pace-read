@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [v1.7.0]
 ### Fixed
 - Tab-switch auto-pause now shows an explanatory toast ("⏸ Paused — you switched tabs") and a resume nudge on return
 - Eye Focus mode now shows an exit hint ("Tap 👁 or Esc to exit") on enter, matching regular Focus mode behaviour
@@ -13,6 +13,13 @@
 - Session strip: "↕ jump" affordance hint on the word-position button
 - Fine-tune settings: description line beneath each toggle/control explaining its effect
 - Onboarding demo: speed ramps from 150 WPM to 250 WPM over first 10 words (was: fixed 250 WPM cold start)
+- **Onboarding v6: 3-step flow** — theme selection removed from onboarding; replaced by a post-onboarding ThemeToggle coach mark (fires once, 12s after onboarding, `fastread_theme_coach_shown` key)
+- **Onboarding demo: 3-phase speed ramp** — 200 WPM → 275 WPM → 350 WPM across three phrase segments (replaces 150→250 ramp)
+- **Onboarding demo: ORP annotation** — at word index 17 ("across") the demo holds 700ms and displays "← lock-on letter" below the highlighted ORP character
+- **Onboarding demo: speed calibration** — after demo finishes, heading changes to "How did that feel?" with three stacked buttons (Too slow / Just right / A bit fast) that set starting WPM (350 / 250 / 175) and auto-advance to Step 1 after 1200ms
+- **Onboarding Step 2: activation cards** — replaces former theme + how-to-load steps with "Load something and begin": Upload file, Paste/URL, Practice story, I'll decide later
+- **Welcome text** — replaced 300-word RSVP instruction wall with 180-word lighthouse story + 2-line actionable prompt
+- **`onComplete` callback extended** — accepts `wpm?: number` and `action?: 'paste' | 'file' | 'story' | null`; App.tsx applies calibrated WPM via `setWpm` and fires paste panel or practice story on onboarding exit
 
 ## [2.4.0] — Gap fix · tagline · viewport nav · empty state · default text · session strip · footer
 ### Fixed

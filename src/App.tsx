@@ -48,6 +48,14 @@ import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import './styles/app.css';
 
+const PRACTICE_STORY_TEXT =
+  'The lighthouse keeper wound the mechanism each evening, as his father had, and his ' +
+  'father before him. He was the fourth in a line of men who had turned this light against ' +
+  'the dark water, and he expected someday to be the last. The boats knew the rhythm. Two ' +
+  'flashes, a pause, two more. Ships that understood the signal found the channel and passed ' +
+  'safely into the harbor. Ships that ignored it — or missed it in fog — found the rocks. ' +
+  'The light was not a decoration. It was a fact.';
+
 /** Per-format file size limits (bytes). */
 const FORMAT_LIMITS: Record<string, number> = {
   pdf:  50  * 1024 * 1024, // 50 MB
@@ -112,6 +120,7 @@ export default function App() {
     applyMode,
     setActiveMode,
     activeMode,
+    setWpm,
     setPendingSpeedSuggestion,
   } = useReaderContext();
 
@@ -149,6 +158,7 @@ export default function App() {
   const [, setContextExpanded] = useState(false);
   const [showPostOnboardingCoach, setShowPostOnboardingCoach] = useState(false);
   const [showBurgerCoach, setShowBurgerCoach] = useState(false);
+  const [showThemeCoach, setShowThemeCoach] = useState(false);
   const [showFocusHint, setShowFocusHint] = useState(false);
   const [showEyeFocusHint, setShowEyeFocusHint] = useState(false);
   const [showFirstActionCTA, setShowFirstActionCTA] = useState(false);
@@ -564,16 +574,28 @@ export default function App() {
   }, [play, pause]);
 
   const completeOnboarding = useCallback(
-    (prefs: { theme: Theme; modeId: PresetModeId }) => {
+    (prefs: {
+      theme: Theme;
+      modeId: PresetModeId;
+      wpm?: number;
+      action?: 'paste' | 'file' | 'story' | null;
+    }) => {
       setTheme(prefs.theme);
       applyMode(PRESET_MODES[prefs.modeId].settings);
       setActiveMode(prefs.modeId);
+      if (prefs.wpm) setWpm(prefs.wpm);
       localStorage.setItem('fastread_onboarding_complete', 'true');
       setShowOnboarding(false);
+      if (prefs.action === 'paste') {
+        setShowPaste(true);
+      } else if (prefs.action === 'story') {
+        const { words: parsed, rawLines } = parseRawText(PRACTICE_STORY_TEXT, 'Practice Story');
+        handleTextReady(parsed, 'Practice Story', rawLines);
+      }
       setShowFirstActionCTA(true);
       setShowPostOnboardingCoach(true);
     },
-    [setTheme, applyMode, setActiveMode],
+    [setTheme, applyMode, setActiveMode, setWpm, setShowPaste, handleTextReady],
   );
 
   const handleWhatsNewDismiss = useCallback(() => {
@@ -605,6 +627,26 @@ export default function App() {
     }
   }, [showBurgerCoach, words.length]); // trigger only when coach is shown or word count changes
 
+  // Theme coach: fires once 12s after onboarding completes, dismisses on click or after 5s
+  useEffect(() => {
+    if (!showPostOnboardingCoach) return;
+    if (localStorage.getItem('fastread_theme_coach_shown')) return;
+    // 12 s delay gives the user time to explore before the coach appears
+    const t = setTimeout(() => {
+      setShowThemeCoach(true);
+      localStorage.setItem('fastread_theme_coach_shown', 'true');
+    }, 12000);
+    return () => clearTimeout(t);
+  }, [showPostOnboardingCoach]);
+
+  useEffect(() => {
+    if (!showThemeCoach) return;
+    const hide = setTimeout(() => setShowThemeCoach(false), 5000); // auto-hide after 5 s
+    const dismiss = () => setShowThemeCoach(false);
+    window.addEventListener('click', dismiss, { once: true });
+    return () => { clearTimeout(hide); window.removeEventListener('click', dismiss); };
+  }, [showThemeCoach]);
+
   return (
     <AuthProvider>
     {/* ── Global reading progress bar ── */}
@@ -620,6 +662,7 @@ export default function App() {
     {!showWhatsNew && showOnboarding && (
       <OnboardingOverlay
         onComplete={completeOnboarding}
+        onFileSelect={handleFileSelect}
         initialTheme={theme}
         initialModeId={activeMode !== 'custom' ? activeMode : 'focus'}
       />
@@ -650,7 +693,15 @@ export default function App() {
           </div>
         </div>
         <div className="topBarActions">
-          <ThemeToggle />
+          <div style={{ position: 'relative' }}>
+            <ThemeToggle />
+            {showThemeCoach && (
+              <div className="themeCoach" aria-live="polite" role="status">
+                Try different themes here
+                <span className="themeCoachArrow" aria-hidden="true" />
+              </div>
+            )}
+          </div>
           <button
             className="helpBtn"
             onClick={() => setShowHelp(true)}

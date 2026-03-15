@@ -921,3 +921,30 @@ kbd {
   border-radius: 0 2px 2px 0;
   box-shadow: 0 0 8px var(--color-accent-30);
 }
+
+/* ─── Post-onboarding theme coach mark ─────────────────────── */
+.themeCoach {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--color-accent);
+  color: var(--bg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 600;
+  animation: coachFadeIn 0.25s ease forwards;
+}
+.themeCoachArrow {
+  position: absolute;
+  top: -5px;
+  right: 1rem;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--color-accent);
+}
