@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.0] — UX polish: burger fix, tagline contrast, sign-in button, duplicate word count removed, preview label
+### Fixed
+- **Burger menu overlay** — removed `backdrop-filter` from `.inner` in `Controls.module.css`; iOS WebKit compositing bug caused the controls panel to paint above the burger menu fixed overlay regardless of z-index; replaced glass blur with solid `--bg-panel` background
+- **Tagline contrast** — `.topBarTagline` changed from `var(--text-faint)` to `var(--text-muted)` for all four themes (text-faint was near-invisible on day + obsidian themes); also removed leftover `.topBarTitle::after` CSS pseudo-element (now that TSX has the real span it was rendering the tagline twice)
+- **Duplicate word count** — `.wordCountOverlay` inside the reading viewport hidden (`display: none`) — session strip in the controls dock is the single source of truth for reading position
+### Changed
+- **Sign in button** — `UserAvatar` unauthenticated state replaced emoji `👤` placeholder with a proper "Sign in" ghost pill button that calls `signInWithGoogle`; styled with `--border-input`, `--radius-full`, hover/focus/active states
+- **ContextPreview label** — "Page Preview" → "Preview" (never wraps on any screen width)
+
 ## [2.0.0] — Full UI/UX Facelift Part 2: viewport active glow, progress bar wired, top bar tagline TSX, controls 3-layer dock TSX, word-jump, help keyboard shortcut
 ### Changed
 - **Reading viewport** — simplified `box-shadow` (explicit `border: 1px solid` + `inset 0 0 60px` vignette + `0 4px 24px` depth); new `.viewportActive` glow state: `border-color: --color-accent-30`, `0 0 0 1px --color-accent-22` outer ring applied when `isPlaying === true`

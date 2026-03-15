@@ -8,7 +8,7 @@ import { useAuth } from '../auth/useAuth';
 import styles from '../styles/UserAvatar.module.css';
 
 export default function UserAvatar() {
-  const { user, isAuthenticated, isSupabaseConfigured } = useAuth();
+  const { user, isAuthenticated, isSupabaseConfigured, signInWithGoogle } = useAuth();
   if (!isSupabaseConfigured) return null;
 
   const avatarUrl = user?.user_metadata?.['avatar_url'] as string | undefined;
@@ -16,9 +16,14 @@ export default function UserAvatar() {
 
   if (!isAuthenticated) {
     return (
-      <div className={styles.avatarPlaceholder} title="Sign in to sync across devices" aria-label="Account">
-        👤
-      </div>
+      <button
+        className={styles.signInBtn}
+        onClick={signInWithGoogle}
+        title="Sign in to sync your reading across devices"
+        aria-label="Sign in with Google"
+      >
+        Sign in
+      </button>
     );
   }
 

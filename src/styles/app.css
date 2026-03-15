@@ -417,35 +417,36 @@ body {
   line-height: 1.1;
 }
 
-/* Tagline injected via CSS — appears below brand name without TSX changes */
-.topBarTitle::after {
-  content: "Read faster, Understand Better";
-  display: block;
-  font-size: 0.62rem;
-  font-weight: 400;
-  color: var(--text-faint);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-
 /* Separate class for when TSX adds explicit tagline element */
 .topBarTagline {
   font-size: 0.62rem;
   font-weight: 400;
-  color: var(--text-faint);
   letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+  /* Default (midnight): --text-muted gives enough contrast on dark glass */
+  color: var(--text-muted);
+}
+
+/* Day theme: dark text on light background */
+[data-theme='day'] .topBarTagline {
+  color: var(--text-muted);
+}
+
+/* Obsidian: slightly brighter than text-faint on near-black */
+[data-theme='obsidian'] .topBarTagline {
+  color: var(--text-muted);
+}
+
+/* Warm: text-muted works on warm dark bg */
+[data-theme='warm'] .topBarTagline {
+  color: var(--text-muted);
 }
 
 @media (max-width: 380px) {
   .topBarTagline { display: none; }
-  .topBarTitle::after { display: none; }
 }
 
 /* ─── 2. Reading main ───────────────────────────────────────── */

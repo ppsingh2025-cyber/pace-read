@@ -522,6 +522,7 @@
 .pageJumpHint { font-size: 0.65rem; color: var(--text-faint); text-align: center; }
 
 .wordCountOverlay {
+  display: none; /* duplicated by session strip in controls dock */
   font-size: 0.62rem; font-variant-numeric: tabular-nums;
   color: var(--text-faint); letter-spacing: 0.02em;
   pointer-events: all; white-space: nowrap;
@@ -577,9 +578,11 @@
 .wordJumpSelect:focus { border-color: var(--color-accent); }
 
 [data-theme='day'] .pageNavBtn,
-[data-theme='day'] .pagePillOverlay,
-[data-theme='day'] .wordCountOverlay {
+[data-theme='day'] .pagePillOverlay {
   background: rgba(255,255,255,0.55); border-color: rgba(0,0,0,0.1); color: var(--text-muted);
+}
+[data-theme='day'] .wordCountOverlay {
+  display: none; /* duplicated by session strip in controls dock */
 }
 [data-theme='day'] .pageNavBtn:hover:not(:disabled),
 [data-theme='day'] .pagePillOverlay:hover { background: rgba(255,255,255,0.8); }
@@ -588,6 +591,7 @@
 
 /* Percentage shown BEFORE the "W" label — muted color to visually separate */
 .wcPctPre {
+  display: none; /* duplicated by session strip in controls dock */
   font-variant-numeric: tabular-nums;
   color: var(--text-faint);
   opacity: 0.85;

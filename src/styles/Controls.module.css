@@ -17,7 +17,10 @@
   .controls { padding: var(--space-1) var(--space-3); flex: 1; justify-content: center; }
 }
 
-/* ── Inner dock — glass card ── */
+/* ── Inner dock — solid card (no backdrop-filter)
+ * backdrop-filter intentionally removed — it caused iOS WebKit compositing
+ * bug where the controls panel painted above the burger menu fixed overlay.
+ * Uses solid semi-transparent bg instead for the same visual depth. */
 .inner {
   width: 100%;
   max-width: 480px;
@@ -25,26 +28,26 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.85);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius-lg, 14px);
   overflow: hidden;
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.4));
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  /* NO z-index — inherits document flow, does not compete with fixed overlays */
+  /* NO backdrop-filter — see comment above */
+  /* NO z-index — does not compete with fixed overlays */
 }
-@supports not (backdrop-filter: blur(1px)) { .inner { background: var(--bg-panel); } }
 [data-theme='day'] .inner {
-  background: rgba(255,255,255,0.82);
-  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--bg-panel);
+  border: 1px solid rgba(0,0,0,0.09);
+  box-shadow: var(--shadow-md);
 }
 @media (max-width: 520px) { .inner { max-width: 100%; } }
 @media (max-height: 480px) and (orientation: landscape) {
   .inner {
-    border: none; border-radius: 0;
-    backdrop-filter: none; -webkit-backdrop-filter: none;
-    max-width: 100%; box-shadow: none;
+    border: none;
+    border-radius: 0;
+    max-width: 100%;
+    box-shadow: none;
   }
 }
 
