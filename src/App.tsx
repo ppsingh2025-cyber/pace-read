@@ -40,6 +40,7 @@ import { AuthProvider } from './auth/AuthContext';
 import SignInPrompt from './auth/SignInPrompt';
 import UserAvatar from './components/UserAvatar';
 import ResetConfirmModal from './components/ResetConfirmModal';
+import ThemeToggle from './components/ThemeToggle';
 import { Toaster, toast } from 'react-hot-toast';
 import { PRESET_MODES } from './config/readingModePresets';
 import type { Theme } from './context/readerContextDef';
@@ -624,6 +625,15 @@ export default function App() {
           </div>
         </div>
         <div className="topBarActions">
+          <ThemeToggle />
+          <button
+            className="helpBtn"
+            onClick={() => setShowHelp(true)}
+            title="How to use PaceRead"
+            aria-label="Help"
+          >
+            ?
+          </button>
           <UserAvatar />
         </div>
       </header>

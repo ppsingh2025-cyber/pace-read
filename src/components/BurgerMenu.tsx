@@ -27,6 +27,7 @@ import { APP_VERSION } from '../version';
 import { IndexedDBService } from '../sync/IndexedDBService';
 import { getThemeOrpAccent } from '../config/orpColors';
 import toast from 'react-hot-toast';
+import { useAuth } from '../auth/useAuth';
 import styles from '../styles/BurgerMenu.module.css';
 
 const THEME_ICONS: Record<Theme, string> = {
@@ -82,6 +83,17 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, onResumeFromCa
     setActiveCustomModeId,
   } = useReaderContext();
   const [confirmReset, setConfirmReset] = useState(false);
+
+  const {
+    isAuthenticated,
+    isSupabaseConfigured,
+    signInWithGoogle,
+    signOut,
+    user,
+  } = useAuth();
+  const accountName = (user?.user_metadata?.['full_name'] as string | undefined)
+    ?? user?.email
+    ?? 'User';
 
   // During active reading, advanced settings are collapsed unless user expands them.
   // Resets every time the menu is opened while playing (so re-opening the menu during
@@ -299,6 +311,44 @@ export default function BurgerMenu({ onFileSelect, onReplayIntro, onResumeFromCa
                   </button>
                 )}
               </section>
+
+              {/* ── Account ────────────────────────────────────────────── */}
+              {isSupabaseConfigured && (
+                <section className={styles.section}>
+                  <h3 className={styles.sectionTitle}>Account</h3>
+                  {isAuthenticated ? (
+                    <div className={styles.accountRow}>
+                      <span className={styles.accountName}>{accountName}</span>
+                      <button
+                        type="button"
+                        className={styles.signOutBtn}
+                        onClick={() => {
+                          if (confirm('Sign out?')) {
+                            signOut();
+                            close();
+                          }
+                        }}
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.signInBurgerBtn}
+                      onClick={() => { signInWithGoogle(); close(); }}
+                    >
+                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none"
+                           stroke="currentColor" strokeWidth="2"
+                           strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                      </svg>
+                      Sign in to sync reading
+                    </button>
+                  )}
+                </section>
+              )}
 
               {/* ── About ───────────────────────────────────────── */}
               <section className={styles.section}>

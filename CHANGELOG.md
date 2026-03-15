@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0] — Top bar: tagline visible, ThemeToggle restored, help circle button, sign-in moved to burger Account section
+### Fixed
+- **Tagline visibility** — removed `display: flex; flex-direction: column; align-items: flex-start` from `.topBarTitle`; these flex properties made the title a column container that consumed all height, leaving zero space for the sibling tagline span
+- **ThemeToggle restored** — added `ThemeToggle` import and component back into `topBarActions` in `App.tsx`
+- **Help circle button** — added `?` button to `topBarActions` wired to `setShowHelp(true)`; restyled `.helpBtn` from 44px square to 36px circle (`border-radius: 50%`)
+- **Sign-in moved to burger** — unauthenticated `UserAvatar` now returns `null` (clean top bar); burger menu gains an Account section with "Sign in to sync reading" button (only when Supabase is configured) and name + sign-out when authenticated
+
 ## [2.2.0] — Fix: burger portal (iOS backdrop-filter trap), obsidian topBar visible, contextStrip gap removed
 ### Fixed
 - **Burger overlay (iOS portal fix)** — wrapped `{open && (...)}` block in `createPortal(…, document.body)` in `BurgerMenu.tsx`; iOS Safari WebKit bug #224093 traps `position:fixed` descendants inside an ancestor with `backdrop-filter` — portaling to `document.body` escapes all ancestor compositing layers so the full-screen overlay now covers the entire viewport on iOS
