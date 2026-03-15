@@ -1,6 +1,99 @@
 # Changelog
 
-## [1.6.0] — Fine-tune menu + wizard restructure
+## [2.4.0] — Gap fix · tagline · viewport nav · empty state · default text · session strip · footer
+### Fixed
+- **Black gap below footer** — added `min-height: 100dvh` to `.appShell` so the shell always fills the screen
+- **Tagline breakpoint** — `.topBarTagline` now hides at `max-width: 340px` (was 380px) so it stays visible on more phones
+- **Word nav overlay hidden** — `.wordNavOverlay` is now `display: none`; word count lives in the session strip in the controls dock
+- **Page nav pill wider** — `.pagePillOverlay` resized to 26px height with better padding, `letter-spacing`, and `--text-muted` colour for readability
+- **Page nav buttons larger** — `.pageNavBtn` is now 26×26px (was 22×22px)
+- **Day-theme nav overrides** — slightly more opaque backgrounds and explicit `color: var(--text)` on hover for contrast
+- **Empty state spacious** — `.emptyState` now uses `gap: 1rem`, `padding: 2rem 1.5rem`, transparent background; heading is `1.4rem` with tracking and centred; `emptyActionBtn` uses `--radius-lg` and taller padding
+- **Viewport expands when empty** — `.viewportEmpty` modifier added; `.readingMain:has(.viewportEmpty)` stretches to fill available height
+- **Session strip minimum 1%** — `pct` now uses `Math.max(1, ...)` so a loaded document never shows "0%"
+- **Large word-count truncation** — documents ≥ 10 000 words show as e.g. "32.3k" in the session strip
+- **Welcome text on first visit** — `WELCOME_TEXT` loaded automatically when no history exists; returning users see their last state
+- **Footer visual weight** — `.footer` is `opacity: 0.5` at rest, full opacity on hover
+
+## [2.3.0] — Top bar: tagline visible, ThemeToggle restored, help circle button, sign-in moved to burger Account section
+### Fixed
+- **Tagline visibility** — removed `display: flex; flex-direction: column; align-items: flex-start` from `.topBarTitle`; these flex properties made the title a column container that consumed all height, leaving zero space for the sibling tagline span
+- **ThemeToggle restored** — added `ThemeToggle` import and component back into `topBarActions` in `App.tsx`
+- **Help circle button** — added `?` button to `topBarActions` wired to `setShowHelp(true)`; restyled `.helpBtn` from 44px square to 36px circle (`border-radius: 50%`)
+- **Sign-in moved to burger** — unauthenticated `UserAvatar` now returns `null` (clean top bar); burger menu gains an Account section with "Sign in to sync reading" button (only when Supabase is configured) and name + sign-out when authenticated
+
+## [2.2.0] — Fix: burger portal (iOS backdrop-filter trap), obsidian topBar visible, contextStrip gap removed
+### Fixed
+- **Burger overlay (iOS portal fix)** — wrapped `{open && (...)}` block in `createPortal(…, document.body)` in `BurgerMenu.tsx`; iOS Safari WebKit bug #224093 traps `position:fixed` descendants inside an ancestor with `backdrop-filter` — portaling to `document.body` escapes all ancestor compositing layers so the full-screen overlay now covers the entire viewport on iOS
+- **Obsidian topBar** — added `[data-theme='obsidian'] .topBar` override with `rgba(28,28,28,0.95)` background; the previous value `rgba(10,10,10,0.80)` was visually indistinguishable from the `#000` page background; also added explicit midnight and warm overrides for completeness
+- **contextStrip gap** — removed `padding-bottom: calc(0.5rem + 2.75rem)` from `.contextStrip`; the 2.75rem was intended to prevent footer overlap but instead created a visible black gap below the collapsed preview panel
+
+## [2.1.0] — UX polish: burger fix, tagline contrast, sign-in button, duplicate word count removed, preview label
+### Fixed
+- **Burger menu overlay** — removed `backdrop-filter` from `.inner` in `Controls.module.css`; iOS WebKit compositing bug caused the controls panel to paint above the burger menu fixed overlay regardless of z-index; replaced glass blur with solid `--bg-panel` background
+- **Tagline contrast** — `.topBarTagline` changed from `var(--text-faint)` to `var(--text-muted)` for all four themes (text-faint was near-invisible on day + obsidian themes); also removed leftover `.topBarTitle::after` CSS pseudo-element (now that TSX has the real span it was rendering the tagline twice)
+- **Duplicate word count** — `.wordCountOverlay` inside the reading viewport hidden (`display: none`) — session strip in the controls dock is the single source of truth for reading position
+### Changed
+- **Sign in button** — `UserAvatar` unauthenticated state replaced emoji `👤` placeholder with a proper "Sign in" ghost pill button that calls `signInWithGoogle`; styled with `--border-input`, `--radius-full`, hover/focus/active states
+- **ContextPreview label** — "Page Preview" → "Preview" (never wraps on any screen width)
+
+## [2.0.0] — Full UI/UX Facelift Part 2: viewport active glow, progress bar wired, top bar tagline TSX, controls 3-layer dock TSX, word-jump, help keyboard shortcut
+### Changed
+- **Reading viewport** — simplified `box-shadow` (explicit `border: 1px solid` + `inset 0 0 60px` vignette + `0 4px 24px` depth); new `.viewportActive` glow state: `border-color: --color-accent-30`, `0 0 0 1px --color-accent-22` outer ring applied when `isPlaying === true`
+- **Top bar** — TSX restructure: `<span className="topBarTitle">` replaced with `<div className="topBarBrandText">` containing title + tagline "Read faster, Understand Better"; `SyncStatusIndicator`, `ThemeToggle`, and help `?` button removed from `topBarActions` (theme accessible via BurgerMenu drawer; help opens via `?` keyboard shortcut)
+- **Controls dock** — full 3-layer TSX restructure: Layer 1 = session strip (`pct%`, word position, reset icon); Layer 2 = action row (Upload+Paste cluster | circular play | Back+Next cluster); Layer 3 = WPM stepper pill; `resetRow` removed, merged into session strip
+- **Controls context** — `currentWordIndex` and `goToWord` added to context destructure
+### Added
+- **Word jump** — session strip `pct%` label is now a tappable button that opens an inline input; supports both word number (`234`) and percentage (`47%`) formats; focus auto-set on open
+- **Reading progress bar** — `<div className="readingProgressBar">` wired in App.tsx with `currentWordIndex / words.length` width calculation
+- **`?` keyboard shortcut** — pressing `?` toggles the HelpModal (replaces the removed top-bar `?` button)
+
+## [1.9.0] — Full UI/UX Facelift Part 1: reading progress bar, glass top bar with tagline, controls v3 dock, burger menu z-index fix, ContextPreview glass card
+### Changed
+- **Top bar** — `will-change: backdrop-filter` for stable composite layer; opacity raised to 0.80; `transition: opacity 0.15s ease`; day-theme and `@supports` fallbacks updated
+- **Top bar brand** — tagline "Read faster, Understand Better" injected via CSS `::after` (no TSX changes); `topBarBrandText` and `topBarTagline` classes added for Part 2 TSX update; title scaled to `clamp(0.9rem, 2.5vw, 1.1rem)` / weight 700
+- **Top bar icon buttons** — ghost border (`transparent` by default), `text-faint` color, simplified hover with `state-hover` bg; removed `box-shadow` and extra transitions
+- **Controls dock** — full v3 redesign: `isolation: isolate` removed from `.controls` (was causing burger menu backdrop to paint behind glass panels on WebKit/iOS Safari); `.inner` uses `overflow: hidden` and `--shadow-md` token with no z-index; new layer classes `.sessionStrip`, `.btnCluster`, `.wpmRow` ready for Part 2 TSX update; backward-compat `.resetRow`/`.resetRowBtn` preserved
+- **Burger menu backdrop** — `z-index: 600 → 1200` (above all backdrop-filter compositing layers); `top: env(safe-area-inset-top) → top: 0`; added `isolation: isolate` and `-webkit-backdrop-filter`
+- **ContextPreview** — `.preview` glass card (`rgba(--bg-panel-rgb, 0.75)` + `backdrop-filter: blur(12px)`); `.headerRow` minimal dark strip with rgba borders; `.content` font-size `0.85rem`, line-height `1.75`
+### Added
+- **Reading progress bar** — `.readingProgressBar` (`position: fixed`, `z-index: 2000`, above burger backdrop) + `.readingProgressFill` (accent color, glow via `--color-accent-30`) ready for TSX wiring in Part 2
+
+## [1.8.0] — Visual redesign: circular play button, viewport vignette, glass controls panel, glass top bar, premium WPM pill
+### Changed
+- **Play button** — redesigned as circular hero element (64 px diameter). Glow ring via `box-shadow` (`--color-accent-12` halo + depth shadow). `:hover` expands glow; `:active` scales to 0.93. Label hidden — icon only.
+- **Reading viewport** — inner vignette (`inset 0 0 80px rgba(0,0,0,0.6)`) focuses the eye on the ORP word. Outer depth shadow grounds the canvas. Border replaced with `box-shadow 0 0 0 1px` technique for smoother appearance. Day-theme lighter overrides added.
+- **Controls panel** — glass treatment: `background: rgba(var(--bg-panel-rgb), 0.85)` + `backdrop-filter: blur(16px) saturate(1.1)`. Elevation via `box-shadow: 0 -4px 24px`. Day-theme and `@supports not (backdrop-filter)` fallbacks included.
+- **Top bar** — glass navigation header: `background: rgba(var(--bg-panel-rgb), 0.75)` + `backdrop-filter: blur(20px) saturate(1.2)`. `border-bottom` uses `rgba(255,255,255,0.06)` for subtlety. Day-theme and `@supports` fallbacks included.
+- **WPM pill** — height fixed to `44px` (was inconsistent 38/44 mix). `border-radius: var(--radius-full)` pill shape. `border-color: var(--border-input)`. Elevated `box-shadow`. `+/−` buttons widened to `44px`. Value display: `font-size: 1rem`, `font-weight: 600`, `min-width: 96px`, `letter-spacing: -0.01em`. Unit text now uses `var(--color-accent)` at `0.7` opacity.
+- **Control buttons** — corner radius upgraded from `--radius-sm (8px)` to `--radius-md (10px)`. Hover adds `box-shadow: 0 2px 8px`. Active scales to `0.94`.
+- **Focal tick marks** — changed from hardcoded `#666`/`#999` to `var(--color-accent)` at `0.35` opacity. Now theme-synchronized across all four themes.
+
+
+### Added
+- Shadow/elevation token scale (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-xl`) in `:root`; lighter overrides in `[data-theme="day"]`
+- Transition timing tokens (`--transition-fast: 100ms ease`, `--transition-base: 150ms ease`, `--transition-slow: 250ms ease`, `--transition-spring`) in `:root`
+- `--bg-panel-rgb` token in all four theme blocks (midnight, warm, day, obsidian) for future `rgba()` usage
+- Inter Variable font via `@fontsource-variable/inter`; imported as very first line of `main.tsx`
+- `font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif` set on `:root` and all theme blocks
+- `-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale` on `body`
+- Micro-interaction layer across all interactive surfaces:
+  - `.controlBtn`, `.playBtn` — multi-property transitions, `@media (hover: hover)` hover with `box-shadow`, `:active` scale, `:focus-visible` ring
+  - `.topBarIconBtn`, `.helpBtn` — upgraded to `@media (hover: hover)`, `:active` scale, `:focus-visible` ring
+  - `.cta` in InputPanel — proper hover (background + glow ring), `:active` scale, `:focus-visible` ring
+  - `.burgerBtn`, `.linkBtn`, `.profileBtn`, `.themeBtn`, `.sectionActionBtn` in BurgerMenu — full interaction pattern
+  - `.presetTile`, `.customTile`, `.wizardTile` in ReadingModes — full interaction pattern
+  - `.wpmStepBtn` — `@media (hover: hover)` hover, `:active` scale
+- `.inner` in Controls — grounding `box-shadow: var(--shadow-sm)` (structural panel)
+- `.panel` in BurgerMenu — `box-shadow: var(--shadow-lg)`
+### Changed
+- All raw `0.15s`, `0.12s`, `0.2s` transition values in modified files replaced with design tokens (`var(--transition-base)`, `var(--transition-fast)`, `var(--transition-slow)`)
+- `.cta` `font-weight` changed from `700` → `600` (correct Inter weight for CTAs)
+- `.titleInput` transition now includes `box-shadow` for the focus ring
+### Known Issues
+- WPM stepper buttons (`.wpmStepBtn`) are 26×26 px — below the 44 px touch target minimum. To be addressed in a separate task.
+
+
 ### Changed
 - Fine-tune menu reordered into 5 logical groups with thin dividers
 - Labels renamed to plain language (Reading anchor, Focus guides,

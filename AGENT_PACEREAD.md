@@ -393,3 +393,12 @@ Before adding any feature, confirm:
 - [ ] Are new settings persisted to localStorage and hydrated on startup?
 - [ ] Are new localStorage keys documented in the State Architecture section above?
 - [ ] If adding animated/transitioning elements near the reading flow, have you verified there is no layout reflow at 250+ WPM?
+
+
+---
+
+## Known Issues
+
+| Component | Issue | File | Status |
+|-----------|-------|------|--------|
+| WPM Stepper (ReadingModes fine-tune) | `.wpmStepBtn` is 26×26 px — below the 44 px touch target minimum (WCAG 2.5.5). Needs a larger tap area (`padding` or `min-width/min-height`) without changing visual size. | `src/styles/ReadingModes.module.css` | Open — separate task |

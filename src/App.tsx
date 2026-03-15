@@ -27,7 +27,6 @@ import Controls from './components/Controls';
 import InputPanel from './components/InputPanel';
 import ContextPreview from './components/ContextPreview';
 import BurgerMenu from './components/BurgerMenu';
-import ThemeToggle from './components/ThemeToggle';
 import AppFooter from './components/AppFooter';
 import HelpModal from './components/HelpModal';
 import { parsePDF } from './parsers/pdfParser';
@@ -40,10 +39,11 @@ import { buildStructureMap, buildStructureMapFromWords } from './utils/structure
 import { AuthProvider } from './auth/AuthContext';
 import SignInPrompt from './auth/SignInPrompt';
 import UserAvatar from './components/UserAvatar';
-import SyncStatusIndicator from './components/SyncStatusIndicator';
 import ResetConfirmModal from './components/ResetConfirmModal';
+import ThemeToggle from './components/ThemeToggle';
 import { Toaster, toast } from 'react-hot-toast';
 import { PRESET_MODES } from './config/readingModePresets';
+import { WELCOME_TEXT } from './config/welcomeText';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import './styles/app.css';
@@ -175,6 +175,15 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Load welcome text on first visit — only if no words loaded and no history
+  useEffect(() => {
+    if (words.length === 0 && records.length === 0) {
+      const { words: parsed, rawLines } = parseRawText(WELCOME_TEXT, 'Welcome to PaceRead');
+      handleTextReady(parsed, 'Welcome to PaceRead', rawLines);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount only
 
   /** Persist reading progress; finalize adaptive speed when session ends */
   useEffect(() => {
@@ -438,11 +447,14 @@ export default function App() {
             return !f;
           });
           break;
+        case '?':
+          setShowHelp((h) => !h);
+          break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, play, pause, faster, slower, prevWord, nextWord, showResetConfirm, setShowResetConfirm]);
+  }, [isPlaying, play, pause, faster, slower, prevWord, nextWord, showResetConfirm, setShowResetConfirm, setShowHelp]);
 
   /** Auto-load the most recently cached file on first mount */
   useEffect(() => {
@@ -580,6 +592,13 @@ export default function App() {
 
   return (
     <AuthProvider>
+    {/* ── Global reading progress bar ── */}
+    <div className="readingProgressBar">
+      <div
+        className="readingProgressFill"
+        style={{ width: words.length > 0 ? `${Math.round((currentWordIndex / Math.max(words.length - 1, 1)) * 100)}%` : '0%' }}
+      />
+    </div>
     {showWhatsNew && (
       <WhatsNewModal onDismiss={handleWhatsNewDismiss} />
     )}
@@ -610,21 +629,22 @@ export default function App() {
             alt=""
             aria-hidden="true"
           />
-          <span className="topBarTitle">PaceRead</span>
+          <div className="topBarBrandText">
+            <span className="topBarTitle">PaceRead</span>
+            <span className="topBarTagline">Read faster, Understand Better</span>
+          </div>
         </div>
         <div className="topBarActions">
-          <SyncStatusIndicator />
-
-          <UserAvatar />
+          <ThemeToggle />
           <button
             className="helpBtn"
             onClick={() => setShowHelp(true)}
-            title="How to Use PaceRead"
-            aria-label="How to Use PaceRead"
+            title="How to use PaceRead"
+            aria-label="Help"
           >
             ?
           </button>
-          <ThemeToggle />
+          <UserAvatar />
         </div>
       </header>
 

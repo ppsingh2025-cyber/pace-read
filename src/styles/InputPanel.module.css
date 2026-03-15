@@ -90,13 +90,34 @@
   border-radius: var(--radius-md, 8px);
   padding: 0.42rem 0.9rem;
   font-size: 0.83rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: opacity 0.15s;
+  transition:
+    background var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-fast);
 }
-.cta:hover:not(:disabled) { opacity: 0.88; }
+
+@media (hover: hover) {
+  .cta:hover:not(:disabled) {
+    background: var(--color-accent-bright, var(--color-accent));
+    box-shadow: 0 0 0 3px var(--color-accent-15);
+  }
+}
+
+.cta:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: none;
+  transition: transform var(--transition-fast);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .cta:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* Error */
@@ -123,7 +144,7 @@
   font-size: 0.78rem;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 .titleInput::placeholder { color: var(--text-faint); }
 .titleInput:focus { border-color: var(--color-accent); box-shadow: 0 0 0 2px var(--color-accent-12); }
