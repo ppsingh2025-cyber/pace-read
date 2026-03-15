@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.9.0] — Full UI/UX Facelift Part 1: reading progress bar, glass top bar with tagline, controls v3 dock, burger menu z-index fix, ContextPreview glass card
+### Changed
+- **Top bar** — `will-change: backdrop-filter` for stable composite layer; opacity raised to 0.80; `transition: opacity 0.15s ease`; day-theme and `@supports` fallbacks updated
+- **Top bar brand** — tagline "Read faster, Understand Better" injected via CSS `::after` (no TSX changes); `topBarBrandText` and `topBarTagline` classes added for Part 2 TSX update; title scaled to `clamp(0.9rem, 2.5vw, 1.1rem)` / weight 700
+- **Top bar icon buttons** — ghost border (`transparent` by default), `text-faint` color, simplified hover with `state-hover` bg; removed `box-shadow` and extra transitions
+- **Controls dock** — full v3 redesign: `isolation: isolate` removed from `.controls` (was causing burger menu backdrop to paint behind glass panels on WebKit/iOS Safari); `.inner` uses `overflow: hidden` and `--shadow-md` token with no z-index; new layer classes `.sessionStrip`, `.btnCluster`, `.wpmRow` ready for Part 2 TSX update; backward-compat `.resetRow`/`.resetRowBtn` preserved
+- **Burger menu backdrop** — `z-index: 600 → 1200` (above all backdrop-filter compositing layers); `top: env(safe-area-inset-top) → top: 0`; added `isolation: isolate` and `-webkit-backdrop-filter`
+- **ContextPreview** — `.preview` glass card (`rgba(--bg-panel-rgb, 0.75)` + `backdrop-filter: blur(12px)`); `.headerRow` minimal dark strip with rgba borders; `.content` font-size `0.85rem`, line-height `1.75`
+### Added
+- **Reading progress bar** — `.readingProgressBar` (`position: fixed`, `z-index: 2000`, above burger backdrop) + `.readingProgressFill` (accent color, glow via `--color-accent-30`) ready for TSX wiring in Part 2
+
 ## [1.8.0] — Visual redesign: circular play button, viewport vignette, glass controls panel, glass top bar, premium WPM pill
 ### Changed
 - **Play button** — redesigned as circular hero element (64 px diameter). Glow ring via `box-shadow` (`--color-accent-12` halo + depth shadow). `:hover` expands glow; `:active` scales to 0.93. Label hidden — icon only.

@@ -63,15 +63,20 @@
 
 .backdrop {
   position: fixed;
-  top: env(safe-area-inset-top, 0px);
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 600;
+  background: rgba(0, 0, 0, 0.60);
+  /* z-index: 1200 — must stay above backdrop-filter compositing layers
+     (topBar z-index: 501, controls glass panel has no z-index).
+     Do not lower this value. */
+  z-index: 1200;
   display: flex;
   align-items: stretch;
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  isolation: isolate;
 }
 
 /* ── Slide-in panel ────────────────────────────────────────────── */

@@ -1,365 +1,301 @@
-/* Controls.module.css — v2: two-row layout, WPM pill stepper */
+/* Controls.module.css — Facelift v3: 3-layer dock
+ * NOTE: isolation:isolate intentionally removed — causes burger menu
+ * backdrop to render behind glass panels on mobile WebKit/iOS Safari.
+ */
 
-/* ─── Wrapper ───────────────────────────────────────────────────── */
-
+/* ── Wrapper ── */
 .controls {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 8px);
   padding: var(--space-2, 8px) var(--space-4, 16px) var(--space-3, 12px);
   background: transparent;
-  position: static;
   width: 100%;
-  isolation: isolate;
+  /* NO isolation: isolate — see comment above */
 }
-
-@media (max-width: 520px) {
-  .controls { padding: 0.5rem 0.75rem 0.6rem; }
-}
-
+@media (max-width: 520px) { .controls { padding: 0.5rem 0.75rem 0.6rem; } }
 @media (max-height: 480px) and (orientation: landscape) {
-  .controls {
-    position: static;
-    border-top: none;
-    padding: var(--space-1, 4px) var(--space-3, 12px);
-    gap: var(--space-1, 4px);
-    flex: 1;
-    justify-content: center;
-  }
+  .controls { padding: var(--space-1) var(--space-3); flex: 1; justify-content: center; }
 }
 
-/* ─── Inner container — constrains rows on wide screens ─────────── */
-
+/* ── Inner dock — glass card ── */
 .inner {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2, 8px);
-
-  /* Glass panel */
+  gap: 0;
   background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.85);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: var(--radius-lg, 14px);
-  padding: var(--space-3, 12px) var(--space-3, 12px) var(--space-4, 16px);
-
-  /* Elevation — panel floats above the page */
-  box-shadow:
-    0 -4px 24px rgba(0,0,0,0.4),
-    0 0 0 1px rgba(255,255,255,0.04);
-
-  /* Glass blur */
+  overflow: hidden;
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.4));
   backdrop-filter: blur(16px) saturate(1.1);
   -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  /* NO z-index — inherits document flow, does not compete with fixed overlays */
 }
-
-/* Fallback for browsers without backdrop-filter support */
-@supports not (backdrop-filter: blur(1px)) {
-  .inner {
-    background: var(--bg-panel);
-    backdrop-filter: none;
-  }
-}
-
+@supports not (backdrop-filter: blur(1px)) { .inner { background: var(--bg-panel); } }
 [data-theme='day'] .inner {
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(0,0,0,0.07);
-  box-shadow:
-    0 -4px 24px rgba(0,0,0,0.08),
-    0 0 0 1px rgba(0,0,0,0.04);
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(0,0,0,0.08);
 }
-
-@media (max-width: 520px) {
-  .inner {
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: var(--radius-lg, 14px);
-    padding: var(--space-3, 12px) var(--space-3, 12px) var(--space-4, 16px);
-    max-width: 100%;
-    box-shadow:
-      0 -4px 24px rgba(0,0,0,0.4),
-      0 0 0 1px rgba(255,255,255,0.04);
-    background: rgba(var(--bg-panel-rgb, 26, 26, 34), 0.85);
-  }
-}
-
+@media (max-width: 520px) { .inner { max-width: 100%; } }
 @media (max-height: 480px) and (orientation: landscape) {
   .inner {
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    max-width: 100%;
-    gap: var(--space-1, 4px);
+    border: none; border-radius: 0;
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    max-width: 100%; box-shadow: none;
   }
 }
 
-/* ─── Row 1: Action buttons ──────────────────────────────────────── */
+/* ── LAYER 1: Session info strip ── */
+.sessionStrip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px 0;
+  min-height: 28px;
+  gap: 0.5rem;
+}
 
+.sessionInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  transition: background var(--transition-base);
+  background: none;
+  border: none;
+  text-align: left;
+}
+.sessionInfo:hover { background: var(--state-hover); }
+
+.sessionPct {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.sessionPos {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wordJumpStrip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  animation: stripIn 0.15s ease;
+}
+@keyframes stripIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.wordJumpInput {
+  flex: 1;
+  height: 24px;
+  background: var(--bg-input);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+  padding: 0 6px;
+  -moz-appearance: textfield;
+}
+.wordJumpInput::-webkit-outer-spin-button,
+.wordJumpInput::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.wordJumpHint {
+  font-size: 0.62rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.resetIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-base), background var(--transition-base);
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+.resetIconBtn:hover:not(:disabled) { color: #e05252; background: rgba(224,82,82,0.10); }
+.resetIconBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── LAYER 2: Action row ── */
 .actionRow {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  padding: 8px 12px 4px;
+  gap: 0;
 }
 
-.hiddenInput {
-  display: none;
+.hiddenInput { display: none; }
+
+.btnCluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* ── Base: Upload / Paste / Back / Next ── */
+/* Secondary ghost buttons */
 .controlBtn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-md, 10px);
   border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-muted);
-
+  background: transparent;
+  color: var(--text-faint);
   cursor: pointer;
   transition:
     background var(--transition-base),
     border-color var(--transition-base),
     color var(--transition-base),
-    box-shadow var(--transition-base),
     transform var(--transition-fast);
   flex-shrink: 0;
+  touch-action: manipulation;
 }
-
 @media (hover: hover) {
   .controlBtn:hover:not(:disabled) {
-    background: var(--bg-panel);
-    color: var(--text);
+    background: var(--state-hover);
     border-color: var(--border-input);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    color: var(--text-muted);
   }
 }
-
 .controlBtn:active:not(:disabled) {
-  transform: scale(0.94);
-  box-shadow: none;
-  background: var(--state-active);
+  transform: scale(0.93);
   transition: transform var(--transition-fast);
 }
-
-.controlBtn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.controlBtn:disabled {
-  opacity: var(--state-disabled, 0.35);
-  cursor: not-allowed;
-}
-
+.controlBtn:disabled { opacity: 0.32; cursor: not-allowed; }
+.controlBtn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 .controlBtn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
+  width: 17px; height: 17px;
+  fill: none; stroke: currentColor; stroke-width: 2;
   flex-shrink: 0;
 }
-
 .controlBtnLabel {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  color: inherit;
-  pointer-events: none;
-  user-select: none;
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; line-height: 1; color: inherit;
+  pointer-events: none; user-select: none;
 }
 
-/* Active/pressed state for paste toggle */
 .controlBtnActive {
   background: var(--color-accent-dim);
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-/* Upload button pulse — post-onboarding attention cue */
 @keyframes uploadPulse {
   0%   { box-shadow: 0 0 0 0 var(--color-accent-30); }
   50%  { box-shadow: 0 0 0 8px var(--color-accent-8); }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
-.controlBtnPulse {
-  animation: uploadPulse 0.9s ease-in-out 3;
-}
+.controlBtnPulse { animation: uploadPulse 0.9s ease-in-out 3; }
 
-/* ── PLAY / PAUSE — primary action ── */
+/* ── Hero play button — circular ── */
 .playBtn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-
-  /* Shape: circular — not square */
   width: 64px;
   height: 64px;
   border-radius: 50%;
   border: none;
-
-  /* Color */
   background: var(--color-accent);
   color: var(--bg);
-
   cursor: pointer;
   flex-shrink: 0;
-
-  /* Glow ring — subtle accent halo that gives it weight */
   box-shadow:
     0 0 0 6px var(--color-accent-12),
-    0 4px 16px rgba(0,0,0,0.4);
-
+    0 4px 20px rgba(0,0,0,0.45);
   transition:
     background var(--transition-base),
     box-shadow var(--transition-base),
     transform var(--transition-fast);
+  touch-action: manipulation;
 }
-
-.playBtn:hover:not(:disabled) {
-  background: var(--color-accent-bright);
-  box-shadow:
-    0 0 0 8px var(--color-accent-22),
-    0 6px 20px rgba(0,0,0,0.5);
+@media (hover: hover) {
+  .playBtn:hover:not(:disabled) {
+    background: var(--color-accent-bright);
+    box-shadow: 0 0 0 9px var(--color-accent-22), 0 6px 24px rgba(0,0,0,0.5);
+  }
 }
-
 .playBtn:active:not(:disabled) {
-  transform: scale(0.93);
-  box-shadow:
-    0 0 0 4px var(--color-accent-15),
-    0 2px 8px rgba(0,0,0,0.3);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transform: scale(0.92);
+  box-shadow: 0 0 0 4px var(--color-accent-15), 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 80ms ease, box-shadow 80ms ease;
 }
+.playBtn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+.playBtn:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 4px; }
+.playBtn svg { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; }
+.playBtnLabel { display: none; }
 
-.playBtn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.playBtn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-.playBtn svg {
-  width: 22px;
-  height: 22px;
-  fill: currentColor;
-  flex-shrink: 0;
-}
-
-/* Hide the text label inside the circular play button — icon only */
-.playBtnLabel {
-  display: none;
-}
-
-/* ── RESET — muted / secondary ── */
-
-/* ─── Mobile tweaks ──────────────────────────────────────────────── */
-
-@media (min-width: 321px) and (max-width: 400px) {
-  .controlBtn {
-    width: 46px;
-    height: 52px;
-  }
-
-  .playBtn {
-    width: 58px;
-    height: 58px;
-  }
-}
-
+@media (max-width: 400px) { .playBtn { width: 58px; height: 58px; } }
 @media (max-width: 320px) {
-  .controlBtn {
-    width: 44px;
-    height: 44px;
-  }
-
-  .playBtn {
-    width: 52px;
-    height: 52px;
-  }
-
-  .playBtn svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .controlBtnLabel {
-    display: none;
-  }
+  .playBtn { width: 52px; height: 52px; }
+  .playBtn svg { width: 18px; height: 18px; }
 }
-
 @media (max-height: 480px) and (orientation: landscape) {
-  .actionRow {
-    padding: 0;
-  }
-
-  .controlBtn {
-    width: 40px;
-    height: 40px;
-  }
-
-  .controlBtn svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .playBtn {
-    width: 44px;
-    height: 44px;
-  }
-
-  .playBtn svg {
-    width: 17px;
-    height: 17px;
-  }
-
-  .controlBtnLabel,
-  .playBtnLabel {
-    display: none;
-  }
+  .playBtn { width: 44px; height: 44px; box-shadow: none; }
+  .playBtn svg { width: 17px; height: 17px; }
+  .controlBtn { width: 38px; height: 38px; }
+  .controlBtn svg { width: 14px; height: 14px; }
+  .controlBtnLabel { display: none; }
 }
 
-/* ── WPM pill stepper ── */
+/* ── LAYER 3: WPM stepper ── */
+.wpmRow { padding: 4px 12px 12px; }
+
 .wpmPill {
   display: flex;
   flex-direction: row;
   align-items: center;
-  align-self: center;
-  height: 44px;
-  min-height: 44px;
-
-  /* Elevated pill with border */
+  width: 100%;
+  height: 48px;
   background: var(--bg-input);
   border: 1px solid var(--border-input);
   border-radius: var(--radius-full);
   overflow: hidden;
-
-  /* Subtle shadow to lift it off the panel */
-  box-shadow: 0 1px 4px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
-
-[data-theme='day'] .wpmPill {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
+[data-theme='day'] .wpmPill { box-shadow: inset 0 1px 2px rgba(0,0,0,0.06); }
 
 .wpmPillBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 52px;
+  min-width: 52px;
   height: 100%;
   background: transparent;
   border: none;
@@ -368,9 +304,11 @@
   transition: background var(--transition-base), color var(--transition-base);
   flex-shrink: 0;
   font-size: 1.1rem;
-  font-weight: 400;
+  touch-action: manipulation;
 }
-.wpmPillBtn:hover:not(:disabled) { background: var(--state-hover); color: var(--text); }
+@media (hover: hover) {
+  .wpmPillBtn:hover:not(:disabled) { background: var(--state-hover); color: var(--text); }
+}
 .wpmPillBtn:active:not(:disabled) { background: var(--state-active); }
 .wpmPillBtn:disabled { opacity: var(--state-disabled, 0.35); cursor: not-allowed; }
 
@@ -378,34 +316,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.2em;
-  min-width: 96px;
+  gap: 0.22em;
+  flex: 1;
   height: 100%;
   background: transparent;
   border: none;
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
   color: var(--text);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
   cursor: text;
   transition: background var(--transition-base);
   white-space: nowrap;
-  padding: 0 0.6rem;
-  letter-spacing: -0.01em;
+  padding: 0 0.5rem;
 }
 .wpmPillValue:hover { background: var(--state-hover); }
-
-/* WPM flash on speed change */
-@keyframes wpmFlash {
-  0%   { transform: scale(1);    background: transparent; }
-  40%  { transform: scale(1.08); background: var(--color-accent-12); }
-  100% { transform: scale(1);    background: transparent; }
-}
-.wpmPillFlash {
-  animation: wpmFlash var(--transition-slow) ease-out;
-}
 
 .wpmUnit {
   font-size: 0.6rem;
@@ -413,19 +341,19 @@
   color: var(--color-accent);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .wpmPillInput {
-  min-width: 90px;
+  flex: 1;
   height: 100%;
   background: var(--bg-panel);
   border: none;
   border-left: 1px solid var(--color-accent);
   border-right: 1px solid var(--color-accent);
   color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: center;
   outline: none;
@@ -435,18 +363,26 @@
 .wpmPillInput::-webkit-outer-spin-button,
 .wpmPillInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
+@keyframes wpmFlash {
+  0%   { transform: scale(1); background: transparent; }
+  40%  { transform: scale(1.06); background: var(--color-accent-12); }
+  100% { transform: scale(1); background: transparent; }
+}
+.wpmPillFlash { animation: wpmFlash 0.2s ease-out; }
+
 @media (max-height: 480px) and (orientation: landscape) {
-  .wpmPill { height: 32px; min-height: 32px; }
-  .wpmPillBtn { width: 32px; min-height: 32px; }
-  .wpmPillValue { min-width: 78px; font-size: 0.8rem; }
+  .wpmPill { height: 36px; }
+  .wpmPillBtn { width: 40px; min-width: 40px; }
+  .wpmPillValue { font-size: 0.85rem; }
+  .wpmRow { padding: 2px 8px 8px; }
+  .sessionStrip { padding: 4px 10px 0; }
 }
 
-/* ── Row 3: Reset to beginning ────────────────────────────────── */
-
+/* ── Backward-compat: reset row (used by Controls.tsx until Part 2 TSX update) ── */
 .resetRow {
   display: flex;
   justify-content: center;
-  padding-top: 2px;
+  padding: 2px 12px 8px;
 }
 
 .resetRowBtn {
@@ -465,7 +401,7 @@
   transition: color var(--transition-base), background var(--transition-base);
 }
 .resetRowBtn:hover:not(:disabled) {
-  color: var(--color-danger, #e05252);
+  color: #e05252;
   background: rgba(224, 82, 82, 0.08);
 }
 .resetRowBtn:disabled {
