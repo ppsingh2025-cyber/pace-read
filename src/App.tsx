@@ -631,7 +631,7 @@ export default function App() {
   useEffect(() => {
     if (!showPostOnboardingCoach) return;
     if (localStorage.getItem('fastread_theme_coach_shown')) return;
-    // 12 s delay gives the user time to explore before the coach appears
+    // 12s delay gives the user time to explore before the coach appears
     const t = setTimeout(() => {
       setShowThemeCoach(true);
       localStorage.setItem('fastread_theme_coach_shown', 'true');
@@ -641,7 +641,7 @@ export default function App() {
 
   useEffect(() => {
     if (!showThemeCoach) return;
-    const hide = setTimeout(() => setShowThemeCoach(false), 5000); // auto-hide after 5 s
+    const hide = setTimeout(() => setShowThemeCoach(false), 5000); // auto-hide after 5s
     const dismiss = () => setShowThemeCoach(false);
     window.addEventListener('click', dismiss, { once: true });
     return () => { clearTimeout(hide); window.removeEventListener('click', dismiss); };

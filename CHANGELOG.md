@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.7.1]
+### Fixed
+- **Word jump keyboard** — changed `inputMode` from `numeric` to `text` so the `%` key is available on Android/iOS; placeholder updated to `1–N  or  50%` for clarity
+- **Eye focus: focal lines restored** — focal tick marks (ORP guide lines) were incorrectly hidden in eye focus mode; they are now visible (more useful with no surrounding context)
+- **Eye focus: word centered** — word row now centers horizontally in eye focus (was left-anchored at ~24% from left); word size slightly increased to `clamp(1.6rem, 10vw, 4rem)`
+- **Eye button opacity** — raised from 0.4 → 0.65 (was below WCAG contrast threshold); hover 0.75 → 1; active 0.2 → 0.45
+- **Maximize mode bottom gap** — `visibility: hidden` on `.appShellFocused .topBar/.controlsBar` replaced with `height: 0; overflow: hidden` so layout space is fully collapsed (no invisible ~48px gap at bottom)
+- **Landscape maximize fullscreen** — maximize mode in landscape now collapses the sidebar and gives the viewport full width
+- **Landscape sidebar overflow** — Upload and Paste buttons hidden in landscape (unusable during reading); session strip shows percentage only; action row recentered around remaining 3 controls
+- **Eye focus exit hint position** — moved from `top: 1rem` to `bottom: 3rem`, improved contrast (`text-muted` vs `text-faint`, darker background)
+
 ## [v1.7.0]
 ### Fixed
 - Tab-switch auto-pause now shows an explanatory toast ("⏸ Paused — you switched tabs") and a resume nudge on return

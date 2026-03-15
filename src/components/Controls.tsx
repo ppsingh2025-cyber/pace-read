@@ -140,10 +140,10 @@ export default memo(function Controls({
               <input
                 ref={jumpInputRef}
                 type="text"
-                inputMode="numeric"
+                inputMode="text"
                 className={styles.wordJumpInput}
                 value={jumpDraft}
-                placeholder={`word # or %  (1–${words.length})`}
+                placeholder={`1–${words.length}  or  50%`}
                 onChange={e => setJumpDraft(e.target.value)}
                 onBlur={handleJumpCommit}
                 onKeyDown={e => {

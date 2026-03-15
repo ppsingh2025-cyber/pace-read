@@ -421,6 +421,27 @@
   .wpmPillValue { font-size: 0.85rem; }
   .wpmRow { padding: 2px 8px 8px; }
   .sessionStrip { padding: 4px 10px 0; }
+
+  /* Hide left cluster (upload + paste) in landscape — unusable during reading */
+  .btnCluster:first-child {
+    display: none;
+  }
+
+  /* Session strip: show only percentage in landscape */
+  .sessionPos {
+    display: none;
+  }
+
+  .sessionPct {
+    font-size: 0.85rem;
+  }
+
+  /* Tighten action row in landscape — centre the remaining 3 controls */
+  .actionRow {
+    padding: 4px 8px 2px;
+    justify-content: center;
+    gap: 10px;
+  }
 }
 
 /* ── Backward-compat: reset row (used by Controls.tsx until Part 2 TSX update) ── */
