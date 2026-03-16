@@ -483,7 +483,7 @@ body {
 .appShellFocused .readingMain {
   flex: 1;
   min-height: 0;
-  padding: 0;
+  padding: var(--space-3, 12px);
 }
 
 /* Taller viewport for empty state — gives the empty state room to breathe */
@@ -515,6 +515,26 @@ body {
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+/* ── Eye focus mode: true blackout — only word + eye exit button visible ── */
+.appShellEyeFocus .controlsBar {
+  display: none !important;
+}
+
+.appShellEyeFocus .topBar {
+  display: none !important;
+}
+
+/* In portrait, eye focus: viewport fills full remaining space */
+.appShellEyeFocus .readingMain {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+.appShellEyeFocus .viewportWrapper {
+  flex: 1;
 }
 
 .viewportWrapper {
@@ -802,22 +822,31 @@ body {
     display: none;
   }
 
-  /* Maximize mode in landscape: collapse sidebar, viewport takes full width */
-  .appShellFocused {
+  /* Maximize mode in landscape: collapse grid, viewport fills full screen */
+  .appShellFocused,
+  .appShellEyeFocus {
     display: flex;
     flex-direction: column;
   }
 
-  .appShellFocused .readingMain {
+  .appShellFocused .readingMain,
+  .appShellEyeFocus .readingMain {
     grid-column: unset;
     grid-row: unset;
     flex: 1;
+    min-height: 0;
     padding: 0;
   }
 
-  .appShellFocused .viewportWrapper {
+  .appShellFocused .viewportWrapper,
+  .appShellEyeFocus .viewportWrapper {
     width: 100%;
     height: 100%;
+  }
+
+  /* Keep eye button accessible in landscape eye focus */
+  .appShellEyeFocus .controlsBar {
+    display: none;
   }
 }
 

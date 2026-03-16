@@ -1,5 +1,17 @@
 # Changelog
 
+## [v1.7.2]
+### Fixed
+- **Eye focus: true blackout** — eye focus no longer borrows `isFocused`; new `appShellEyeFocus` class hides topBar + controlsBar completely (`display: none`) leaving only the word and eye exit button
+- **Eye focus: paste panel blocked** — paste panel no longer opens over the eye focus blackout (`!isEyeFocus` guard added)
+- **Eye focus: eye button centred** — overlayBar now uses `justify-content: center` in eye focus so the single remaining eye button sits at the horizontal midpoint
+- **Landscape eye focus / maximize: full screen** — landscape `@media` overrides now cover both `appShellEyeFocus` and `appShellFocused`, collapsing the grid and filling the full viewport
+- **Maximize mode: rounded viewport corners** — `.viewportFull` now uses `border-radius: var(--radius-lg, 14px)` with 12px padding on `readingMain` for a crafted, intentional look
+- **Landscape sidebar: Paste accessible** — only the Upload button is hidden in landscape (`.btnCluster:first-child .controlBtn:first-child`); Paste stays visible for clipboard auto-fill
+- **Landscape sidebar: layout tightened** — `actionRow` gap 10px → 6px, `sessionPct` font-size 0.9rem + bold, `sessionStrip` padding normalised
+- **Clipboard denied hint** — when clipboard permission is denied, InputPanel now shows an italic hint "Copy text first, then tap Paste to auto-load it" instead of silent failure
+- **Welcome text updated** — first-visit welcome text replaced with a longer RSVP training narrative explaining ORP, speed training, and app features
+
 ## [v1.7.1]
 ### Fixed
 - **Word jump keyboard** — changed `inputMode` from `numeric` to `text` so the `%` key is available on Android/iOS; placeholder updated to `1–N  or  50%` for clarity

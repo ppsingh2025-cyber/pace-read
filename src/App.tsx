@@ -540,8 +540,6 @@ export default function App() {
   const toggleEyeFocus = useCallback(() => {
     setIsEyeFocus((prev) => {
       const entering = !prev;
-      // Eye focus borrows the shell's focus mode to hide topBar + controlsBar
-      setIsFocused(entering);
       if (entering) {
         setShowEyeFocusHint(true);
         setTimeout(() => setShowEyeFocusHint(false), 3000);
@@ -667,7 +665,7 @@ export default function App() {
         initialModeId={activeMode !== 'custom' ? activeMode : 'focus'}
       />
     )}
-    <div className={`appShell${isFocused ? ' appShellFocused' : ''}`}>
+    <div className={`appShell${isFocused ? ' appShellFocused' : ''}${isEyeFocus ? ' appShellEyeFocus' : ''}`}>
 
       {/* ── 1. Top bar ──────────────────────────────────────────── */}
       <header className="topBar">
@@ -788,7 +786,7 @@ export default function App() {
         </main>
 
       {/* ── Paste / URL panel (above bottom bar, collapsible) ───── */}
-      {showPaste && !isFocused && (
+      {showPaste && !isFocused && !isEyeFocus && (
         <div className="pasteArea">
           <InputPanel
             onTextReady={handleTextReady}

@@ -60,7 +60,7 @@
 .viewportFull {
   height: 100%;
   min-height: 300px;
-  border-radius: 0;
+  border-radius: var(--radius-lg, 14px);
 }
 
 .viewportEmpty {
@@ -691,6 +691,7 @@
 /* Keep overlayBar present so eye button stays clickable */
 .viewportEyeFocus .overlayBar {
   pointer-events: none;
+  justify-content: center;
 }
 
 .viewportEyeFocus .eyeBtn {
