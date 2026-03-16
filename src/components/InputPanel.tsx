@@ -37,6 +37,7 @@ export default function InputPanel({ onTextReady, onClose, wpm = 250 }: InputPan
   const [value,        setValue]        = useState('');
   const [error,        setError]        = useState<string | null>(null);
   const [clipboardHit, setClipboardHit] = useState(false);
+  const [clipboardDenied, setClipboardDenied] = useState(false);
   const [isFetching,   setIsFetching]   = useState(false);
   const [sessionTitle, setSessionTitle] = useState('');
   const titleEditedRef = useRef(false);
@@ -53,7 +54,7 @@ export default function InputPanel({ onTextReady, onClose, wpm = 250 }: InputPan
         setClipboardHit(true);
         textareaRef.current?.select();
       } catch {
-        // Permission denied or API unavailable — silent fail
+        setClipboardDenied(true);
       }
     })();
     return () => { cancelled = true; };
@@ -128,6 +129,13 @@ export default function InputPanel({ onTextReady, onClose, wpm = 250 }: InputPan
 
   return (
     <div className={styles.panel}>
+
+      {/* Clipboard permission denied / unavailable hint */}
+      {clipboardDenied && !value && (
+        <div className={styles.clipBannerHint}>
+          Copy text first, then tap Paste to auto-load it
+        </div>
+      )}
 
       {/* Clipboard notice */}
       {clipboardHit && (

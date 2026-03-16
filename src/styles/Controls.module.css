@@ -421,6 +421,34 @@
   .wpmPillValue { font-size: 0.85rem; }
   .wpmRow { padding: 2px 8px 8px; }
   .sessionStrip { padding: 4px 10px 0; }
+
+  /* Hide Upload button in landscape — file picking unusable while reading */
+  /* Keep Paste button — clipboard auto-fill is still useful in landscape */
+  .btnCluster:first-child .controlBtn:first-child {
+    display: none;
+  }
+
+  /* Session strip: show only percentage in landscape */
+  .sessionPos {
+    display: none;
+  }
+
+  .sessionPct {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  /* Tighten session strip padding */
+  .sessionStrip {
+    padding: 4px 8px 0;
+  }
+
+  /* Tighten action row in landscape — centre the remaining controls */
+  .actionRow {
+    padding: 4px 6px 2px;
+    justify-content: center;
+    gap: 6px;
+  }
 }
 
 /* ── Backward-compat: reset row (used by Controls.tsx until Part 2 TSX update) ── */

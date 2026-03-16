@@ -483,7 +483,7 @@ body {
 .appShellFocused .readingMain {
   flex: 1;
   min-height: 0;
-  padding: 0;
+  padding: var(--space-3, 12px);
 }
 
 /* Taller viewport for empty state — gives the empty state room to breathe */
@@ -503,16 +503,38 @@ body {
 }
 /* Staggered fade-out when entering focus mode */
 .appShellFocused .topBar {
+  height: 0;
+  overflow: hidden;
+  padding: 0;
+  border: none;
   opacity: 0;
   pointer-events: none;
-  visibility: hidden;
-  transition: opacity 0.1s ease;
 }
 .appShellFocused .controlsBar {
+  height: 0;
+  overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  visibility: hidden;
-  transition: opacity var(--transition-fast) 0.06s;
+}
+
+/* ── Eye focus mode: true blackout — only word + eye exit button visible ── */
+.appShellEyeFocus .controlsBar {
+  display: none !important;
+}
+
+.appShellEyeFocus .topBar {
+  display: none !important;
+}
+
+/* In portrait, eye focus: viewport fills full remaining space */
+.appShellEyeFocus .readingMain {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+.appShellEyeFocus .viewportWrapper {
+  flex: 1;
 }
 
 .viewportWrapper {
@@ -799,6 +821,33 @@ body {
   .appFooterLandscapeHide {
     display: none;
   }
+
+  /* Maximize mode in landscape: collapse grid, viewport fills full screen */
+  .appShellFocused,
+  .appShellEyeFocus {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .appShellFocused .readingMain,
+  .appShellEyeFocus .readingMain {
+    grid-column: unset;
+    grid-row: unset;
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .appShellFocused .viewportWrapper,
+  .appShellEyeFocus .viewportWrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Keep eye button accessible in landscape eye focus */
+  .appShellEyeFocus .controlsBar {
+    display: none;
+  }
 }
 
 /* ─── Suppress browser red invalid/out-of-range styling ─────── */
@@ -847,14 +896,14 @@ kbd {
 
 .eyeFocusExitHint {
   position: absolute;
-  top: 1rem;
+  bottom: 3rem;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.72rem;
-  color: var(--text-faint);
-  background: rgba(0, 0, 0, 0.45);
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.55);
   border-radius: var(--radius-full);
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.9rem;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
@@ -920,4 +969,31 @@ kbd {
   transition: width 0.3s ease;
   border-radius: 0 2px 2px 0;
   box-shadow: 0 0 8px var(--color-accent-30);
+}
+
+/* ─── Post-onboarding theme coach mark ─────────────────────── */
+.themeCoach {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--color-accent);
+  color: var(--bg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 600;
+  animation: coachFadeIn 0.25s ease forwards;
+}
+.themeCoachArrow {
+  position: absolute;
+  top: -5px;
+  right: 1rem;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--color-accent);
 }

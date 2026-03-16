@@ -28,6 +28,19 @@
 }
 .clipDismiss:hover { opacity: 1; }
 
+/* Clipboard denied / unavailable hint — softer than the success banner */
+.clipBannerHint {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.85rem;
+  background: var(--bg-input);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.73rem;
+  color: var(--text-faint);
+  font-style: italic;
+  line-height: 1;
+}
+
 /* Textarea */
 .textarea {
   width: 100%;

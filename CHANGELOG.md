@@ -1,6 +1,29 @@
 # Changelog
 
-## [Unreleased]
+## [v1.7.2]
+### Fixed
+- **Eye focus: true blackout** — eye focus no longer borrows `isFocused`; new `appShellEyeFocus` class hides topBar + controlsBar completely (`display: none`) leaving only the word and eye exit button
+- **Eye focus: paste panel blocked** — paste panel no longer opens over the eye focus blackout (`!isEyeFocus` guard added)
+- **Eye focus: eye button centred** — overlayBar now uses `justify-content: center` in eye focus so the single remaining eye button sits at the horizontal midpoint
+- **Landscape eye focus / maximize: full screen** — landscape `@media` overrides now cover both `appShellEyeFocus` and `appShellFocused`, collapsing the grid and filling the full viewport
+- **Maximize mode: rounded viewport corners** — `.viewportFull` now uses `border-radius: var(--radius-lg, 14px)` with 12px padding on `readingMain` for a crafted, intentional look
+- **Landscape sidebar: Paste accessible** — only the Upload button is hidden in landscape (`.btnCluster:first-child .controlBtn:first-child`); Paste stays visible for clipboard auto-fill
+- **Landscape sidebar: layout tightened** — `actionRow` gap 10px → 6px, `sessionPct` font-size 0.9rem + bold, `sessionStrip` padding normalised
+- **Clipboard denied hint** — when clipboard permission is denied, InputPanel now shows an italic hint "Copy text first, then tap Paste to auto-load it" instead of silent failure
+- **Welcome text updated** — first-visit welcome text replaced with a longer RSVP training narrative explaining ORP, speed training, and app features
+
+## [v1.7.1]
+### Fixed
+- **Word jump keyboard** — changed `inputMode` from `numeric` to `text` so the `%` key is available on Android/iOS; placeholder updated to `1–N  or  50%` for clarity
+- **Eye focus: focal lines restored** — focal tick marks (ORP guide lines) were incorrectly hidden in eye focus mode; they are now visible (more useful with no surrounding context)
+- **Eye focus: word centered** — word row now centers horizontally in eye focus (was left-anchored at ~24% from left); word size slightly increased to `clamp(1.6rem, 10vw, 4rem)`
+- **Eye button opacity** — raised from 0.4 → 0.65 (was below WCAG contrast threshold); hover 0.75 → 1; active 0.2 → 0.45
+- **Maximize mode bottom gap** — `visibility: hidden` on `.appShellFocused .topBar/.controlsBar` replaced with `height: 0; overflow: hidden` so layout space is fully collapsed (no invisible ~48px gap at bottom)
+- **Landscape maximize fullscreen** — maximize mode in landscape now collapses the sidebar and gives the viewport full width
+- **Landscape sidebar overflow** — Upload and Paste buttons hidden in landscape (unusable during reading); session strip shows percentage only; action row recentered around remaining 3 controls
+- **Eye focus exit hint position** — moved from `top: 1rem` to `bottom: 3rem`, improved contrast (`text-muted` vs `text-faint`, darker background)
+
+## [v1.7.0]
 ### Fixed
 - Tab-switch auto-pause now shows an explanatory toast ("⏸ Paused — you switched tabs") and a resume nudge on return
 - Eye Focus mode now shows an exit hint ("Tap 👁 or Esc to exit") on enter, matching regular Focus mode behaviour
@@ -13,6 +36,13 @@
 - Session strip: "↕ jump" affordance hint on the word-position button
 - Fine-tune settings: description line beneath each toggle/control explaining its effect
 - Onboarding demo: speed ramps from 150 WPM to 250 WPM over first 10 words (was: fixed 250 WPM cold start)
+- **Onboarding v6: 3-step flow** — theme selection removed from onboarding; replaced by a post-onboarding ThemeToggle coach mark (fires once, 12s after onboarding, `fastread_theme_coach_shown` key)
+- **Onboarding demo: 3-phase speed ramp** — 200 WPM → 275 WPM → 350 WPM across three phrase segments (replaces 150→250 ramp)
+- **Onboarding demo: ORP annotation** — at word index 17 ("across") the demo holds 700ms and displays "← lock-on letter" below the highlighted ORP character
+- **Onboarding demo: speed calibration** — after demo finishes, heading changes to "How did that feel?" with three stacked buttons (Too slow / Just right / A bit fast) that set starting WPM (350 / 250 / 175) and auto-advance to Step 1 after 1200ms
+- **Onboarding Step 2: activation cards** — replaces former theme + how-to-load steps with "Load something and begin": Upload file, Paste/URL, Practice story, I'll decide later
+- **Welcome text** — replaced 300-word RSVP instruction wall with 180-word lighthouse story + 2-line actionable prompt
+- **`onComplete` callback extended** — accepts `wpm?: number` and `action?: 'paste' | 'file' | 'story' | null`; App.tsx applies calibrated WPM via `setWpm` and fires paste panel or practice story on onboarding exit
 
 ## [2.4.0] — Gap fix · tagline · viewport nav · empty state · default text · session strip · footer
 ### Fixed

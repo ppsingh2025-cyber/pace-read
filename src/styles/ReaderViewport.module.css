@@ -60,7 +60,7 @@
 .viewportFull {
   height: 100%;
   min-height: 300px;
-  border-radius: 0;
+  border-radius: var(--radius-lg, 14px);
 }
 
 .viewportEmpty {
@@ -663,7 +663,7 @@
   cursor: pointer;
   padding: var(--space-1, 4px);
   color: var(--text-muted);
-  opacity: 0.4;
+  opacity: 0.65;
   transition: opacity 0.2s ease;
   display: flex;
   align-items: center;
@@ -674,12 +674,12 @@
 }
 
 .eyeBtn:hover {
-  opacity: 0.75;
+  opacity: 1;
 }
 
 /* Active = eye focus ON */
 .eyeBtnActive {
-  opacity: 0.2;
+  opacity: 0.45;
 }
 
 .eyeBtnActive:hover {
@@ -691,6 +691,7 @@
 /* Keep overlayBar present so eye button stays clickable */
 .viewportEyeFocus .overlayBar {
   pointer-events: none;
+  justify-content: center;
 }
 
 .viewportEyeFocus .eyeBtn {
@@ -710,8 +711,23 @@
   pointer-events: none;
 }
 
-/* Focal tick marks are distracting in eye focus — hide them */
-.viewportEyeFocus .focalTickTop,
-.viewportEyeFocus .focalTickBottom {
-  visibility: hidden;
+/* In eye focus mode, shift the word row so the ORP anchor
+   appears at the horizontal centre of the viewport.
+   padding-left uses var(--focal-tick-x) which is calculated by JS as
+   padding-left + 3×charWidth + 0.5×charWidth — the exact ORP tick position.
+   To centre the tick, we set padding-left so tick lands at 50% viewport width.
+   We use CSS to shift the entire row: center the wordLayout inline-block
+   inside windowHorizontal which is already text-align:center.
+   The wordRow itself needs padding-left: 0 so it doesn't offset the layout. */
+.viewportEyeFocus .wordRow {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* In eye focus, the preOrp fixed-width column still applies,
+   so the ORP letter naturally lands near centre.
+   Make the word slightly larger in eye focus for better readability. */
+.viewportEyeFocus .mainWord {
+  font-size: clamp(1.6rem, 10vw, 4rem);
 }
