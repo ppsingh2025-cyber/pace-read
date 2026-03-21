@@ -220,6 +220,12 @@ export default function App() {
       if (currentWordIndex / words.length >= 0.95) {
         setSessionCompleted(true);
       }
+      // Engine-stop detection: engine stops at words.length - 1 without advancing further
+      if (currentWordIndex >= words.length - 1) {
+        const raw = fileMetadata.name;
+        const label = raw.length > 35 ? raw.slice(0, 35) + '…' : raw;
+        toast(`✓ Finished "${label}"`, { duration: 4000 });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying]);

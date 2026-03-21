@@ -12,7 +12,7 @@
   padding: 0.45rem 0.9rem;
   font-size: 0.82rem;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--transition-base), background var(--transition-base);
   width: 100%;
   text-align: left;
 }
