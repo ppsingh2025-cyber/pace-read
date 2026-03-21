@@ -577,10 +577,20 @@ body {
 }
 
 /* ─── Controls bar wrapper ──────────────────────────────────── */
-/* In portrait, acts as a transparent pass-through so Controls' sticky
-   behaviour is unchanged. In landscape, becomes the right sidebar cell. */
+/* On mobile portrait: sticky-anchored to viewport bottom so height changes
+   in Context Preview don't move the controls. In landscape: right sidebar cell. */
 .controlsBar {
   display: contents; /* no visual box; children render as if appShell children */
+}
+
+@media (max-width: 640px) {
+  .controlsBar {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: var(--bg);
+  }
 }
 
 @media (max-height: 480px) and (orientation: landscape) {
