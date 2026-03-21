@@ -753,7 +753,14 @@ export default function App() {
         </div>
       )}
 
-      {/* ── 4. Bottom control bar ───────────────────────────────── */}
+      {/* ── Context Preview (below viewport) ──────────────────── */}
+      {!isFocused && (
+        <div className="contextStrip">
+          <ContextPreview onExpandChange={setContextExpanded} />
+        </div>
+      )}
+
+      {/* ── Controls bar ────────────────────────────────────────── */}
       <div className="controlsBar">
         <Controls
           onFileSelect={handleFileSelect}
@@ -771,13 +778,6 @@ export default function App() {
           focused={isFocused}
         />
       </div>
-
-      {/* ── Context Preview (below controls) ───────────────────── */}
-      {!isFocused && (
-        <div className="contextStrip">
-          <ContextPreview onExpandChange={setContextExpanded} />
-        </div>
-      )}
 
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
