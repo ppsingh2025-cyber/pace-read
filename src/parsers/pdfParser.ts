@@ -109,6 +109,32 @@ const ZONE_EXPAND_GAP = 40;
  */
 const MIN_BAND_ITEMS = 2;
 
+/**
+ * Maximum x-gap (in PDF user units) between two consecutive TextItems that
+ * are considered part of the same word fragment. At typical body font sizes
+ * (10–12pt), intra-word kerning gaps are ≤ 0pt and inter-word spaces are
+ * 3–6pt. A threshold of 1pt safely captures all fragment-joins (including
+ * slight negative gaps from kerning) without merging legitimately separate
+ * words at narrow column widths.
+ */
+const WORD_MERGE_GAP_MAX = 1;
+
+/**
+ * Unicode ligature characters → ASCII expansions.
+ * PDF fonts frequently encode fi, fl, ff etc. as single ligature glyphs
+ * (U+FB00–FB06). Expanding them here ensures correct word tokenization
+ * downstream.
+ */
+const LIGATURES: Record<string, string> = {
+  '\uFB00': 'ff',
+  '\uFB01': 'fi',
+  '\uFB02': 'fl',
+  '\uFB03': 'ffi',
+  '\uFB04': 'ffl',
+  '\uFB05': 'st',
+  '\uFB06': 'st',
+};
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 /**
@@ -137,6 +163,11 @@ export interface ParseProgress {
 }
 
 // ─── Diagram symbol classification ───────────────────────────────────────────
+
+/** Expand Unicode ligature glyphs to their ASCII equivalents. */
+function expandLigatures(str: string): string {
+  return str.replace(/[\uFB00-\uFB06]/g, (ch) => LIGATURES[ch] ?? ch);
+}
 
 /**
  * Returns true if a single character qualifies as a diagram symbol.
@@ -361,6 +392,10 @@ export async function* parsePDF(
 
     let pageText = '';
     let lastWasFigurePlaceholder = false;
+    // Track the last non-diagram item so we can measure the x-gap to the next item.
+    // Reset to null after a diagram zone so the first word after [Figure] always
+    // gets a space rather than risking a spurious merge with pre-diagram text.
+    let prevNonDiagramItem: SpatialTextItem | null = null;
 
     for (const item of items) {
       const itemY = item.transform[5];
@@ -373,11 +408,34 @@ export async function* parsePDF(
           pageText += '\n[Figure]\n';
           lastWasFigurePlaceholder = true;
         }
-        // Diagram items are discarded — do not append item.str
+        // Reset tracking so the next prose item after a diagram gets a space
+        prevNonDiagramItem = null;
       } else {
         lastWasFigurePlaceholder = false;
-        pageText += item.str + ((item.hasEOL ?? false) ? '\n' : ' ');
+        const expandedStr = expandLigatures(item.str);
+
+        if (prevNonDiagramItem === null) {
+          // First prose item on this page (or immediately after a [Figure])
+          pageText += expandedStr;
+        } else if (prevNonDiagramItem.hasEOL) {
+          // Previous item ended a visual line — start new line then append
+          pageText += '\n' + expandedStr;
+        } else {
+          // Measure x-gap between end of previous item and start of this item.
+          // gap ≤ WORD_MERGE_GAP_MAX (1pt) → same word fragment, concatenate directly.
+          // gap > WORD_MERGE_GAP_MAX → separate words, insert space.
+          const gap =
+            item.transform[4] - (prevNonDiagramItem.transform[4] + prevNonDiagramItem.width);
+          pageText += (gap <= WORD_MERGE_GAP_MAX ? '' : ' ') + expandedStr;
+        }
+
+        prevNonDiagramItem = item;
       }
+    }
+
+    // Emit trailing newline for the final item if it ended a visual line
+    if (prevNonDiagramItem?.hasEOL) {
+      pageText += '\n';
     }
 
     pageText = pageText.trim();

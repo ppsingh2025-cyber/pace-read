@@ -10,6 +10,7 @@
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
+import { useHoldToFlow } from '../hooks/useHoldToFlow';
 import styles from '../styles/WordNavigator.module.css';
 
 interface WordNavigatorProps {
@@ -22,6 +23,15 @@ export default memo(function WordNavigator({ onPrevWord, onNextWord }: WordNavig
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const prevHold = useHoldToFlow({
+    onStep: onPrevWord,
+    disabled: currentWordIndex <= 0,
+  });
+  const nextHold = useHoldToFlow({
+    onStep: onNextWord,
+    disabled: currentWordIndex >= words.length - 1,
+  });
 
   // Select all text when input appears so the user can type immediately
   useEffect(() => {
@@ -59,7 +69,7 @@ export default memo(function WordNavigator({ onPrevWord, onNextWord }: WordNavig
 
       <button
         className={styles.navBtn}
-        onClick={onPrevWord}
+        {...prevHold}
         disabled={currentWordIndex <= 0}
         title="Previous word (←)"
         aria-label="Previous word"
@@ -96,7 +106,7 @@ export default memo(function WordNavigator({ onPrevWord, onNextWord }: WordNavig
 
       <button
         className={styles.navBtn}
-        onClick={onNextWord}
+        {...nextHold}
         disabled={currentWordIndex >= words.length - 1}
         title="Next word (→)"
         aria-label="Next word"
