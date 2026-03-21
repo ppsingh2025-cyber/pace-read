@@ -1,7 +1,7 @@
 /* app.css – global styles for PaceRead
  *
  * Layout layers (top to bottom in flex column):
- *   1. topBar  2. readingMain  3. pasteArea  4. controlsBar  5. contextStrip  6. footer(sticky)
+ *   1. topBar  2. readingMain  3. pasteArea  4. contextStrip  5. controlsBar  6. footer(sticky)
  *
  * Focus / fullscreen mode:
  *   appShellFocused → position:fixed inset:0, navLayer/pasteArea hidden,
