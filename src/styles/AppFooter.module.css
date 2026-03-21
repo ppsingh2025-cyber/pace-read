@@ -10,13 +10,13 @@
   flex-shrink: 0;
   opacity: 0.5;
 }
-.footer:hover { opacity: 1; transition: opacity 0.2s; }
+.footer:hover { opacity: 1; transition: opacity var(--transition-base); }
 
 .link {
   font-size: 0.75rem;
   color: var(--text-faint, #444);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color var(--transition-base);
 }
 
 .link:hover {

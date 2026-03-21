@@ -116,7 +116,7 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-base), color var(--transition-base);
   line-height: 1.4;
 }
 .speedSuggestionBadge:hover {
