@@ -352,6 +352,7 @@ const ReaderViewport = memo(function ReaderViewport({
     viewportRef.current.style.setProperty('--pre-orp-col',  `${preOrpColWidth}px`);
     viewportRef.current.style.setProperty('--focal-tick-x', `${tickX}px`);
     viewportRef.current.style.setProperty('--focal-tick-h', `${tickHeight}px`);
+    viewportRef.current.style.setProperty('--vp-word-gap', `${Math.round(charWidth * 0.5)}px`);
   }, []);
   // ⚠️ currentWordIndex is DELIBERATELY ABSENT from deps.
   // mainWordFontSize is NOT in deps here — the useEffect below handles that trigger.

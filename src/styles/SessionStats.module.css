@@ -188,7 +188,7 @@
   color: var(--color-accent);
   background: var(--color-accent-8);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background var(--transition-fast);
   touch-action: manipulation;
 }
 .resumeBtn:hover { background: var(--color-accent-15); }
@@ -203,7 +203,7 @@
   color: var(--bg);
   background: var(--color-accent);
   cursor: pointer;
-  transition: opacity 0.12s;
+  transition: opacity var(--transition-fast);
   touch-action: manipulation;
 }
 .resumeBtnCached:hover { opacity: 0.85; }
@@ -224,7 +224,7 @@
   font-size: 0.75rem;
   padding: 2px 4px;
   border-radius: 3px;
-  transition: color 0.1s;
+  transition: color var(--transition-fast);
 }
 .deleteRecordBtn:hover { color: #e57373; }
 
@@ -237,7 +237,7 @@
   font-size: 0.72rem;
   color: var(--text-faint);
   padding: 0.2rem 0.6rem;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 .clearBtn:hover { background: var(--state-hover); color: var(--text); }
 
@@ -266,7 +266,7 @@
   color: var(--text-faint);
   padding: 0.2rem 0.6rem;
   min-height: 44px;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 .clearCancelBtn:hover { background: var(--state-hover); color: var(--text); }
 
@@ -281,7 +281,7 @@
   color: var(--color-danger, #e05252);
   padding: 0.2rem 0.6rem;
   min-height: 44px;
-  transition: background 0.12s, color 0.12s;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 .clearConfirmBtn:hover {
   background: var(--color-danger, #e05252);

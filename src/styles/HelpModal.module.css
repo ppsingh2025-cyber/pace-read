@@ -62,7 +62,7 @@
   font-size: 11px;
   cursor: pointer;
   line-height: 1;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-base), color var(--transition-base);
   flex-shrink: 0;
 }
 .closeBtn:hover { background: var(--state-hover); color: var(--text); }
@@ -158,7 +158,7 @@
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color var(--transition-base), border-color var(--transition-base);
   white-space: nowrap;
 }
 .tab:hover { color: var(--text); }

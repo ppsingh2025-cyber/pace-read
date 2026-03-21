@@ -51,7 +51,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-base);
 }
 
 .continueBtn:hover { opacity: 0.85; }
@@ -64,7 +64,7 @@
   padding: 0.65rem 1.25rem;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color var(--transition-base);
 }
 
 .startOverBtn:hover { color: var(--text, #f0f0f0); }
