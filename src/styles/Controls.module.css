@@ -215,7 +215,8 @@
     color var(--transition-base),
     transform var(--transition-fast);
   flex-shrink: 0;
-  touch-action: manipulation;
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 @media (hover: hover) {
   .controlBtn:hover:not(:disabled) {
@@ -454,3 +455,15 @@
   cursor: not-allowed;
 }
 
+
+.controlBtn[data-holding="true"] {
+  background: var(--accent, #4a9eff22);
+  border-color: var(--accent, #4a9eff);
+  box-shadow: 0 0 0 2px var(--accent, #4a9eff44);
+  animation: controlHoldPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes controlHoldPulse {
+  0%,100% { box-shadow: 0 0 0 2px var(--accent, #4a9eff44); }
+  50%     { box-shadow: 0 0 0 5px var(--accent, #4a9eff22); }
+}

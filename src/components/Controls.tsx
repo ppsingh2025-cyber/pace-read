@@ -11,6 +11,7 @@
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
+import { useHoldToFlow } from '../hooks/useHoldToFlow';
 import styles from '../styles/Controls.module.css';
 
 interface ControlsProps {
@@ -89,6 +90,15 @@ export default memo(function Controls({
   );
 
   const hasWords = words.length > 0;
+
+  const prevHold = useHoldToFlow({
+    onStep: onPrevWord,
+    disabled: prevDisabled ?? !hasWords,
+  });
+  const nextHold = useHoldToFlow({
+    onStep: onNextWord,
+    disabled: nextDisabled ?? !hasWords,
+  });
 
   /* ── Word jump inline input ─────────────────── */
   const [jumpOpen, setJumpOpen] = useState(false);
@@ -264,7 +274,7 @@ export default memo(function Controls({
           {/* Right cluster: Back + Next */}
           <div className={styles.btnCluster}>
             <button type="button" className={styles.controlBtn}
-              onClick={onPrevWord} disabled={prevDisabled ?? !hasWords}
+              {...prevHold} disabled={prevDisabled ?? !hasWords}
               title="Previous word (←)" aria-label="Previous word">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -273,7 +283,7 @@ export default memo(function Controls({
               <span className={styles.controlBtnLabel}>Back</span>
             </button>
             <button type="button" className={styles.controlBtn}
-              onClick={onNextWord} disabled={nextDisabled ?? !hasWords}
+              {...nextHold} disabled={nextDisabled ?? !hasWords}
               title="Next word (→)" aria-label="Next word">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
