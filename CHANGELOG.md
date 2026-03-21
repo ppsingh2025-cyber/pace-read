@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Tab-switch auto-pause now shows an explanatory toast ("⏸ Paused — you switched tabs") and a resume nudge on return
+- Eye Focus mode now shows an exit hint ("Tap 👁 or Esc to exit") on enter, matching regular Focus mode behaviour
+- Burger menu coach mark after onboarding now persists until first content is loaded (was: auto-dismissed after 8s)
+
+### Added
+- Adaptive speed suggestion now persists as a tappable badge (⚡ N WPM) in the session strip until acted on or overridden by manual WPM change
+- Post-onboarding empty screen: Upload and Paste buttons highlighted with accent glow to guide first content load
+- WPM pill: faint "tap to set" micro-hint indicates the number is directly editable
+- Session strip: "↕ jump" affordance hint on the word-position button
+- Fine-tune settings: description line beneath each toggle/control explaining its effect
+- Onboarding demo: speed ramps from 150 WPM to 250 WPM over first 10 words (was: fixed 250 WPM cold start)
+
 ## [2.4.0] — Gap fix · tagline · viewport nav · empty state · default text · session strip · footer
 ### Fixed
 - **Black gap below footer** — added `min-height: 100dvh` to `.appShell` so the shell always fills the screen

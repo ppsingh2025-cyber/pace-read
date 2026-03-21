@@ -11,6 +11,7 @@
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
+import { useHoldToFlow } from '../hooks/useHoldToFlow';
 import styles from '../styles/Controls.module.css';
 
 interface ControlsProps {
@@ -54,7 +55,8 @@ export default memo(function Controls({
   prevDisabled,
   nextDisabled,
 }: ControlsProps) {
-  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, goToWord } =
+  const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, goToWord,
+    pendingSpeedSuggestion, setPendingSpeedSuggestion } =
     useReaderContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -89,6 +91,15 @@ export default memo(function Controls({
 
   const hasWords = words.length > 0;
 
+  const prevHold = useHoldToFlow({
+    onStep: onPrevWord,
+    disabled: prevDisabled ?? !hasWords,
+  });
+  const nextHold = useHoldToFlow({
+    onStep: onNextWord,
+    disabled: nextDisabled ?? !hasWords,
+  });
+
   /* ── Word jump inline input ─────────────────── */
   const [jumpOpen, setJumpOpen] = useState(false);
   const [jumpDraft, setJumpDraft] = useState('');
@@ -113,6 +124,13 @@ export default memo(function Controls({
     }
     setJumpOpen(false);
   }, [jumpDraft, words.length, goToWord]);
+
+  const handleApplySuggestion = useCallback(() => {
+    if (pendingSpeedSuggestion !== null) {
+      setWpm(pendingSpeedSuggestion);
+      setPendingSpeedSuggestion(null);
+    }
+  }, [pendingSpeedSuggestion, setWpm, setPendingSpeedSuggestion]);
 
   useEffect(() => {
     if (jumpOpen) {
@@ -161,6 +179,19 @@ export default memo(function Controls({
                   ? `Word ${(currentWordIndex + 1).toLocaleString()} of ${words.length >= 10000 ? `${(words.length / 1000).toFixed(1)}k` : words.length.toLocaleString()}`
                   : 'No content loaded'}
               </span>
+              {hasWords && <span className={styles.sessionJumpHint} aria-hidden="true">↕ jump</span>}
+            </button>
+          )}
+
+          {pendingSpeedSuggestion !== null && !jumpOpen && (
+            <button
+              type="button"
+              className={styles.speedSuggestionBadge}
+              onClick={handleApplySuggestion}
+              title={`Apply suggested speed: ${pendingSpeedSuggestion} WPM`}
+              aria-label={`Suggested speed ${pendingSpeedSuggestion} words per minute — tap to apply`}
+            >
+              ⚡ {pendingSpeedSuggestion} WPM
             </button>
           )}
 
@@ -243,7 +274,7 @@ export default memo(function Controls({
           {/* Right cluster: Back + Next */}
           <div className={styles.btnCluster}>
             <button type="button" className={styles.controlBtn}
-              onClick={onPrevWord} disabled={prevDisabled ?? !hasWords}
+              {...prevHold} disabled={prevDisabled ?? !hasWords}
               title="Previous word (←)" aria-label="Previous word">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -252,7 +283,7 @@ export default memo(function Controls({
               <span className={styles.controlBtnLabel}>Back</span>
             </button>
             <button type="button" className={styles.controlBtn}
-              onClick={onNextWord} disabled={nextDisabled ?? !hasWords}
+              {...nextHold} disabled={nextDisabled ?? !hasWords}
               title="Next word (→)" aria-label="Next word">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
                    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -283,6 +314,7 @@ export default memo(function Controls({
                 onBlur={() => {
                   const v = parseInt(wpmDraft, 10);
                   if (!isNaN(v)) setWpm(Math.min(1500, Math.max(60, v)));
+                  setPendingSpeedSuggestion(null);
                   setWpmEditing(false);
                 }}
                 onKeyDown={e => {
@@ -298,6 +330,7 @@ export default memo(function Controls({
                 aria-label={`${wpm} words per minute, tap to edit`}
                 title="Tap to set exact WPM">
                 {wpm} <span className={styles.wpmUnit}>WPM</span>
+                <span className={styles.wpmTapHint}>tap to set</span>
               </button>
             )}
 

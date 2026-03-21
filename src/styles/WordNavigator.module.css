@@ -32,6 +32,10 @@
   cursor: pointer;
   transition: background 0.15s;
   padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 .navBtn:hover:not(:disabled) {
@@ -86,4 +90,16 @@
 .wordInput::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.navBtn[data-holding="true"] {
+  background: var(--accent, #4a9eff22);
+  border-color: var(--accent, #4a9eff);
+  box-shadow: 0 0 0 2px var(--accent, #4a9eff44);
+  animation: holdPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes holdPulse {
+  0%,100% { box-shadow: 0 0 0 2px var(--accent, #4a9eff44); }
+  50%     { box-shadow: 0 0 0 5px var(--accent, #4a9eff22); }
 }

@@ -274,6 +274,18 @@
   background: var(--color-accent-8);
 }
 
+/* First-action CTA state — applied after onboarding until first content load */
+.emptyStateFirstAction .emptyActionBtn {
+  border-color: var(--color-accent);
+  background: var(--color-accent-8);
+  box-shadow: 0 0 0 1px var(--color-accent), 0 0 16px var(--color-accent-22);
+  transition: border-color 0.2s ease, box-shadow 0.3s ease, background 0.2s ease;
+}
+.emptyStateFirstAction .emptyActionBtn:hover {
+  background: var(--color-accent-15);
+  box-shadow: 0 0 0 1px var(--color-accent), 0 0 24px var(--color-accent-30);
+}
+
 .emptyActionIcon {
   color: var(--color-accent);
   display: flex;
