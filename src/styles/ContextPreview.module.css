@@ -145,6 +145,7 @@
 
 /* ── Content area ── */
 .content {
+  position: relative;
   overflow-y: auto;
   max-height: clamp(120px, 25vh, 300px);
   padding: 0.5rem 0.75rem;
