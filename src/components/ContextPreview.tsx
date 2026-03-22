@@ -41,34 +41,30 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
     if (!isDetached) setViewPage(readingPage);
   }, [readingPage, isDetached]);
 
-  // Threshold-based instant scroll using getBoundingClientRect() for reliable
-  // position calculation (offsetTop is relative to offsetParent, not the scroll
-  // container, so it gives wrong values when the content div has no position:relative).
-  // The active word "walks" down the visible area. When its bottom edge passes
-  // 75% of the container height, the view snaps so the word sits at 25% from the
-  // top — giving the reader plenty of forward context below.
+  // Auto-scroll: keep the active word visible as reading advances.
+  // Uses offsetTop (not getBoundingClientRect) so the calculation is
+  // completely independent of viewport coordinates, sticky ancestors,
+  // and stacking contexts. Requires position:relative on .content.
   useEffect(() => {
     if (collapsed || !activeWordRef.current || !contentRef.current) return;
     if (!autoScroll) return;
+
     const el        = activeWordRef.current;
     const container = contentRef.current;
-    const elRect    = el.getBoundingClientRect();
-    const cRect     = container.getBoundingClientRect();
+    const elTop     = el.offsetTop;
+    const elBottom  = elTop + el.offsetHeight;
     const ch        = container.clientHeight;
+    const scrollTop = container.scrollTop;
 
-    // Position of active word's edges within the visible container area
-    const relTop    = elRect.top - cRect.top;
-    const relBottom = elRect.bottom - cRect.top;
-
-    // Word's bottom is past 75% of the visible area → snap so word sits at 25% from top
-    if (relBottom > ch * 0.75) {
-      container.scrollTop += relTop - ch * 0.25;
+    // Word's bottom edge is past 75% of the visible area → snap so word sits at 25% from top
+    if (elBottom - scrollTop > ch * 0.75) {
+      container.scrollTop = Math.max(0, elTop - ch * 0.25);
     }
-    // Word is above the visible area (page changed, content replaced) → same snap
-    else if (relTop < 0) {
-      container.scrollTop += relTop - ch * 0.25;
+    // Word is above the visible area (page turned back, content replaced) → same snap
+    else if (elTop < scrollTop) {
+      container.scrollTop = Math.max(0, elTop - ch * 0.25);
     }
-    // Word is in the comfortable zone (top 0–75%) → do nothing
+    // Word is in the comfortable zone (visible, not near bottom) → do nothing
   }, [currentWordIndex, collapsed, autoScroll]);
 
   // When there are no structural page breaks (plain text, short paste),
