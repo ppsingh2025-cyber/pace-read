@@ -22,6 +22,7 @@ import { useReaderContext } from './context/useReaderContext';
 import { useRSVPEngine } from './hooks/useRSVPEngine';
 import { useChunkEngine } from './hooks/useChunkEngine';
 import { useAdaptiveSpeed } from './hooks/useAdaptiveSpeed';
+import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 import ReaderViewport from './components/ReaderViewport';
 import Controls from './components/Controls';
 import InputPanel from './components/InputPanel';
@@ -139,6 +140,9 @@ export default function App() {
 
   // Whether WPM was manually adjusted in this session (suppresses adaptive apply)
   const manualWpmRef = useRef(false);
+
+  // Keep the screen awake while reading is active.
+  useScreenWakeLock(isPlaying);
 
   const [showHelp, setShowHelp] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
