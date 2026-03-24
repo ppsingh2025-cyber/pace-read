@@ -63,4 +63,24 @@ describe('tokenize', () => {
   it('returns empty array when input is only punctuation tokens', () => {
     expect(tokenize('— | •')).toEqual([]);
   });
+
+  it('strips [Figure] placeholder (case-insensitive)', () => {
+    expect(tokenize('hello [Figure] world')).toEqual(['hello', 'world']);
+    expect(tokenize('hello [figure] world')).toEqual(['hello', 'world']);
+    expect(tokenize('hello [FIGURE] world')).toEqual(['hello', 'world']);
+  });
+
+  it('strips TOC dot-leader sequences (4+ dots)', () => {
+    expect(tokenize('Chapter 1......... 15')).toEqual(['Chapter', '1', '15']);
+    expect(tokenize('Introduction....1')).toEqual(['Introduction', '1']);
+  });
+
+  it('preserves three-dot ellipsis (...) in normal prose', () => {
+    expect(tokenize('Wait... he said')).toEqual(['Wait...', 'he', 'said']);
+    expect(tokenize('I think... therefore I am')).toEqual(['I', 'think...', 'therefore', 'I', 'am']);
+  });
+
+  it('preserves version strings and abbreviations with single dots', () => {
+    expect(tokenize('v1.3.1 e.g. etc.')).toEqual(['v1.3.1', 'e.g.', 'etc.']);
+  });
 });
