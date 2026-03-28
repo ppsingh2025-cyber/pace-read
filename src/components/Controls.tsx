@@ -98,7 +98,7 @@ export default memo(function Controls({
     [onFileSelect],
   );
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     try {
       await Share.share({
         title: 'PaceRead — Speed Reader',
@@ -109,7 +109,7 @@ export default memo(function Controls({
     } catch {
       // User cancelled share sheet — not an error
     }
-  };
+  }, []);
 
   const hasWords = words.length > 0;
 

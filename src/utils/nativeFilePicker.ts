@@ -23,16 +23,45 @@ export async function pickNativeFile(): Promise<File | null> {
     input.accept = '.pdf,.epub,.txt,.md,.docx,.rtf,.srt,.html,.htm';
     input.style.display = 'none';
 
-    input.addEventListener('change', () => {
-      const file = input.files?.[0] ?? null;
-      document.body.removeChild(input);
-      resolve(file);
-    });
+    let resolved = false;
 
-    input.addEventListener('cancel', () => {
-      document.body.removeChild(input);
+    const cleanup = () => {
+      if (document.body.contains(input)) {
+        document.body.removeChild(input);
+      }
+    };
+
+    const onChange = () => {
+      if (resolved) return;
+      resolved = true;
+      const file = input.files?.[0] ?? null;
+      cleanup();
+      resolve(file);
+    };
+
+    const onCancel = () => {
+      if (resolved) return;
+      resolved = true;
+      cleanup();
       resolve(null);
-    });
+    };
+
+    // Fallback: resolve null if the window regains focus without a file selection
+    // (covers browsers/platforms that don't fire the 'cancel' event)
+    const onFocusBack = () => {
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(null);
+        }
+      }, 300);
+      window.removeEventListener('focus', onFocusBack);
+    };
+
+    input.addEventListener('change', onChange);
+    input.addEventListener('cancel', onCancel);
+    window.addEventListener('focus', onFocusBack);
 
     document.body.appendChild(input);
     input.click();
