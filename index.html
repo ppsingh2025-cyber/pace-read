@@ -31,12 +31,17 @@
     <meta property="og:description" content="Read PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT at 60–1500 WPM. No account. No data collection. Free." />
     <meta property="og:site_name" content="PaceRead by Techscript Limited" />
 
-    <!-- GoatCounter analytics — free, privacy-friendly visitor tracking -->
-    <script
-      data-goatcounter="https://paceread.goatcounter.com/count"
-      async
-      src="https://gc.zgo.at/count.js"
-    ></script>
+    <!-- GoatCounter analytics — web only; suppressed in native Android/iOS builds -->
+    <script>
+      (function () {
+        if ('%VITE_IS_NATIVE%' === 'true') return;
+        var s = document.createElement('script');
+        s.async = true;
+        s.setAttribute('data-goatcounter', 'https://paceread.goatcounter.com/count');
+        s.src = 'https://gc.zgo.at/count.js';
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

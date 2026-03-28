@@ -44,11 +44,11 @@
     <p class="meta">
       <strong>PaceRead</strong> — published by Techscript Limited<br />
       Effective date: 2025-01-01<br />
-      Last updated: 2025-06-01
+      Last updated: 2026-03-28
     </p>
 
     <div class="summary-box">
-      <p><strong>Summary:</strong> PaceRead collects no personal data, uses no analytics, contains no advertising, and sends nothing to any server. All document processing occurs locally on your device. This policy documents that in full legal form.</p>
+      <p><strong>Summary:</strong> The PaceRead native apps (Android and iOS) collect no personal data, use no analytics, contain no advertising, and send nothing to any server. The web version uses GoatCounter for anonymous page-view counting only (no cookies, no fingerprinting, no personal data). All document processing occurs locally on your device on all platforms.</p>
     </div>
 
     <h2>1. Who We Are</h2>
@@ -102,14 +102,27 @@
       The file content is never uploaded, transmitted, or shared with Techscript Limited or any other party.
     </p>
 
-    <h2>5. No Analytics or Tracking</h2>
+    <h2>5. Analytics</h2>
     <p>
-      PaceRead contains <strong>no analytics software</strong> of any kind. It does not integrate with
-      Google Analytics, Firebase, Sentry, Mixpanel, Amplitude, or any other analytics or crash-reporting service.
+      The <strong>native Android and iOS apps</strong> (distributed via Google Play and the Apple App Store)
+      contain <strong>no analytics software of any kind</strong>. They make no outbound network requests
+      related to analytics, tracking, or advertising, and collect no data about your usage.
     </p>
     <p>
-      PaceRead contains <strong>no advertising SDKs</strong>. It displays no advertisements and does not participate
-      in any advertising network.
+      The <strong>web version</strong> of PaceRead (accessible at
+      <a href="https://paceread.techscript.ca" rel="noopener noreferrer">paceread.techscript.ca</a>)
+      uses <a href="https://www.goatcounter.com" rel="noopener noreferrer">GoatCounter</a>, a
+      privacy-respecting, open-source page-view counter. GoatCounter records anonymous page views
+      (page path and approximate country only). It does <strong>not</strong> set cookies, does not
+      fingerprint your browser, does not track you across sessions or sites, and does not share data
+      with any advertising network. No personally identifiable information is collected. GoatCounter's
+      privacy policy is available at
+      <a href="https://www.goatcounter.com/help/privacy" rel="noopener noreferrer">goatcounter.com/help/privacy</a>.
+      This analytics script is <strong>not present</strong> in the native app builds.
+    </p>
+    <p>
+      PaceRead contains <strong>no advertising SDKs</strong>. It displays no advertisements and does
+      not participate in any advertising network on any platform.
     </p>
 
     <h2>6. No Third-Party Data Sharing</h2>
@@ -120,9 +133,11 @@
 
     <h2>7. Internet Access</h2>
     <p>
-      The PaceRead application shell is delivered over the internet when first installed. Thereafter, the app
-      operates fully offline — no internet connection is required to read documents. After the initial load, no
-      outbound network requests are made during normal use.
+      The native app shell is delivered over the internet when first installed. Thereafter, the app
+      operates fully offline — no internet connection is required to read documents. The native apps
+      make no outbound network requests during normal use (excluding optional Supabase sync if the
+      user signs in with Google). The web version makes one anonymous page-view count request to
+      GoatCounter on initial load (see Section 5).
     </p>
 
     <h2>8. Children's Privacy</h2>
