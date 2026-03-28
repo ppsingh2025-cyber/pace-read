@@ -9,7 +9,8 @@
 import { createContext } from 'react';
 import type { ModeId, CustomMode, ModeSettings, PresetModeId } from '../types/readingModes';
 import type { StoredSession } from '../types/metadata';
-export type { ModeId, CustomMode, ModeSettings, PresetModeId };
+import type { AudioMode } from '../audio/AudioController';
+export type { ModeId, CustomMode, ModeSettings, PresetModeId, AudioMode };
 
 export interface FileMetadata {
   name: string;
@@ -118,6 +119,10 @@ interface ReaderState {
   activeCustomModeId: string | null;
   /** Suggested WPM from the adaptive speed system — shown until user acts on it */
   pendingSpeedSuggestion: number | null;
+  /** Whether Text-to-Speech audio is enabled */
+  audioEnabled: boolean;
+  /** Active audio reading mode: visual = RSVP only; guided = audio + RSVP; assist = short audio burst */
+  audioMode: AudioMode;
 }
 
 interface ReaderActions {
@@ -171,6 +176,10 @@ interface ReaderActions {
   selectCustomMode: (mode: CustomMode) => void;
   /** Set or clear the adaptive speed suggestion */
   setPendingSpeedSuggestion: (wpm: number | null) => void;
+  /** Enable or disable Text-to-Speech audio */
+  setAudioEnabled: (enabled: boolean) => void;
+  /** Switch between audio reading modes */
+  setAudioMode: (mode: AudioMode) => void;
 }
 
 export type ReaderContextValue = ReaderState & ReaderActions;

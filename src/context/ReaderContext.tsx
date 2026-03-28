@@ -12,13 +12,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ReaderContext, type FileMetadata, type ReadingRecord, type WindowSize, type Orientation, type Theme, type ChunkMode, type SessionStats, type StructuralMarker, type ModeId, type CustomMode } from './readerContextDef';
+import { ReaderContext, type FileMetadata, type ReadingRecord, type WindowSize, type Orientation, type Theme, type ChunkMode, type SessionStats, type StructuralMarker, type ModeId, type CustomMode, type AudioMode } from './readerContextDef';
 import { ReaderEngineContext } from './ReaderEngineContext';
 import { loadRecords } from '../utils/recordsUtils';
 import { PRESET_MODES } from '../config/readingModePresets';
 import type { PresetModeId, ModeSettings } from '../types/readingModes';
 import type { StoredSession } from '../types/metadata';
 import { getThemeOrpAccent, isOrpColorInTheme } from '../config/orpColors';
+import { isValidAudioMode } from '../audio/AudioController';
 
 const LS_KEY_INDEX = 'fastread_word_index';
 const LS_KEY_WPM = 'fastread_wpm';
@@ -48,6 +49,8 @@ const LS_KEY_CONTEXT_FONT_SIZE = 'fastread_context_font_size';
 // old key kept as read-only for migration
 const LS_KEY_CONTEXT_SAME_SIZE_LEGACY = 'fastread_context_same_size';
 const LS_KEY_CONTEXT_OPACITY   = 'fastread_context_opacity';
+const LS_KEY_AUDIO_ENABLED = 'fastread_audio_enabled';
+const LS_KEY_AUDIO_MODE    = 'fastread_audio_mode';
 const DEFAULT_WPM = 250;
 const DEFAULT_WINDOW_SIZE: WindowSize = 1;
 const DEFAULT_ORIENTATION: Orientation = 'horizontal';
@@ -217,6 +220,13 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     const saved = localStorage.getItem(LS_KEY_CONTEXT_OPACITY);
     const parsed = saved ? parseFloat(saved) : NaN;
     return !isNaN(parsed) && parsed >= 0.2 && parsed <= 1.0 ? parsed : 0.65;
+  });
+  const [audioEnabled, setAudioEnabledState] = useState<boolean>(() => {
+    return localStorage.getItem(LS_KEY_AUDIO_ENABLED) === 'true';
+  });
+  const [audioMode, setAudioModeState] = useState<AudioMode>(() => {
+    const saved = localStorage.getItem(LS_KEY_AUDIO_MODE);
+    return (saved && isValidAudioMode(saved)) ? saved : 'guided';
   });
 
   /** True while applyMode is executing — suppresses auto-switch to Custom */
@@ -520,6 +530,16 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LS_KEY_CONTEXT_OPACITY, String(clamped));
   }, []);
 
+  const setAudioEnabled = useCallback((enabled: boolean) => {
+    setAudioEnabledState(enabled);
+    localStorage.setItem(LS_KEY_AUDIO_ENABLED, String(enabled));
+  }, []);
+
+  const setAudioMode = useCallback((mode: AudioMode) => {
+    setAudioModeState(mode);
+    localStorage.setItem(LS_KEY_AUDIO_MODE, mode);
+  }, []);
+
   const updateSessionStats = useCallback((delta: Partial<SessionStats>) => {
     setSessionStatsState((prev) => {
       const next: SessionStats = { ...prev, ...delta };
@@ -735,6 +755,10 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       selectPresetMode,
       selectCustomMode,
       setPendingSpeedSuggestion,
+      audioEnabled,
+      audioMode,
+      setAudioEnabled,
+      setAudioMode,
     }),
     [
       words,
@@ -809,6 +833,10 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
       selectCustomMode,
       pendingSpeedSuggestion,
       setPendingSpeedSuggestion,
+      audioEnabled,
+      audioMode,
+      setAudioEnabled,
+      setAudioMode,
     ],
   );
 

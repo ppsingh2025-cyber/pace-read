@@ -12,6 +12,7 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import { useHoldToFlow } from '../hooks/useHoldToFlow';
+import AudioControls from './AudioControls';
 import styles from '../styles/Controls.module.css';
 
 interface ControlsProps {
@@ -345,6 +346,9 @@ export default memo(function Controls({
             </button>
           </div>
         </div>
+
+        {/* ── Layer 4: Audio controls ── */}
+        <AudioControls />
 
       </div>
     </div>
