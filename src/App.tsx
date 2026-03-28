@@ -23,6 +23,7 @@ import { useRSVPEngine } from './hooks/useRSVPEngine';
 import { useChunkEngine } from './hooks/useChunkEngine';
 import { useAdaptiveSpeed } from './hooks/useAdaptiveSpeed';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
+import { useAudioMode } from './audio/useAudioMode';
 import ReaderViewport from './components/ReaderViewport';
 import Controls from './components/Controls';
 import InputPanel from './components/InputPanel';
@@ -143,6 +144,9 @@ export default function App() {
 
   // Keep the screen awake while reading is active.
   useScreenWakeLock(isPlaying);
+
+  // Drive TTS audio playback in sync with RSVP.
+  useAudioMode();
 
   const [showHelp, setShowHelp] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
