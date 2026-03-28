@@ -21,6 +21,7 @@
     "@capacitor/android": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@capacitor/ios": "^8.1.0",
+    "@capacitor/splash-screen": "^8.0.1",
     "@fontsource-variable/inter": "5.2.5",
     "@supabase/supabase-js": "^2.98.0",
     "epubjs": "^0.3.93",

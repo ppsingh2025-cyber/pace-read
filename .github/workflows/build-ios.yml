@@ -28,8 +28,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build web app
+      - name: Build web app (native — analytics suppressed)
         run: npm run build
+        env:
+          VITE_IS_NATIVE: 'true'
 
       - name: Capacitor sync
         run: |
