@@ -5,27 +5,31 @@
  *
  * Reading modes:
  *  - 'visual'  → RSVP only. Audio is never started.
- *  - 'guided'  → Audio plays the full remaining text alongside RSVP.
+ *  - 'guided'  → Audio plays alongside RSVP from the current word position.
  *                WPM is automatically capped at GUIDED_WPM_CAP so that RSVP
  *                speed stays in the same ballpark as natural speech.
+ *                At most MAX_TTS_WORDS words are sent to the TTS engine at once
+ *                to keep payload sizes reasonable and improve responsiveness.
  *  - 'assist'  → Audio plays for ASSIST_DURATION_MS (default 5 s) then stops
  *                automatically. RSVP continues independently at its own speed.
  *
- * Synchronisation strategy (why perfect sync is impossible):
- *   The browser SpeechSynthesis API provides 'start', 'end', and 'boundary'
- *   events. However:
+ * Synchronisation strategy (why perfect sync is NOT possible):
+ *   The browser SpeechSynthesis API (web path) provides 'start', 'end', and
+ *   'boundary' events. However:
  *   • 'boundary' (word-level) events are inconsistently fired — missing on
  *     many mobile browsers (especially iOS/Safari) and unreliable in timing.
  *   • There is no seek / time-offset API, so restarting from an arbitrary
  *     word position requires re-feeding the whole remaining text.
  *   • Utterance timing depends on the chosen voice and system TTS engine,
  *     both of which vary across platforms.
+ *   The native Capacitor path (iOS/Android) has the same fundamental limitation
+ *   — AVSpeechSynthesizer's word boundary events are not exposed by the plugin.
  *
  *   Best-effort approach implemented here:
  *   • Both audio and RSVP start simultaneously when the user presses play.
- *   • Audio is spoken from words[currentWordIndex] onward (remaining text).
- *   • On pause, audio is stopped (cancel). On resume, audio restarts from the
- *     new currentWordIndex — keeping rough alignment without fake precision.
+ *   • Audio is spoken from words[currentWordIndex] onward (up to MAX_TTS_WORDS).
+ *   • On pause, audio is stopped. On resume, audio restarts from the new
+ *     currentWordIndex — keeping rough alignment without fake precision.
  *   • If drift accumulates, the visual RSVP display remains stable and correct;
  *     audio may be slightly ahead or behind but does not block visual progress.
  *
@@ -46,6 +50,14 @@ export const GUIDED_WPM_CAP = 250;
 
 /** Duration (ms) that audio plays in Assist mode before stopping automatically. */
 export const ASSIST_DURATION_MS = 5_000;
+
+/**
+ * Maximum number of words fed to the TTS engine per play() call.
+ * Prevents very large payloads (e.g. 50 000 word books) from being sent at once,
+ * which could cause memory pressure and delayed speech start on some engines.
+ * At 160 WPM natural speech rate, 500 words ≈ ~3 minutes of audio.
+ */
+const MAX_TTS_WORDS = 500;
 
 export function useAudioMode(): void {
   const {
@@ -87,7 +99,8 @@ export function useAudioMode(): void {
         preCapWpmRef.current = null;
       }
     }
-    // Only track the mode & enabled flag here; wpm changes are handled separately
+    // wpm is intentionally excluded: wpm-only changes are handled by the effect below.
+    // setWpm is a stable useCallback (no deps) and does not need to be in the array.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioEnabled, audioMode]);
 
@@ -96,7 +109,9 @@ export function useAudioMode(): void {
     if (audioEnabled && audioMode === 'guided' && wpm > GUIDED_WPM_CAP) {
       setWpm(GUIDED_WPM_CAP);
     }
-  }, [wpm, audioEnabled, audioMode, setWpm]);
+    // setWpm is a stable useCallback and does not need to be in the dependency array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wpm, audioEnabled, audioMode]);
 
   // ── Main audio lifecycle ────────────────────────────────────────────────────
   useEffect(() => {
@@ -112,9 +127,12 @@ export function useAudioMode(): void {
       return;
     }
 
-    // Build the remaining text from the current word position onward
-    const remainingText = words.slice(currentWordIndex).join(' ');
-    if (!remainingText.trim()) {
+    // Slice to MAX_TTS_WORDS to keep payload sizes reasonable for both native TTS
+    // engines and the web SpeechSynthesis API. Very long texts (entire books) can
+    // cause memory pressure and delayed utterance start.
+    const chunk = words.slice(currentWordIndex, currentWordIndex + MAX_TTS_WORDS);
+    const textToSpeak = chunk.join(' ');
+    if (!textToSpeak.trim()) {
       audioController.stop();
       return;
     }
@@ -122,7 +140,7 @@ export function useAudioMode(): void {
     const rate = wpmToSpeechRate(audioMode === 'guided' ? Math.min(wpm, GUIDED_WPM_CAP) : wpm);
 
     // Start audio
-    audioController.play(remainingText, rate);
+    audioController.play(textToSpeak, rate);
 
     // Assist mode: schedule automatic stop after ASSIST_DURATION_MS
     if (audioMode === 'assist') {
@@ -141,10 +159,13 @@ export function useAudioMode(): void {
       }
       audioController.stop();
     };
-    // Re-run when play state, text, or mode changes.
-    // currentWordIndex is intentionally excluded: we only restart audio on play/pause
-    // transitions or text changes, not on every word advance (that would restart audio
-    // 5 times per second at 300 WPM — far too disruptive).
+    // Intentionally excluded deps:
+    // • currentWordIndex — re-running on every word advance (up to 25×/sec at 1500 WPM)
+    //   would restart audio constantly, making speech unusable.
+    // • wpm — a WPM change alone does not require restarting audio mid-utterance;
+    //   the new rate takes effect automatically on the next play() call (triggered by
+    //   isPlaying toggling, text changes, or mode switches).
+    // • setWpm — stable useCallback, no deps, safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying, audioEnabled, audioMode, words]);
 }
