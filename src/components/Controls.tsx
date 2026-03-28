@@ -13,6 +13,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useReaderContext } from '../context/useReaderContext';
 import { useHoldToFlow } from '../hooks/useHoldToFlow';
 import styles from '../styles/Controls.module.css';
+import { isNative } from '../utils/platform';
 
 interface ControlsProps {
   onFileSelect: (file: File) => void;
@@ -33,6 +34,8 @@ interface ControlsProps {
   prevDisabled?: boolean;
   /** When true, the "next word" button is disabled */
   nextDisabled?: boolean;
+  /** Native file picker (Capacitor only) */
+  onNativeFileOpen?: () => void;
 }
 
 /** Duration in ms for the WPM flash animation — matches the CSS @keyframes wpmFlash */
@@ -54,6 +57,7 @@ export default memo(function Controls({
   focused,
   prevDisabled,
   nextDisabled,
+  onNativeFileOpen,
 }: ControlsProps) {
   const { isPlaying, wpm, setWpm, words, isLoading, currentWordIndex, goToWord,
     pendingSpeedSuggestion, setPendingSpeedSuggestion } =
@@ -75,8 +79,12 @@ export default memo(function Controls({
 
   /* ── File upload ─────────────────────────────────────────────── */
   const handleFileClick = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+    if (isNative() && onNativeFileOpen) {
+      onNativeFileOpen();
+    } else {
+      fileInputRef.current?.click();
+    }
+  }, [onNativeFileOpen]);
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

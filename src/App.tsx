@@ -48,6 +48,9 @@ import { WELCOME_TEXT } from './config/welcomeText';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import './styles/app.css';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { isNative } from './utils/platform';
+import { pickNativeFile } from './utils/nativeFilePicker';
 
 /** Per-format file size limits (bytes). */
 const FORMAT_LIMITS: Record<string, number> = {
@@ -553,6 +556,13 @@ export default function App() {
   }, []);
   const togglePaste = useCallback(() => setShowPaste((p) => !p), []);
 
+  const handleNativeFileOpen = useCallback(async () => {
+    const file = await pickNativeFile();
+    if (file) {
+      await handleFileSelect(file);
+    }
+  }, [handleFileSelect]);
+
   // Stable callbacks for memo'd children — wrapping in useCallback prevents
   // prop-identity changes from defeating React.memo on Controls / ReaderViewport.
   const handleFaster = useCallback(() => {
@@ -569,8 +579,18 @@ export default function App() {
 
   const handleResetRequest = useCallback(() => setShowResetConfirm(true), []);
 
-  const handlePlayPause = useCallback(() => {
-    if (isPlayingRef.current) pause(); else play();
+  const handlePlayPause = useCallback(async () => {
+    if (isPlayingRef.current) {
+      pause();
+      if (isNative()) {
+        await Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+      }
+    } else {
+      play();
+      if (isNative()) {
+        await Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
+      }
+    }
   }, [play, pause]);
 
   const completeOnboarding = useCallback(
@@ -780,6 +800,7 @@ export default function App() {
           prevDisabled={!words.length || currentWordIndex <= 0}
           nextDisabled={!words.length || currentWordIndex >= words.length - 1}
           focused={isFocused}
+          onNativeFileOpen={handleNativeFileOpen}
         />
       </div>
 
