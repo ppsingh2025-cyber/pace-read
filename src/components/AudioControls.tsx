@@ -74,7 +74,7 @@ export default memo(function AudioControls() {
             <line x1="17" y1="9" x2="23" y2="15"/>
           </svg>
         )}
-        <span className={styles.audioToggleLabel}>{audioEnabled ? 'Audio' : 'Audio'}</span>
+        <span className={styles.audioToggleLabel}>Audio</span>
       </button>
 
       {/* Mode pills — always visible so users can select a mode before toggling on */}

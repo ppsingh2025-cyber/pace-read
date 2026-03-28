@@ -19,6 +19,7 @@ import { PRESET_MODES } from '../config/readingModePresets';
 import type { PresetModeId, ModeSettings } from '../types/readingModes';
 import type { StoredSession } from '../types/metadata';
 import { getThemeOrpAccent, isOrpColorInTheme } from '../config/orpColors';
+import { isValidAudioMode } from '../audio/AudioController';
 
 const LS_KEY_INDEX = 'fastread_word_index';
 const LS_KEY_WPM = 'fastread_wpm';
@@ -225,7 +226,7 @@ export function ReaderProvider({ children }: { children: React.ReactNode }) {
   });
   const [audioMode, setAudioModeState] = useState<AudioMode>(() => {
     const saved = localStorage.getItem(LS_KEY_AUDIO_MODE);
-    return (saved === 'visual' || saved === 'guided' || saved === 'assist') ? saved as AudioMode : 'guided';
+    return (saved && isValidAudioMode(saved)) ? saved : 'guided';
   });
 
   /** True while applyMode is executing — suppresses auto-switch to Custom */

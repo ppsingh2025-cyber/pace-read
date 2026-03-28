@@ -147,6 +147,14 @@ class BrowserAudioController implements IAudioController {
  */
 export const audioController: IAudioController = new BrowserAudioController();
 
+/** All valid AudioMode values — use for runtime validation of persisted strings. */
+const VALID_AUDIO_MODES: readonly AudioMode[] = ['visual', 'guided', 'assist'];
+
+/** Type guard: checks that `value` is a valid AudioMode string. */
+export function isValidAudioMode(value: string): value is AudioMode {
+  return (VALID_AUDIO_MODES as readonly string[]).includes(value);
+}
+
 /**
  * Convert WPM to a SpeechSynthesis speech rate (best-effort approximation).
  * 200 WPM → rate 1.0, 400 WPM → rate 2.0, etc.
