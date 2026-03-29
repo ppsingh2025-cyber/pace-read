@@ -47,7 +47,15 @@ import { PRESET_MODES } from './config/readingModePresets';
 import { WELCOME_TEXT } from './config/welcomeText';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
+import { App as CapApp } from '@capacitor/app';
+import { isNative } from './utils/platform';
+import { openFileFromUrl } from './utils/nativeFilePicker';
 import './styles/app.css';
+
+/** Minimal interface for the PWA File Handling API (Chrome / Edge). */
+interface LaunchQueue {
+  setConsumer(consumer: (launchParams: { files: FileSystemFileHandle[] }) => void): void;
+}
 
 /** Per-format file size limits (bytes). */
 const FORMAT_LIMITS: Record<string, number> = {
@@ -503,6 +511,69 @@ export default function App() {
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Native "Open With" / file-association handler.
+   *
+   * On native platforms (Android / iOS):
+   *   - Detects a cold-launch file URL via CapApp.getLaunchUrl().
+   *   - Listens for warm-open events via CapApp.addListener('appUrlOpen', ...).
+   *
+   * On web (when the PWA File Handling API is available):
+   *   - Registers a window.launchQueue consumer to receive file handles.
+   */
+  useEffect(() => {
+    /** Opens a file from a URI and routes it through handleFileSelect. */
+    const openFromUrl = async (url: string) => {
+      const file = await openFileFromUrl(url);
+      if (file) await handleFileSelect(file);
+    };
+
+    if (isNative()) {
+      // --- Cold launch: app was not running when the file was tapped ---
+      CapApp.getLaunchUrl().then(async (result) => {
+        if (!result?.url) return;
+        await openFromUrl(result.url);
+      }).catch((err: unknown) => {
+        console.warn('[file-open] getLaunchUrl failed:', err);
+      });
+
+      // --- Warm open: app was already running when the file was tapped ---
+      let listenerHandle: { remove: () => void } | null = null;
+      CapApp.addListener('appUrlOpen', async (data: { url: string }) => {
+        if (!data?.url) return;
+        await openFromUrl(data.url);
+      }).then((handle) => {
+        listenerHandle = handle;
+      }).catch((err: unknown) => {
+        console.warn('[file-open] addListener failed:', err);
+      });
+
+      return () => {
+        listenerHandle?.remove();
+      };
+    } else {
+      // --- PWA File Handling API (Chrome / Edge on desktop and Android) ---
+      try {
+        if ('launchQueue' in window) {
+          (window as Window & { launchQueue: LaunchQueue }).launchQueue.setConsumer(
+            async (launchParams) => {
+              for (const fileHandle of launchParams.files ?? []) {
+                try {
+                  const file = await fileHandle.getFile();
+                  await handleFileSelect(file);
+                } catch (err) {
+                  console.warn('[file-open] launchQueue file error:', err);
+                }
+              }
+            },
+          );
+        }
+      } catch (err) {
+        console.warn('[file-open] launchQueue setup failed:', err);
+      }
+    }
+  }, [handleFileSelect]);
 
   /** Resume from IDB cache (file or text) without a file picker */
   const handleResumeFromCache = useCallback(async (name: string) => {

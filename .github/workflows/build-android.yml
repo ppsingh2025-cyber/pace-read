@@ -48,6 +48,9 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Inject Android intent filters
+        run: python3 release-package/android/inject-intent-filters.py
+
       - name: Install ImageMagick
         run: sudo apt-get install -y imagemagick
 
