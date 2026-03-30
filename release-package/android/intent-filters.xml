@@ -41,13 +41,21 @@
     <data android:scheme="content" android:mimeType="text/plain" />
 </intent-filter>
 
-<!-- Markdown (.md) -->
+<!-- Markdown (.md) — both registered MIME variants -->
 <intent-filter android:label="@string/app_name">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
     <data android:scheme="file" android:mimeType="text/markdown" />
     <data android:scheme="content" android:mimeType="text/markdown" />
+</intent-filter>
+
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/x-markdown" />
+    <data android:scheme="content" android:mimeType="text/x-markdown" />
 </intent-filter>
 
 <!-- HTML (.html, .htm) -->
@@ -59,13 +67,21 @@
     <data android:scheme="content" android:mimeType="text/html" />
 </intent-filter>
 
-<!-- RTF (.rtf) -->
+<!-- RTF (.rtf) — both registered MIME variants -->
 <intent-filter android:label="@string/app_name">
     <action android:name="android.intent.action.VIEW" />
     <category android:name="android.intent.category.DEFAULT" />
     <category android:name="android.intent.category.BROWSABLE" />
     <data android:scheme="file" android:mimeType="application/rtf" />
     <data android:scheme="content" android:mimeType="application/rtf" />
+</intent-filter>
+
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/rtf" />
+    <data android:scheme="content" android:mimeType="text/rtf" />
 </intent-filter>
 
 <!-- Subtitles (.srt) -->
@@ -75,14 +91,4 @@
     <category android:name="android.intent.category.BROWSABLE" />
     <data android:scheme="file" android:mimeType="application/x-subrip" />
     <data android:scheme="content" android:mimeType="application/x-subrip" />
-</intent-filter>
-
-<!-- Catch-all wildcard — for files served without a recognised MIME type.
-     handleFileSelect will reject unsupported formats with a user-facing alert. -->
-<intent-filter android:label="@string/app_name">
-    <action android:name="android.intent.action.VIEW" />
-    <category android:name="android.intent.category.DEFAULT" />
-    <category android:name="android.intent.category.BROWSABLE" />
-    <data android:scheme="file" android:mimeType="*/*" />
-    <data android:scheme="content" android:mimeType="*/*" />
 </intent-filter>
