@@ -29,13 +29,14 @@ const MIME_TO_EXT: Record<string, string> = {
 
 /**
  * Derives a filename from a URI and optional Content-Type header.
+ * Exported so `nativeFileReader.ts` can reuse it without duplication.
  *
  * Priority:
  *  1. Last path segment of the URL if it has a recognised extension.
  *  2. MIME-derived extension from Content-Type.
  *  3. Fallback: "document.bin".
  */
-function deriveFilename(url: string, contentType: string | null): string {
+export function deriveFilename(url: string, contentType: string | null): string {
   try {
     const decoded = decodeURIComponent(url);
     // Extract the last path segment (ignore query string / fragment)
@@ -66,16 +67,20 @@ function deriveFilename(url: string, contentType: string | null): string {
 }
 
 /**
- * Converts a file URI (file:// or content://) to a File object.
+ * Converts a URL to a File object using the browser's fetch() API.
  *
- * Used when the OS delivers a file-open intent or share-sheet event to the app.
- * The Capacitor WebView on both Android and iOS allows fetch() to read file://
- * and content:// URIs from the host process.
+ * This works for:
+ *  - http/https URLs (web builds)
+ *  - file:// URLs accessible from the WKWebView sandbox (some iOS builds)
  *
- * Returns null if the fetch fails or the URL is empty.
+ * It does NOT work for Android content:// URIs from external content providers,
+ * which require ContentResolver at the Java layer.  For those, use
+ * readNativeFile() in nativeFileReader.ts which uses @capacitor/filesystem.
  *
- * This function contains no Capacitor imports and is safe to import anywhere.
- * The isNative() guard lives at the call site (App.tsx).
+ * Returns null — never throws — if the URL is empty or the fetch fails.
+ *
+ * Contains no Capacitor imports and is safe to import in any environment.
+ * The isNative() guard lives at the call site.
  */
 export async function openFileFromUrl(url: string): Promise<File | null> {
   if (!url) return null;

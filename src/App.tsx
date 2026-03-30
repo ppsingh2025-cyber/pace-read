@@ -49,7 +49,7 @@ import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
 import { App as CapApp } from '@capacitor/app';
 import { isNative } from './utils/platform';
-import { openFileFromUrl } from './utils/nativeFilePicker';
+import { readNativeFile } from './utils/nativeFileReader';
 import './styles/app.css';
 
 /** Minimal interface for the PWA File Handling API (Chrome / Edge). */
@@ -491,6 +491,13 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
+        // On native, skip auto-load when the app was launched via a file intent —
+        // the file-open effect below will handle loading the external file instead.
+        if (isNative()) {
+          const launchResult = await CapApp.getLaunchUrl();
+          if (launchResult?.url) return;
+        }
+
         if (!records[0]) return;
         const name = records[0].name;
         const cached = await IndexedDBService.getFileCache(name);
@@ -516,24 +523,34 @@ export default function App() {
    * Native "Open With" / file-association handler.
    *
    * On native platforms (Android / iOS):
-   *   - Detects a cold-launch file URL via CapApp.getLaunchUrl().
-   *   - Listens for warm-open events via CapApp.addListener('appUrlOpen', ...).
+   *   - Reads the file using @capacitor/filesystem (ContentResolver on Android,
+   *     FileManager on iOS) which correctly handles content:// and file:// URIs.
+   *   - Detects cold-launch files via CapApp.getLaunchUrl().
+   *   - Detects warm-open files via CapApp.addListener('appUrlOpen', ...).
    *
    * On web (when the PWA File Handling API is available):
    *   - Registers a window.launchQueue consumer to receive file handles.
    */
   useEffect(() => {
-    /** Opens a file from a URI and routes it through handleFileSelect. */
-    const openFromUrl = async (url: string) => {
-      const file = await openFileFromUrl(url);
-      if (file) await handleFileSelect(file);
+    /**
+     * Reads a native URI and routes the resulting File through handleFileSelect.
+     * Uses @capacitor/filesystem as the primary reader (ContentResolver / FileManager)
+     * which can handle content:// URIs that fetch() cannot access from the WebView.
+     */
+    const openFromNativeUrl = async (url: string) => {
+      const file = await readNativeFile(url);
+      if (file) {
+        await handleFileSelect(file);
+      } else {
+        toast.error('Could not read the file. Please try opening it again.', { duration: 4000 });
+      }
     };
 
     if (isNative()) {
       // --- Cold launch: app was not running when the file was tapped ---
       CapApp.getLaunchUrl().then(async (result) => {
         if (!result?.url) return;
-        await openFromUrl(result.url);
+        await openFromNativeUrl(result.url);
       }).catch((err: unknown) => {
         console.warn('[file-open] getLaunchUrl failed:', err);
       });
@@ -542,7 +559,7 @@ export default function App() {
       let listenerHandle: { remove: () => void } | null = null;
       CapApp.addListener('appUrlOpen', async (data: { url: string }) => {
         if (!data?.url) return;
-        await openFromUrl(data.url);
+        await openFromNativeUrl(data.url);
       }).then((handle) => {
         listenerHandle = handle;
       }).catch((err: unknown) => {
