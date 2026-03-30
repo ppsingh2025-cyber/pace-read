@@ -60,7 +60,7 @@ export default memo(function ReadingHistory({ onFileSelect }: ReadingHistoryProp
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.epub"
+        accept=".pdf,.epub,.txt,.md,.html,.htm,.rtf,.srt,.docx"
         style={{ display: 'none' }}
         onChange={handleResumeFileChange}
         aria-label="Re-upload file to resume reading"

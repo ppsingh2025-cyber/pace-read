@@ -1,0 +1,94 @@
+<!-- Intent filters to be injected into the main <activity> in AndroidManifest.xml.
+     This fragment is inserted by release-package/android/inject-intent-filters.py
+     during the CI build (after "npx cap sync android").
+
+     These filters allow PaceRead to appear in the Android "Open with" chooser
+     when a user opens a supported document file from any app. -->
+
+<!-- PDF -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="application/pdf" />
+    <data android:scheme="content" android:mimeType="application/pdf" />
+</intent-filter>
+
+<!-- EPUB -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="application/epub+zip" />
+    <data android:scheme="content" android:mimeType="application/epub+zip" />
+</intent-filter>
+
+<!-- DOCX -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+    <data android:scheme="content" android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+</intent-filter>
+
+<!-- Plain text (.txt) -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/plain" />
+    <data android:scheme="content" android:mimeType="text/plain" />
+</intent-filter>
+
+<!-- Markdown (.md) — both registered MIME variants -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/markdown" />
+    <data android:scheme="content" android:mimeType="text/markdown" />
+</intent-filter>
+
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/x-markdown" />
+    <data android:scheme="content" android:mimeType="text/x-markdown" />
+</intent-filter>
+
+<!-- HTML (.html, .htm) -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/html" />
+    <data android:scheme="content" android:mimeType="text/html" />
+</intent-filter>
+
+<!-- RTF (.rtf) — both registered MIME variants -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="application/rtf" />
+    <data android:scheme="content" android:mimeType="application/rtf" />
+</intent-filter>
+
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="text/rtf" />
+    <data android:scheme="content" android:mimeType="text/rtf" />
+</intent-filter>
+
+<!-- Subtitles (.srt) -->
+<intent-filter android:label="@string/app_name">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="file" android:mimeType="application/x-subrip" />
+    <data android:scheme="content" android:mimeType="application/x-subrip" />
+</intent-filter>
