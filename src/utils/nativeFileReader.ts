@@ -169,9 +169,8 @@ function detectTypeFromBinaryMagic(bytes: Uint8Array): DetectedType | null {
         bytes[i+3] === 0x41 && bytes[i+4] === 0x2D && bytes[i+5] === 0x49 &&
         bytes[i+6] === 0x4E && bytes[i+7] === 0x46
       ) { epubMarkerFound = true; break; }
-      // "OEBPS" (4F 45 42 50 53) — 5 bytes
+      // "OEBPS" (4F 45 42 50 53) — 5 bytes (always fits; loop bound is scanLen - 8)
       if (
-        i <= scanLen - 5 &&
         bytes[i] === 0x4F && bytes[i+1] === 0x45 && bytes[i+2] === 0x42 &&
         bytes[i+3] === 0x50 && bytes[i+4] === 0x53
       ) { epubMarkerFound = true; break; }
@@ -313,10 +312,11 @@ export async function readNativeFile(url: string): Promise<File | null> {
       }
     }
 
-    // Use slice() so the File owns exactly the bytes for this view, not any
-    // extra padding that might exist in the underlying ArrayBuffer.
-    const fileBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
-    return new File([fileBuffer], filename, { type: mimeType });
+    // Pass bytes directly — Uint8Array owns exactly the content bytes with
+    // byteOffset 0 and byteLength equal to the data size.  The cast is needed
+    // because TypeScript models the generic as Uint8Array<ArrayBufferLike> but
+    // both code paths produce a Uint8Array backed by a plain ArrayBuffer.
+    return new File([bytes.buffer as ArrayBuffer], filename, { type: mimeType });
   } catch (primaryErr) {
     console.warn('[readNativeFile] Filesystem plugin failed, trying fetch fallback:', primaryErr);
   }

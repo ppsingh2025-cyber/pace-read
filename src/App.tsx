@@ -172,6 +172,15 @@ export default function App() {
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
 
+  // Stable ref to always hold the latest handleFileSelect without requiring the
+  // native/launchQueue effect to re-run when records or wpm change.
+  // Without this, every successful file load would recreate handleFileSelect
+  // (via records → finaliseWords → handleFileSelect) and re-trigger the effect,
+  // causing getLaunchUrl() to return the same cold-launch URL again — infinite loop.
+  // Initializer is a no-op placeholder; the sync effect below (defined after
+  // handleFileSelect) overwrites it before the native/launchQueue effect runs on mount.
+  const handleFileSelectRef = useRef<(file: File) => Promise<void>>(async () => {});
+
   // Tracks whether WE auto-paused due to tab switch (to show resume toast only in that case)
   const tabAutoPausedRef = useRef(false);
 
@@ -390,6 +399,10 @@ export default function App() {
     [setIsPlaying, saveCurrentSession, setIsLoading, setLoadingProgress, setFileMetadata, finaliseWords],
   );
 
+  // Keep the ref in sync so the stable native/launchQueue effect always calls the
+  // latest handleFileSelect without needing to re-subscribe to its dep changes.
+  useEffect(() => { handleFileSelectRef.current = handleFileSelect; }, [handleFileSelect]);
+
   const handleTextReady = useCallback(
     (words: string[], sourceName: string, rawLines?: string[]) => {
       setFileMetadata({ name: sourceName, size: 0, type: 'text' });
@@ -536,11 +549,17 @@ export default function App() {
      * Reads a native URI and routes the resulting File through handleFileSelect.
      * Uses @capacitor/filesystem as the primary reader (ContentResolver / FileManager)
      * which can handle content:// URIs that fetch() cannot access from the WebView.
+     *
+     * handleFileSelectRef.current is used (instead of handleFileSelect directly) so
+     * that this effect runs only once on mount.  handleFileSelect is recreated on
+     * every file load (records → finaliseWords → handleFileSelect), so listing it
+     * as a dep would re-run getLaunchUrl() on each load, returning the same cold-
+     * launch URL and causing an infinite reload loop.
      */
     const openFromNativeUrl = async (url: string) => {
       const file = await readNativeFile(url);
       if (file) {
-        await handleFileSelect(file);
+        await handleFileSelectRef.current(file);
       } else {
         toast.error('Could not read the file. Please try opening it again.', { duration: 4000 });
       }
@@ -578,7 +597,7 @@ export default function App() {
               for (const fileHandle of launchParams.files ?? []) {
                 try {
                   const file = await fileHandle.getFile();
-                  await handleFileSelect(file);
+                  await handleFileSelectRef.current(file);
                 } catch (err) {
                   console.warn('[file-open] launchQueue file error:', err);
                 }
@@ -590,7 +609,7 @@ export default function App() {
         console.warn('[file-open] launchQueue setup failed:', err);
       }
     }
-  }, [handleFileSelect]);
+  }, []); // stable — uses handleFileSelectRef.current to avoid infinite reload loop
 
   /** Resume from IDB cache (file or text) without a file picker */
   const handleResumeFromCache = useCallback(async (name: string) => {
