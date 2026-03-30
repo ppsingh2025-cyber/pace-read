@@ -1,6 +1,6 @@
 {
   "name": "paceread",
-  "description": "PaceRead: RSVP speed reader — Read Faster. Understand Better. PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT at 60–1500 WPM. PWA + Android + iOS.",
+  "description": "PaceRead: RSVP speed reader \u2014 Read Faster. Understand Better. PDF, EPUB, DOCX, TXT, MD, HTML, RTF, SRT at 60\u20131500 WPM. PWA + Android + iOS.",
   "version": "1.0.6",
   "author": "Techscript Limited",
   "homepage": "https://techscript.ca",
@@ -19,7 +19,9 @@
   "dependencies": {
     "@capacitor-community/keep-awake": "^8.0.0",
     "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.1.0",
+    "@capacitor/filesystem": "^8.1.0",
     "@capacitor/ios": "^8.1.0",
     "@fontsource-variable/inter": "5.2.5",
     "@supabase/supabase-js": "^2.98.0",

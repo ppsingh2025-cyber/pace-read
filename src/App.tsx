@@ -47,7 +47,15 @@ import { PRESET_MODES } from './config/readingModePresets';
 import { WELCOME_TEXT } from './config/welcomeText';
 import type { Theme } from './context/readerContextDef';
 import type { PresetModeId } from './types/readingModes';
+import { App as CapApp } from '@capacitor/app';
+import { isNative } from './utils/platform';
+import { readNativeFile } from './utils/nativeFileReader';
 import './styles/app.css';
+
+/** Minimal interface for the PWA File Handling API (Chrome / Edge). */
+interface LaunchQueue {
+  setConsumer(consumer: (launchParams: { files: FileSystemFileHandle[] }) => void): void;
+}
 
 /** Per-format file size limits (bytes). */
 const FORMAT_LIMITS: Record<string, number> = {
@@ -163,6 +171,15 @@ export default function App() {
   // Ref to mirror isPlaying without stale closure issues (used by visibilitychange handler)
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+  // Stable ref to always hold the latest handleFileSelect without requiring the
+  // native/launchQueue effect to re-run when records or wpm change.
+  // Without this, every successful file load would recreate handleFileSelect
+  // (via records → finaliseWords → handleFileSelect) and re-trigger the effect,
+  // causing getLaunchUrl() to return the same cold-launch URL again — infinite loop.
+  // Initializer is a no-op placeholder; the sync effect below (defined after
+  // handleFileSelect) overwrites it before the native/launchQueue effect runs on mount.
+  const handleFileSelectRef = useRef<(file: File) => Promise<void>>(async () => {});
 
   // Tracks whether WE auto-paused due to tab switch (to show resume toast only in that case)
   const tabAutoPausedRef = useRef(false);
@@ -382,6 +399,10 @@ export default function App() {
     [setIsPlaying, saveCurrentSession, setIsLoading, setLoadingProgress, setFileMetadata, finaliseWords],
   );
 
+  // Keep the ref in sync so the stable native/launchQueue effect always calls the
+  // latest handleFileSelect without needing to re-subscribe to its dep changes.
+  useEffect(() => { handleFileSelectRef.current = handleFileSelect; }, [handleFileSelect]);
+
   const handleTextReady = useCallback(
     (words: string[], sourceName: string, rawLines?: string[]) => {
       setFileMetadata({ name: sourceName, size: 0, type: 'text' });
@@ -483,6 +504,13 @@ export default function App() {
   useEffect(() => {
     (async () => {
       try {
+        // On native, skip auto-load when the app was launched via a file intent —
+        // the file-open effect below will handle loading the external file instead.
+        if (isNative()) {
+          const launchResult = await CapApp.getLaunchUrl();
+          if (launchResult?.url) return;
+        }
+
         if (!records[0]) return;
         const name = records[0].name;
         const cached = await IndexedDBService.getFileCache(name);
@@ -503,6 +531,85 @@ export default function App() {
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * Native "Open With" / file-association handler.
+   *
+   * On native platforms (Android / iOS):
+   *   - Reads the file using @capacitor/filesystem (ContentResolver on Android,
+   *     FileManager on iOS) which correctly handles content:// and file:// URIs.
+   *   - Detects cold-launch files via CapApp.getLaunchUrl().
+   *   - Detects warm-open files via CapApp.addListener('appUrlOpen', ...).
+   *
+   * On web (when the PWA File Handling API is available):
+   *   - Registers a window.launchQueue consumer to receive file handles.
+   */
+  useEffect(() => {
+    /**
+     * Reads a native URI and routes the resulting File through handleFileSelect.
+     * Uses @capacitor/filesystem as the primary reader (ContentResolver / FileManager)
+     * which can handle content:// URIs that fetch() cannot access from the WebView.
+     *
+     * handleFileSelectRef.current is used (instead of handleFileSelect directly) so
+     * that this effect runs only once on mount.  handleFileSelect is recreated on
+     * every file load (records → finaliseWords → handleFileSelect), so listing it
+     * as a dep would re-run getLaunchUrl() on each load, returning the same cold-
+     * launch URL and causing an infinite reload loop.
+     */
+    const openFromNativeUrl = async (url: string) => {
+      const file = await readNativeFile(url);
+      if (file) {
+        await handleFileSelectRef.current(file);
+      } else {
+        toast.error('Could not read the file. Please try opening it again.', { duration: 4000 });
+      }
+    };
+
+    if (isNative()) {
+      // --- Cold launch: app was not running when the file was tapped ---
+      CapApp.getLaunchUrl().then(async (result) => {
+        if (!result?.url) return;
+        await openFromNativeUrl(result.url);
+      }).catch((err: unknown) => {
+        console.warn('[file-open] getLaunchUrl failed:', err);
+      });
+
+      // --- Warm open: app was already running when the file was tapped ---
+      let listenerHandle: { remove: () => void } | null = null;
+      CapApp.addListener('appUrlOpen', async (data: { url: string }) => {
+        if (!data?.url) return;
+        await openFromNativeUrl(data.url);
+      }).then((handle) => {
+        listenerHandle = handle;
+      }).catch((err: unknown) => {
+        console.warn('[file-open] addListener failed:', err);
+      });
+
+      return () => {
+        listenerHandle?.remove();
+      };
+    } else {
+      // --- PWA File Handling API (Chrome / Edge on desktop and Android) ---
+      try {
+        if ('launchQueue' in window) {
+          (window as Window & { launchQueue: LaunchQueue }).launchQueue.setConsumer(
+            async (launchParams) => {
+              for (const fileHandle of launchParams.files ?? []) {
+                try {
+                  const file = await fileHandle.getFile();
+                  await handleFileSelectRef.current(file);
+                } catch (err) {
+                  console.warn('[file-open] launchQueue file error:', err);
+                }
+              }
+            },
+          );
+        }
+      } catch (err) {
+        console.warn('[file-open] launchQueue setup failed:', err);
+      }
+    }
+  }, []); // stable — uses handleFileSelectRef.current to avoid infinite reload loop
 
   /** Resume from IDB cache (file or text) without a file picker */
   const handleResumeFromCache = useCallback(async (name: string) => {

@@ -27,5 +27,7 @@ dist-ssr
 android/
 ios/
 !release-package/icons/ios/
+!release-package/android/
+!release-package/ios/
 .env
 .env.local

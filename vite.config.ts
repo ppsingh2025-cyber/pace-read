@@ -40,6 +40,20 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
+        file_handlers: [
+          {
+            action: '/open',
+            accept: {
+              'application/pdf':                                                                        ['.pdf'],
+              'application/epub+zip':                                                                   ['.epub'],
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document':               ['.docx'],
+              'text/plain':                                                                             ['.txt', '.srt'],
+              'text/markdown':                                                                          ['.md'],
+              'text/html':                                                                              ['.html', '.htm'],
+              'application/rtf':                                                                        ['.rtf'],
+            },
+          },
+        ],
       },
       workbox: {
         // Cache the app shell
