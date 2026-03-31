@@ -126,7 +126,6 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
 
         {/* Label */}
         <span className={styles.headingLabel}>
-          Preview
           {isDetached && (
             <button
               type="button"
@@ -184,11 +183,11 @@ export default function ContextPreview({ onExpandChange }: ContextPreviewProps) 
             setAutoScroll(next);
             localStorage.setItem(LS_AUTOSCROLL_KEY, String(next));
           }}
-          aria-label={autoScroll ? 'Auto-scroll on, click to disable' : 'Auto-scroll off, click to enable'}
-          title={autoScroll ? 'Auto-scroll on' : 'Auto-scroll off'}
+          aria-label={autoScroll ? 'Scroll auto-advance on, tap to disable' : 'Scroll auto-advance off, tap to enable'}
+          title={autoScroll ? 'Scroll: ON' : 'Scroll: OFF'}
           data-dot={autoScroll ? '●' : '○'}
         >
-          {autoScroll ? 'Auto ●' : 'Auto ○'}
+          {autoScroll ? 'Scroll ON' : 'Scroll OFF'}
         </button>
 
         {/* Collapse toggle */}
